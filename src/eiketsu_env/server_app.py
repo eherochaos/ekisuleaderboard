@@ -57,6 +57,11 @@ except ModuleNotFoundError:  # pragma: no cover - 当前开发虚拟环境可能
     GZipMiddleware = None  # type: ignore[assignment]
 
 
+# 手机浏览器不适合一次解析数千个榜单 DOM；HTML 页面默认给轻量榜，API 继续保留全量。
+LEADERBOARD_HTML_DEFAULT_LIMIT = 80
+LEADERBOARD_HTML_MAX_LIMIT = 500
+
+
 def create_app(settings: Settings | None = None):
     if FastAPI is None:
         raise RuntimeError("缺少 FastAPI 依赖；请安装 `pip install .[server]` 后再启动服务端")
@@ -294,11 +299,20 @@ def create_app(settings: Settings | None = None):
         contributor: str = "",
         cluster: str = "on",
         rank_scope: str = RANK_SCOPE_ALL,
+        limit: int | None = None,
+        full: str = "",
     ) -> HTMLResponse:
         personal_requested = scope in {"mine", "contributor"}
         token_value = _user_token_from_request(request, token)
         contributor_value = _contributor_from_request(request, contributor)
         cluster_enabled = _cluster_enabled(cluster)
+        display_limit = _leaderboard_display_limit(limit, full)
+        leaderboard_kwargs = {
+            "limit": display_limit,
+            "archetype_limit": display_limit,
+            "rank_scope": rank_scope,
+            "include_archetypes": cluster_enabled,
+        }
         filter_error = ""
         try:
             if scope == "contributor":
@@ -306,29 +320,27 @@ def create_app(settings: Settings | None = None):
                     payload = contributor_leaderboard(
                         settings,
                         contributor_value,
-                        rank_scope=rank_scope,
-                        include_archetypes=cluster_enabled,
+                        **leaderboard_kwargs,
                     )
                     if not payload.get("contributor_found"):
                         filter_error = f"还没有找到用户名“{contributor_value}”的上传记录。"
                 else:
-                    payload = public_leaderboard(settings, rank_scope=rank_scope, include_archetypes=cluster_enabled)
+                    payload = public_leaderboard(settings, **leaderboard_kwargs)
                     filter_error = "请输入绑定用户名后查看我的贡献视角。"
             elif scope == "mine":
                 if token_value:
                     payload = personal_leaderboard(
                         settings,
                         token_value,
-                        rank_scope=rank_scope,
-                        include_archetypes=cluster_enabled,
+                        **leaderboard_kwargs,
                     )
                 else:
-                    payload = public_leaderboard(settings, rank_scope=rank_scope, include_archetypes=cluster_enabled)
+                    payload = public_leaderboard(settings, **leaderboard_kwargs)
                     filter_error = "旧版 token 链接缺少 token；请改用绑定用户名查看贡献。"
             else:
-                payload = public_leaderboard(settings, rank_scope=rank_scope, include_archetypes=cluster_enabled)
+                payload = public_leaderboard(settings, **leaderboard_kwargs)
         except ServerAuthError as exc:
-            payload = public_leaderboard(settings, rank_scope=rank_scope, include_archetypes=cluster_enabled)
+            payload = public_leaderboard(settings, **leaderboard_kwargs)
             filter_error = "旧版 token 链接不可用；请改用绑定用户名查看贡献。" if scope == "mine" else str(exc)
         except ValueError as exc:
             return HTMLResponse(_page("公开聚合榜", f"<p>{html.escape(str(exc))}</p>"))
@@ -339,6 +351,7 @@ def create_app(settings: Settings | None = None):
                 filter_error=filter_error,
                 contributor_name=contributor_value,
                 cluster_enabled=cluster_enabled,
+                display_limit=display_limit,
             )
         )
         if token:
@@ -368,6 +381,14 @@ def _contributor_from_request(request, query_contributor: str = "") -> str:
 
 def _cluster_enabled(value: str) -> bool:
     return str(value or "on").strip().lower() not in {"0", "false", "off", "deck", "none"}
+
+
+def _leaderboard_display_limit(limit: int | None, full: str = "") -> int | None:
+    if str(full or "").strip().lower() in {"1", "true", "yes", "all"}:
+        return None
+    if limit is None:
+        return LEADERBOARD_HTML_DEFAULT_LIMIT
+    return max(1, min(int(limit), LEADERBOARD_HTML_MAX_LIMIT))
 
 
 def _parse_urlencoded_form(body: bytes) -> dict[str, str]:
@@ -710,6 +731,7 @@ def _leaderboard_visual_page(
     filter_error: str = "",
     contributor_name: str = "",
     cluster_enabled: bool = True,
+    display_limit: int | None = None,
 ) -> str:
     archetypes = list(payload.get("top_archetypes") or [])
     decks = list(payload.get("top_decks") or [])
@@ -729,6 +751,13 @@ def _leaderboard_visual_page(
     )
     mobile_summary = _leaderboard_mobile_summary(payload, upload_label)
     view_controls = _leaderboard_view_controls(payload, cluster_enabled, contributor_name)
+    display_notice = _leaderboard_display_notice(
+        payload,
+        cluster_enabled=cluster_enabled,
+        contributor_name=contributor_name,
+        display_limit=display_limit,
+        shown_count=len(archetypes) if is_archetype_view else len(decks),
+    )
     return f"""
     <!doctype html>
     <html lang="zh-CN">
@@ -743,6 +772,9 @@ def _leaderboard_visual_page(
           .site-nav a {{ color: var(--accent); font-size: 13px; font-weight: 800; text-decoration: none; }}
           .site-nav a:hover {{ text-decoration: underline; }}
           .leaderboard-note {{ color: var(--muted); font-size: 13px; margin: 0 0 16px; }}
+          .leaderboard-display-note {{ background: var(--panel); border: 1px solid var(--line); color: var(--muted); font-size: 13px; font-weight: 700; margin: 0 0 14px; padding: 10px 12px; }}
+          .leaderboard-display-note a {{ color: var(--accent); font-weight: 900; margin-left: 8px; text-decoration: none; }}
+          .leaderboard-display-note a:hover {{ text-decoration: underline; }}
           .scope-tools {{ align-items: center; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }}
           .scope-tools form {{ align-items: center; display: flex; gap: 8px; margin: 0; }}
           .scope-tools input {{ background: var(--panel); border: 1px solid var(--line); color: var(--ink); font: inherit; font-size: 13px; height: 32px; padding: 0 10px; width: 220px; }}
@@ -780,6 +812,8 @@ def _leaderboard_visual_page(
             .summary {{ display: none; }}
             .leaderboard-mobile-summary {{ color: var(--muted); display: flex; flex-wrap: wrap; font-size: 13px; font-weight: 800; gap: 4px 10px; margin: 8px 0 0; }}
             .leaderboard-note {{ display: none; }}
+            .leaderboard-display-note {{ font-size: 12px; line-height: 1.5; margin-bottom: 10px; padding: 9px 10px; }}
+            .leaderboard-display-note a {{ display: inline-block; margin-left: 0; }}
             .view-controls {{ gap: 6px 10px; margin: 8px 0 10px; }}
             .view-control-group {{ gap: 6px; }}
             .view-control-link {{ padding: 7px 9px; }}
@@ -821,6 +855,7 @@ def _leaderboard_visual_page(
           </header>
           <p class="leaderboard-note">{privacy_note}</p>
           {view_controls}
+          {display_notice}
           {"" if is_archetype_view else _feature_grid(decks[:3])}
           <div class="sort-toolbar" data-sort-toolbar data-sort-target="{sort_target}">
             <span>排序</span>
@@ -891,6 +926,33 @@ def _leaderboard_mobile_summary(payload: dict[str, Any], upload_label: str) -> s
         f"{upload_label} {payload.get('upload_count', 0)}",
     ]
     return " · ".join(_html(part) for part in parts if part)
+
+
+def _leaderboard_display_notice(
+    payload: dict[str, Any],
+    *,
+    cluster_enabled: bool,
+    contributor_name: str,
+    display_limit: int | None,
+    shown_count: int,
+) -> str:
+    if display_limit is None or shown_count < display_limit:
+        return ""
+    rank_scope = str(payload.get("rank_scope") or RANK_SCOPE_ALL)
+    if rank_scope not in RANK_SCOPE_LABELS:
+        rank_scope = RANK_SCOPE_ALL
+    full_url = _leaderboard_query_url(
+        _leaderboard_base_query(payload, contributor_name),
+        cluster="on" if cluster_enabled else "off",
+        rank_scope=rank_scope,
+        full="1",
+    )
+    return (
+        f'<p class="leaderboard-display-note">'
+        f"轻量模式已显示 Top {display_limit}，完整榜体积较大。"
+        f'<a href="{_html(full_url)}">查看完整榜</a>'
+        f"</p>"
+    )
 
 
 def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, contributor_name: str = "") -> str:

@@ -12,7 +12,14 @@ from eiketsu_env.config import Settings
 from eiketsu_env.db.base import Base
 from eiketsu_env.db.models import Match, ServerApiToken, ServerInvite, ServerLeaderboardSnapshot, ServerUpload, SharedContributionPackage
 from eiketsu_env.db.session import make_engine
-from eiketsu_env.server_app import _admin_invites_response, _admin_updates_response, _leaderboard_visual_page
+from eiketsu_env.server_app import (
+    LEADERBOARD_HTML_DEFAULT_LIMIT,
+    LEADERBOARD_HTML_MAX_LIMIT,
+    _admin_invites_response,
+    _admin_updates_response,
+    _leaderboard_display_limit,
+    _leaderboard_visual_page,
+)
 from eiketsu_env.services.client_update import publish_client_update
 from eiketsu_env.services.repository import EnvRepository
 from eiketsu_env.services.server_share import (
@@ -539,6 +546,51 @@ def test_leaderboard_mobile_layout_keeps_personal_filter_collapsed():
     assert "12 对局" in html
     assert ".scope-form-desktop { display: none !important; }" in html
     assert ".summary { display: none; }" in html
+
+
+def test_leaderboard_html_display_limit_defaults_to_lightweight_mode():
+    assert _leaderboard_display_limit(None, "") == LEADERBOARD_HTML_DEFAULT_LIMIT
+    assert _leaderboard_display_limit(9999, "") == LEADERBOARD_HTML_MAX_LIMIT
+    assert _leaderboard_display_limit(0, "") == 1
+    assert _leaderboard_display_limit(20, "1") is None
+
+
+def test_leaderboard_limited_html_links_to_full_page():
+    archetype = {
+        "title": "Deck A 系",
+        "member_count": 1,
+        "sample_count": 3,
+        "win_count": 2,
+        "loss_count": 1,
+        "draw_count": 0,
+        "top_player": "Player One",
+        "top_player_count": 2,
+        "player_count": 1,
+        "core_cards": [],
+        "member_decks": [],
+    }
+    html = _leaderboard_visual_page(
+        {
+            "scope": "public",
+            "scope_label": "公开匿名聚合",
+            "target_version": "Ver.vps",
+            "date_from": "2026-05-10",
+            "date_to": "2026-05-12",
+            "rank_scope": "all",
+            "upload_count": 2,
+            "match_count": 12,
+            "side_sample_count": 24,
+            "generated_at": "",
+            "top_decks": [],
+            "top_archetypes": [archetype, {**archetype, "title": "Deck B 系"}],
+        },
+        display_limit=2,
+    )
+
+    assert "Top 2" in html
+    assert "full=1" in html
+    assert "cluster=on" in html
+    assert "rank_scope=all" in html
 
 
 def test_leaderboard_view_controls_can_disable_clustering():
