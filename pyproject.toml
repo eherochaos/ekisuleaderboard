@@ -44,7 +44,7 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-eiketsu_env = ["assets/*.json"]
+eiketsu_env = ["assets/*.json", "web/templates/*.html", "web/static/*.css", "web/static/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

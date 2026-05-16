@@ -5,6 +5,7 @@
 ## 应该进入 Git
 
 - `src/`：客户端、服务端、网页渲染、采集、上传、分析逻辑。
+- `src/eiketsu_env/web/templates/`、`src/eiketsu_env/web/static/`：VPS 网页前端模板、CSS 和 JS，适合频繁迭代并随源码部署。
 - `tests/`：回归测试和接口测试。
 - `alembic/`、`alembic.ini`：数据库结构迁移。
 - `scripts/`：构建 exe、部署 VPS、发布更新等可复现脚本。

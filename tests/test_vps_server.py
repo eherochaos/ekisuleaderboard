@@ -18,6 +18,7 @@ from eiketsu_env.server_app import (
     _admin_invites_response,
     _admin_updates_response,
     _leaderboard_display_limit,
+    _leaderboard_rows_response,
     _leaderboard_visual_page,
 )
 from eiketsu_env.services.client_update import publish_client_update
@@ -544,8 +545,8 @@ def test_leaderboard_mobile_layout_keeps_personal_filter_collapsed():
     assert "scope-mobile-drawer" in html
     assert "leaderboard-mobile-summary" in html
     assert "12 对局" in html
-    assert ".scope-form-desktop { display: none !important; }" in html
-    assert ".summary { display: none; }" in html
+    assert "/web/static/leaderboard.css" in html
+    assert "/web/static/leaderboard.js" in html
 
 
 def test_leaderboard_html_display_limit_defaults_to_lightweight_mode():
@@ -582,15 +583,55 @@ def test_leaderboard_limited_html_links_to_full_page():
             "side_sample_count": 24,
             "generated_at": "",
             "top_decks": [],
-            "top_archetypes": [archetype, {**archetype, "title": "Deck B 系"}],
+            "top_archetypes": [
+                archetype,
+                {**archetype, "title": "Deck B 系"},
+                {**archetype, "title": "Deck C 系"},
+            ],
         },
         display_limit=2,
     )
 
-    assert "Top 2" in html
+    assert "2 / 3" in html
+    assert "加载更多" in html
     assert "full=1" in html
     assert "cluster=on" in html
     assert "rank_scope=all" in html
+
+
+def test_leaderboard_rows_response_returns_next_page_html():
+    decks = [
+        {
+            "deck_name": f"Deck {index}",
+            "deck_fingerprint": f"deck-{index}",
+            "sample_count": 10 - index,
+            "wilson_lower_bound": 0.9 - index * 0.1,
+            "win_count": 1,
+            "loss_count": 0,
+            "draw_count": 0,
+            "cards": [],
+        }
+        for index in range(4)
+    ]
+    response = _leaderboard_rows_response(
+        {
+            "scope": "public",
+            "rank_scope": "all",
+            "top_decks": decks,
+            "top_archetypes": [],
+        },
+        cluster_enabled=False,
+        contributor_name="",
+        offset=2,
+        limit=1,
+        sort_key="wilson",
+    )
+
+    assert response["next_offset"] == 3
+    assert response["has_more"] is True
+    assert response["total"] == 4
+    assert "Deck 2" in response["html"]
+    assert "Deck 1" not in response["html"]
 
 
 def test_leaderboard_view_controls_can_disable_clustering():
