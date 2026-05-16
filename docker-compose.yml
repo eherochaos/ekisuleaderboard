@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: eiketsu
+      POSTGRES_USER: eiketsu
+      POSTGRES_PASSWORD: eiketsu-change-me
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eiketsu -d eiketsu"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      EIKETSU_ENV_ROOT: /app
+      EIKETSU_ENV_DB_URL: postgresql+psycopg://eiketsu:eiketsu-change-me@db:5432/eiketsu
+      EIKETSU_ADMIN_TOKEN: ${EIKETSU_ADMIN_TOKEN:-}
+    volumes:
+      - server-data:/app/data
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres-data:
+  server-data:

@@ -1,0 +1,6 @@
+pytest-cache-files-*/
+.tmp/
+.test-tmp/
+.test-tmp2/
+.venv/
+data/

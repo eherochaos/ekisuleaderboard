@@ -1,0 +1,10 @@
+{
+  "schema_version": "share_v1",
+  "target_version": "Ver.3.1.0H",
+  "date_from": "2026-04-22",
+  "date_to": "2026-05-11",
+  "include_solo": false,
+  "high_ranker_rank": 100,
+  "report_formats": ["md", "csv"],
+  "reports": ["overview", "deck", "card", "deck-version", "card-version"]
+}

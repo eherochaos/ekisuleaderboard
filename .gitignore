@@ -1,0 +1,53 @@
+# Python / virtualenv
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Local runtime data. These may contain cookies, browser profiles, SQLite DBs,
+# raw collected pages, local tokens, or other machine-specific state.
+data/
+.tmp/
+.pytest-tmp/
+.pytest-tmp-run/
+.test-tmp/
+.test-tmp2/
+pytest-cache-files-*/
+
+# Test / coverage caches
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# Build and release outputs. Rebuild these from source instead of committing them.
+build/
+dist/
+
+# Local editor and browser automation state
+.idea/
+.vscode/
+.playwright-mcp/
+
+# Local secrets / deployment overrides
+.env
+.env.*
+!.env.example
+client_config.json
+
+# Shared exports are runtime data; keep only shared/share_config.json in Git.
+shared/contributions/
+shared/reports/
+
+# Local visual QA screenshots generated while tuning the leaderboard.
+leaderboard-*.png
+local-*.png
+
+# Database and temporary archives
+*.db
+*.sqlite
+*.sqlite3
+*.tar
+*.zip
+*.log
