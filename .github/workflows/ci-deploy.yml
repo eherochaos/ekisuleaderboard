@@ -88,7 +88,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: package
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    environment: production
 
     steps:
       - name: Download deploy archive
@@ -115,6 +114,17 @@ jobs:
             echo "::error::Missing GitHub Secret: VPS_SSH_KEY"
             exit 1
           fi
+          VPS_HOST="$(printf '%s' "$VPS_HOST" | tr -d '\r\n ')"
+          VPS_USER="$(printf '%s' "$VPS_USER" | tr -d '\r\n ')"
+          VPS_PORT="$(printf '%s' "$VPS_PORT" | tr -d '\r\n ')"
+          if printf '%s' "$VPS_HOST" | grep -q '@'; then
+            echo "::error::VPS_HOST should be only the host/IP, for example 43.128.xxx.xxx. Do not include ubuntu@."
+            exit 1
+          fi
+          if printf '%s' "$VPS_USER" | grep -q '@'; then
+            echo "::error::VPS_USER should be only the username, for example ubuntu. Do not include the host."
+            exit 1
+          fi
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" | tr -d '\r' > ~/.ssh/eiketsu_deploy_key
@@ -123,6 +133,8 @@ jobs:
             echo "::error::VPS_SSH_KEY is not a readable OpenSSH private key. Paste the full private key, not the .pub file or local file path."
             exit 1
           fi
+          ssh-keygen -y -f ~/.ssh/eiketsu_deploy_key > ~/.ssh/eiketsu_deploy_key.pub
+          ssh-keygen -lf ~/.ssh/eiketsu_deploy_key.pub
           if [ -z "$VPS_PORT" ]; then
             VPS_PORT=22
           fi
@@ -130,44 +142,29 @@ jobs:
             echo "::error::Cannot read VPS SSH host key. Check VPS_HOST and VPS_PORT."
             exit 255
           fi
+          cat > ~/.ssh/config <<EOF
+          Host eiketsu-vps
+            HostName $VPS_HOST
+            User $VPS_USER
+            Port $VPS_PORT
+            IdentityFile ~/.ssh/eiketsu_deploy_key
+            BatchMode yes
+            ConnectTimeout 15
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+          EOF
+          chmod 600 ~/.ssh/config
 
       - name: Check SSH login
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_PORT: ${{ secrets.VPS_PORT }}
         run: |
-          if [ -z "$VPS_PORT" ]; then
-            VPS_PORT=22
-          fi
-          if ! ssh -i ~/.ssh/eiketsu_deploy_key -p "$VPS_PORT" \
-            -o BatchMode=yes \
-            -o ConnectTimeout=15 \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=yes \
-            "$VPS_USER@$VPS_HOST" "echo vps-ssh-ok; docker --version; docker compose version"; then
+          if ! ssh eiketsu-vps "echo vps-ssh-ok; docker --version; docker compose version"; then
             echo "::error::SSH login failed. Check VPS_USER, VPS_HOST, VPS_PORT, VPS_SSH_KEY, and whether the matching public key is in ~/.ssh/authorized_keys on the VPS."
             exit 255
           fi
 
       - name: Upload archive to VPS
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_PORT: ${{ secrets.VPS_PORT }}
         run: |
-          test -n "$VPS_HOST"
-          test -n "$VPS_USER"
-          if [ -z "$VPS_PORT" ]; then
-            VPS_PORT=22
-          fi
-          scp -i ~/.ssh/eiketsu_deploy_key -P "$VPS_PORT" \
-            -o BatchMode=yes \
-            -o ConnectTimeout=15 \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=yes \
-            eiketsu-vps-update.tar \
-            "$VPS_USER@$VPS_HOST:/tmp/eiketsu-vps-update-${GITHUB_SHA}.tar"
+          scp eiketsu-vps-update.tar "eiketsu-vps:/tmp/eiketsu-vps-update-${GITHUB_SHA}.tar"
 
       - name: Rebuild and restart service
         env:
@@ -185,12 +182,7 @@ jobs:
             VPS_REMOTE_DIR='~/eiketsu-env-db'
           fi
 
-          ssh -i ~/.ssh/eiketsu_deploy_key -p "$VPS_PORT" \
-            -o BatchMode=yes \
-            -o ConnectTimeout=15 \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=yes \
-            "$VPS_USER@$VPS_HOST" \
+          ssh eiketsu-vps \
             "set -e; \
              mkdir -p $VPS_REMOTE_DIR; \
              tar -xf /tmp/eiketsu-vps-update-${GITHUB_SHA}.tar -C $VPS_REMOTE_DIR; \

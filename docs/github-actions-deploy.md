@@ -39,6 +39,22 @@ scp: Connection closed
 - 私钥开头应为 `-----BEGIN OPENSSH PRIVATE KEY-----`。
 - 与该私钥配对的 `.pub` 公钥已经追加到 VPS 用户的 `~/.ssh/authorized_keys`。
 - `VPS_USER` 与公钥放置的用户一致，例如 `ubuntu` 就必须放到 `/home/ubuntu/.ssh/authorized_keys`。
+- `VPS_HOST` 只填 IP 或域名，不要填 `ubuntu@IP`。
+- `VPS_USER` 只填用户名，例如 `ubuntu`。
+
+Actions 日志里的 `Configure SSH` 会打印一行公钥指纹，例如：
+
+```text
+256 SHA256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx github-actions-eiketsu (ED25519)
+```
+
+它必须和本机部署 key 的指纹一致：
+
+```powershell
+ssh-keygen -lf C:\Users\WINDOWS\.ssh\eiketsu_github_deploy.pub
+```
+
+如果不一致，说明 GitHub 的 `VPS_SSH_KEY` 粘错了。
 
 本机可以用这条命令验证部署 key 是否能登录：
 
