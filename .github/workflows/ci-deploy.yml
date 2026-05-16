@@ -6,26 +6,8 @@ env:
 on:
   push:
     branches: ["main"]
-    paths:
-      - ".github/workflows/ci-deploy.yml"
-      - "Dockerfile"
-      - "docker-compose.yml"
-      - "pyproject.toml"
-      - "README.md"
-      - "alembic/**"
-      - "src/**"
-      - "tests/**"
   pull_request:
     branches: ["main"]
-    paths:
-      - ".github/workflows/ci-deploy.yml"
-      - "Dockerfile"
-      - "docker-compose.yml"
-      - "pyproject.toml"
-      - "README.md"
-      - "alembic/**"
-      - "src/**"
-      - "tests/**"
   workflow_dispatch:
 
 concurrency:
