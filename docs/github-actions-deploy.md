@@ -24,6 +24,34 @@
 
 不要把 VPS 地址、私钥、管理口令写进代码或 README 正文。
 
+## 如果 Deploy to VPS 显示 Permission denied
+
+如果日志里出现：
+
+```text
+Permission denied (publickey,password).
+scp: Connection closed
+```
+
+说明 GitHub Actions 已经连到 VPS，但 VPS 不接受这把 SSH key。优先检查：
+
+- `VPS_SSH_KEY` 填的是私钥全文，不是 `.pub` 公钥，也不是本机文件路径。
+- 私钥开头应为 `-----BEGIN OPENSSH PRIVATE KEY-----`。
+- 与该私钥配对的 `.pub` 公钥已经追加到 VPS 用户的 `~/.ssh/authorized_keys`。
+- `VPS_USER` 与公钥放置的用户一致，例如 `ubuntu` 就必须放到 `/home/ubuntu/.ssh/authorized_keys`。
+
+本机可以用这条命令验证部署 key 是否能登录：
+
+```powershell
+ssh -i $env:USERPROFILE\.ssh\eiketsu_github_deploy -o BatchMode=yes ubuntu@43.128.141.76 "echo ok"
+```
+
+如果这里也失败，先把公钥追加到 VPS：
+
+```powershell
+type $env:USERPROFILE\.ssh\eiketsu_github_deploy.pub | ssh ubuntu@43.128.141.76 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+```
+
 ## 建议使用专用部署密钥
 
 建议给 GitHub Actions 单独准备一个无密码部署密钥，而不是复用你日常登录用的私钥。
