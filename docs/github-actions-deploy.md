@@ -6,6 +6,8 @@
 - Push 到 `main`：运行测试；测试通过后打包源码；通过 SSH 上传到 VPS；在 VPS 上重建并重启 `api` 服务。
 - 手动触发：可以在 GitHub Actions 页面点 `Run workflow`。
 
+测试 job 使用 `windows-latest`，因为普通用户客户端、浏览器登录态读取和 Tk GUI 都以 Windows 为第一目标环境。部署 job 仍使用 `ubuntu-latest`，只负责打包源码并通过 SSH 控制 VPS。
+
 ## 需要配置的 GitHub Secrets
 
 进入 GitHub 仓库：

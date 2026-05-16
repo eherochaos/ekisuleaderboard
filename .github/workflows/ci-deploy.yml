@@ -1,5 +1,8 @@
 name: CI and VPS Deploy
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 on:
   push:
     branches: ["main"]
@@ -32,7 +35,7 @@ concurrency:
 jobs:
   test:
     name: Run tests
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Check out repository
