@@ -688,6 +688,16 @@ def test_leaderboard_view_controls_can_disable_clustering():
     assert "cluster=off" in html
 
 
+def test_leaderboard_css_keeps_disabled_cluster_view_compact():
+    css = (
+        Path(__file__).parents[1] / "src" / "eiketsu_env" / "web" / "static" / "leaderboard.css"
+    ).read_text(encoding="utf-8")
+    compact_rule = css[css.index(".ranking-board .unit") : css.index(".variant-cards .unit")]
+
+    assert "width: 44px;" in compact_rule
+    assert "min-width: 44px;" in compact_rule
+
+
 def test_public_leaderboard_groups_deck_archetypes_by_shared_cost(tmp_path):
     settings = _settings(tmp_path / "server")
     _write_card_catalog(settings)
