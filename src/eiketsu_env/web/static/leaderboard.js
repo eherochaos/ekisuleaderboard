@@ -11,13 +11,18 @@
       const button = viewer.querySelector("[data-variant-button]");
       const label = viewer.querySelector("[data-variant-label]");
       let current = 0;
+      if (!variants.length) {
+        if (label) {
+          label.textContent = "构筑 0/0";
+        }
+        return;
+      }
       const render = () => {
         variants.forEach((variant, index) => {
           variant.classList.toggle("is-active", index === current);
         });
         if (label) {
-          const prefix = current === 0 ? "代表构筑" : "构筑式样";
-          label.textContent = `${prefix} ${current + 1}/${variants.length}`;
+          label.textContent = `构筑 ${current + 1}/${variants.length}`;
         }
       };
       if (button) {

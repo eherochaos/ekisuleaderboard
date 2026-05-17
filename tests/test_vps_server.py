@@ -680,12 +680,73 @@ def test_leaderboard_view_controls_can_disable_clustering():
 
     assert "聚类" in html
     assert "段位" in html
+    assert "feature-grid" not in html
+    assert "feature-card" not in html
+    assert 'class="archetype-board" id="deck-ranking" data-sort-root' in html
+    assert 'class="archetype-row"' in html
+    assert "variant-viewer" in html
+    assert "构筑 1/1" in html
+    assert "Single · 1 构筑" in html
+    assert "战绩" in html
+    assert "平局" not in html
+    assert 'class="card-strip"' not in html
     assert "id=\"deck-ranking\"" in html
     assert "id=\"archetype-ranking\"" not in html
     assert "最多玩家：Player One（2次）" in html
     assert "统计玩家：2人" in html
     assert "rank_scope=traveler_down" in html
     assert "cluster=off" in html
+
+
+def test_leaderboard_cluster_variant_count_is_in_change_control():
+    deck_a = {
+        "deck_name": "Deck A",
+        "deck_fingerprint": "deck-a",
+        "sample_count": 3,
+        "win_count": 2,
+        "loss_count": 1,
+        "draw_count": 0,
+        "top_player": "Player One",
+        "top_player_count": 2,
+        "player_count": 2,
+        "cards": [],
+    }
+    deck_b = {**deck_a, "deck_name": "Deck B", "deck_fingerprint": "deck-b"}
+    html = _leaderboard_visual_page(
+        {
+            "scope": "public",
+            "scope_label": "公开匿名聚合",
+            "target_version": "Ver.vps",
+            "date_from": "2026-05-10",
+            "date_to": "2026-05-12",
+            "rank_scope": "all",
+            "upload_count": 2,
+            "match_count": 4,
+            "side_sample_count": 8,
+            "generated_at": "",
+            "top_decks": [deck_a, deck_b],
+            "top_archetypes": [
+                {
+                    "title": "Deck A 系",
+                    "member_count": 2,
+                    "member_deck_count": 2,
+                    "sample_count": 6,
+                    "win_count": 4,
+                    "loss_count": 2,
+                    "draw_count": 0,
+                    "top_player": "Player One",
+                    "top_player_count": 2,
+                    "player_count": 3,
+                    "member_decks": [deck_a, deck_b],
+                }
+            ],
+        },
+        cluster_enabled=True,
+    )
+
+    assert "构筑 1/2" in html
+    assert "Change · 2 构筑" in html
+    assert "2 个构筑" not in html
 
 
 def test_public_leaderboard_groups_deck_archetypes_by_shared_cost(tmp_path):

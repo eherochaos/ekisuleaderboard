@@ -859,7 +859,7 @@ def _leaderboard_visual_page(
             "privacy_note": _html(privacy_note),
             "view_controls": view_controls,
             "display_notice": display_notice,
-            "feature_grid": "" if is_archetype_view else _feature_grid(decks[:3]),
+            "feature_grid": "",
             "sort_target": _html(sort_target),
             "board": board,
             "load_more": _leaderboard_load_more_control(
@@ -1173,7 +1173,7 @@ def _archetype_rank_row(index: int, archetype: dict[str, Any]) -> str:
             f'<article class="archetype-row" {_sort_item_attrs(title, archetype.get("wilson_lower_bound"), archetype.get("sample_count"))}>',
             '<div class="row-rank">',
             f'<strong data-rank-value>{index:02d}</strong>',
-            f'<span>{_html(archetype.get("member_count", 0))} 个构筑</span>',
+            f'<span>{_record_label(archetype)}</span>',
             "</div>",
             '<div class="row-deck">',
             f"<h3>{_html(title)}</h3>",
@@ -1184,7 +1184,6 @@ def _archetype_rank_row(index: int, archetype: dict[str, Any]) -> str:
             _score_pill("Wilson", _fmt_rate(archetype.get("wilson_lower_bound"))),
             _score_pill("胜率", _fmt_rate(archetype.get("win_rate"))),
             _score_pill("样本", archetype.get("sample_count", 0)),
-            _score_pill("构筑", archetype.get("member_count", 0)),
             _score_pill("战绩", _record_label(archetype)),
             "</div>",
             "</article>",
@@ -1202,17 +1201,13 @@ def _archetype_variant_viewer(archetype: dict[str, Any]) -> str:
         representative = archetype.get("representative_deck")
         if isinstance(representative, dict):
             variants = [_archetype_variant(representative, 0)]
-    button = (
-        '<button type="button" class="variant-button" data-variant-button>Change</button>'
-        if len(variants) > 1
-        else '<span class="variant-single">Single</span>'
-    )
+    variant_count = len(variants)
     return "\n".join(
         [
             '<div class="variant-viewer" data-variant-root>',
             '<div class="variant-toolbar">',
-            '<span class="variant-label" data-variant-label>代表构筑</span>',
-            button,
+            f'<span class="variant-label" data-variant-label>构筑 1/{max(variant_count, 1)}</span>',
+            _variant_control(variant_count),
             "</div>",
             '<div class="variant-stage">',
             *variants,
@@ -1300,7 +1295,7 @@ def _ranking_board(decks: list[dict[str, Any]]) -> str:
         return ""
     return "\n".join(
         [
-            '<section class="ranking-board" id="deck-ranking">',
+            '<section class="archetype-board" id="deck-ranking" data-sort-root>',
             '<div class="board-head"><span>Rank</span><span>Deck</span><span>Signals</span></div>',
             _deck_rows(decks),
             "</section>",
@@ -1316,7 +1311,7 @@ def _rank_row(index: int, deck: dict[str, Any]) -> str:
     title = str(deck.get("deck_name") or deck.get("deck_fingerprint") or "")
     return "\n".join(
         [
-            f'<article class="rank-row" {_sort_item_attrs(title, deck.get("wilson_lower_bound"), deck.get("sample_count"))}>',
+            f'<article class="archetype-row" {_sort_item_attrs(title, deck.get("wilson_lower_bound"), deck.get("sample_count"))}>',
             '<div class="row-rank">',
             f'<strong data-rank-value>{index:02d}</strong>',
             f'<span>{_record_label(deck)}</span>',
@@ -1324,17 +1319,41 @@ def _rank_row(index: int, deck: dict[str, Any]) -> str:
             '<div class="row-deck">',
             f"<h3>{_html(title)}</h3>",
             _player_summary(deck),
-            f'<div class="card-strip">{_card_strip(deck.get("cards") or [])}</div>',
+            _deck_variant_viewer(deck),
             "</div>",
             '<div class="row-signals">',
             _score_pill("Wilson", _fmt_rate(deck.get("wilson_lower_bound"))),
             _score_pill("胜率", _fmt_rate(deck.get("win_rate"))),
             _score_pill("样本", deck.get("sample_count", 0)),
-            _score_pill("平局", deck.get("draw_count", 0)),
+            _score_pill("战绩", _record_label(deck)),
             "</div>",
             "</article>",
         ]
     )
+
+
+def _deck_variant_viewer(deck: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            '<div class="variant-viewer" data-variant-root>',
+            '<div class="variant-toolbar">',
+            '<span class="variant-label" data-variant-label>构筑 1/1</span>',
+            _variant_control(1),
+            "</div>",
+            '<div class="variant-stage">',
+            _archetype_variant(deck, 0),
+            "</div>",
+            "</div>",
+        ]
+    )
+
+
+def _variant_control(variant_count: int) -> str:
+    safe_count = max(1, int(variant_count or 0))
+    label = f"{'Change' if safe_count > 1 else 'Single'} · {safe_count} 构筑"
+    if safe_count > 1:
+        return f'<button type="button" class="variant-button" data-variant-button>{_html(label)}</button>'
+    return f'<span class="variant-single">{_html(label)}</span>'
 
 
 def _card_strip(cards: list[dict[str, Any]]) -> str:
