@@ -72,6 +72,7 @@ RANK_SCOPE_ALIASES = {
     "knight-above": RANK_SCOPE_KNIGHT_UP,
 }
 _LEADERBOARD_CACHE: dict[tuple[Any, ...], tuple[float, dict[str, Any]]] = {}
+LEADERBOARD_PAYLOAD_VERSION = 2
 BEHAVIOR_TOP_LIMIT = 3
 BEHAVIOR_MIN_CONDITIONAL_SAMPLE = 20
 
@@ -741,6 +742,8 @@ def _leaderboard_snapshot_key(
     include_archetypes: bool,
 ) -> str:
     identity = {
+        # 排行榜 payload 口径升级时必须变更版本，避免部署后继续命中旧快照。
+        "payload_version": LEADERBOARD_PAYLOAD_VERSION,
         "scope": scope,
         "subject": subject,
         "target_version": config.target_version,
@@ -888,6 +891,7 @@ def _leaderboard_payload(
                 card_buckets.setdefault(card_hash, _LeaderboardBucket()).add(result, side, match.played_at or "")
     return {
         **_config_to_payload(config),
+        "payload_version": LEADERBOARD_PAYLOAD_VERSION,
         "scope": scope,
         "scope_label": scope_label,
         "rank_scope": normalized_rank_scope,
