@@ -1046,23 +1046,7 @@ def _leaderboard_display_notice(
     shown_count: int,
     total_count: int,
 ) -> str:
-    if display_limit is None or shown_count >= total_count:
-        return ""
-    rank_scope = str(payload.get("rank_scope") or RANK_SCOPE_ALL)
-    if rank_scope not in RANK_SCOPE_LABELS:
-        rank_scope = RANK_SCOPE_ALL
-    full_url = _leaderboard_query_url(
-        _leaderboard_base_query(payload, contributor_name),
-        cluster="on" if cluster_enabled else "off",
-        rank_scope=rank_scope,
-        full="1",
-    )
-    return (
-        f'<p class="leaderboard-display-note">'
-        f"轻量模式已显示 {shown_count} / {total_count} 条，继续向下可分批加载。"
-        f'<a href="{_html(full_url)}">查看完整榜</a>'
-        f"</p>"
-    )
+    return ""
 
 
 def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, contributor_name: str = "") -> str:
