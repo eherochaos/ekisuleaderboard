@@ -556,7 +556,7 @@ def test_leaderboard_html_display_limit_defaults_to_lightweight_mode():
     assert _leaderboard_display_limit(20, "1") is None
 
 
-def test_leaderboard_limited_html_links_to_full_page():
+def test_leaderboard_limited_html_uses_load_more_without_top_notice():
     archetype = {
         "title": "Deck A 系",
         "member_count": 1,
@@ -592,6 +592,8 @@ def test_leaderboard_limited_html_links_to_full_page():
         display_limit=2,
     )
 
+    assert "leaderboard-display-note" not in html
+    assert "轻量模式已显示" not in html
     assert "2 / 3" in html
     assert "加载更多" in html
     assert "full=1" in html
