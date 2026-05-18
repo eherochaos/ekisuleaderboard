@@ -168,4 +168,16 @@ eiketsu-client sync
 - `http://你的VPS_IP:8000/leaderboard`：公开匿名聚合榜
 - `http://你的VPS_IP:8000/health`：健康检查
 
+本地页面测试页（固定样例数据，不读写真实数据库）：
+
+```powershell
+eiketsu-server dev-preview
+```
+
+默认会打开 `http://127.0.0.1:8010/`，里面有聚类榜、普通卡组榜、分页、卡牌筛选和贡献者视角入口。只想启动不打开浏览器时使用：
+
+```powershell
+eiketsu-server dev-preview --no-open
+```
+
 IP + HTTP 只建议小范围测试；正式给朋友长期使用前，应配置域名和 HTTPS。

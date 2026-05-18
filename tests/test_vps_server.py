@@ -12,9 +12,11 @@ from eiketsu_env.config import Settings
 from eiketsu_env.db.base import Base
 from eiketsu_env.db.models import Match, ServerApiToken, ServerInvite, ServerLeaderboardSnapshot, ServerUpload, SharedContributionPackage
 from eiketsu_env.db.session import make_engine
+from eiketsu_env.server_cli import build_parser as build_server_parser
 from eiketsu_env.server_app import (
     LEADERBOARD_HTML_DEFAULT_LIMIT,
     LEADERBOARD_HTML_MAX_LIMIT,
+    _dev_leaderboard_payload,
     _admin_invites_response,
     _admin_updates_response,
     _leaderboard_display_limit,
@@ -634,6 +636,112 @@ def test_leaderboard_rows_response_returns_next_page_html():
     assert response["total"] == 4
     assert "Deck 2" in response["html"]
     assert "Deck 1" not in response["html"]
+
+
+def test_leaderboard_card_filter_limits_rendered_decks_and_keeps_controls():
+    deck_a = {
+        "deck_name": "Deck A",
+        "deck_fingerprint": "deck-a",
+        "sample_count": 3,
+        "win_count": 2,
+        "loss_count": 1,
+        "draw_count": 0,
+        "cards": [{"label": "Card A(1.0 槍兵)", "card_code": "A001", "card_hash": "card-a"}],
+    }
+    deck_b = {
+        **deck_a,
+        "deck_name": "Deck B",
+        "deck_fingerprint": "deck-b",
+        "cards": [{"label": "Card B(2.0 騎兵)", "card_code": "B001", "card_hash": "card-b"}],
+    }
+    html = _leaderboard_visual_page(
+        {
+            "scope": "public",
+            "scope_label": "公开匿名聚合",
+            "target_version": "Ver.vps",
+            "date_from": "2026-05-10",
+            "date_to": "2026-05-12",
+            "rank_scope": "all",
+            "upload_count": 2,
+            "match_count": 3,
+            "side_sample_count": 6,
+            "generated_at": "",
+            "top_decks": [deck_a, deck_b],
+            "top_archetypes": [],
+        },
+        cluster_enabled=False,
+        card_filter="Card A",
+    )
+
+    assert 'name="card"' in html
+    assert 'value="Card A"' in html
+    assert "命中 1 / 2" in html
+    assert "Deck A" in html
+    assert "Deck B" not in html
+
+
+def test_leaderboard_card_filter_applies_to_rows_response_before_paging():
+    decks = [
+        {
+            "deck_name": "Deck A",
+            "deck_fingerprint": "deck-a",
+            "sample_count": 3,
+            "wilson_lower_bound": 0.8,
+            "win_count": 2,
+            "loss_count": 1,
+            "draw_count": 0,
+            "cards": [{"label": "Card A(1.0 槍兵)", "card_code": "A001", "card_hash": "card-a"}],
+        },
+        {
+            "deck_name": "Deck B",
+            "deck_fingerprint": "deck-b",
+            "sample_count": 2,
+            "wilson_lower_bound": 0.7,
+            "win_count": 1,
+            "loss_count": 1,
+            "draw_count": 0,
+            "cards": [{"label": "Card B(2.0 騎兵)", "card_code": "B001", "card_hash": "card-b"}],
+        },
+    ]
+    response = _leaderboard_rows_response(
+        {
+            "scope": "public",
+            "rank_scope": "all",
+            "top_decks": decks,
+            "top_archetypes": [],
+        },
+        cluster_enabled=False,
+        contributor_name="",
+        offset=0,
+        limit=1,
+        sort_key="wilson",
+        card_filter="card-b",
+    )
+
+    assert response["total"] == 1
+    assert response["has_more"] is False
+    assert "Deck B" in response["html"]
+    assert "Deck A" not in response["html"]
+
+
+def test_dev_preview_payload_provides_local_fixture_states():
+    public_payload = _dev_leaderboard_payload()
+    contributor_payload = _dev_leaderboard_payload(scope="contributor", contributor="本地测试者")
+
+    assert public_payload["scope"] == "public"
+    assert len(public_payload["top_decks"]) >= 6
+    assert len(public_payload["top_archetypes"]) >= 3
+    assert contributor_payload["scope"] == "contributor"
+    assert contributor_payload["contributor_name"] == "本地测试者"
+
+
+def test_server_cli_has_dev_preview_command():
+    args = build_server_parser().parse_args(["dev-preview", "--port", "8020", "--no-open"])
+
+    assert args.command == "dev-preview"
+    assert args.host == "127.0.0.1"
+    assert args.port == 8020
+    assert args.no_open is True
 
 
 def test_leaderboard_view_controls_can_disable_clustering():

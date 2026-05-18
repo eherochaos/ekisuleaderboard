@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
+import webbrowser
 from pathlib import Path
 
 from eiketsu_env.config import load_settings
@@ -16,6 +18,11 @@ from eiketsu_env.services.server_share import create_invite, get_server_config, 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="eiketsu-server", description="英杰大战 VPS 服务端管理工具")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    preview = subparsers.add_parser("dev-preview", help="启动本地页面测试预览服务")
+    preview.add_argument("--host", default="127.0.0.1", help="监听地址，默认 127.0.0.1")
+    preview.add_argument("--port", type=int, default=8010, help="监听端口，默认 8010")
+    preview.add_argument("--no-open", action="store_true", help="只启动服务，不自动打开浏览器")
 
     admin = subparsers.add_parser("admin", help="服务端管理命令")
     admin_sub = admin.add_subparsers(dest="admin_command", required=True)
@@ -47,6 +54,10 @@ def main(argv: list[str] | None = None) -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     args = build_parser().parse_args(argv)
+    if args.command == "dev-preview":
+        _run_dev_preview(args)
+        return
+
     settings = load_settings()
     upgrade_database(settings)
 
@@ -97,6 +108,27 @@ def main(argv: list[str] | None = None) -> None:
         return
 
     raise SystemExit("未知命令")
+
+
+def _run_dev_preview(args) -> None:
+    try:
+        import uvicorn
+    except ModuleNotFoundError as exc:
+        raise SystemExit("缺少 uvicorn；请先安装 `pip install .[server]` 后再运行本地预览。") from exc
+
+    os.environ["EIKETSU_SKIP_AUTO_APP"] = "1"
+    url = f"http://{args.host}:{args.port}/"
+    print(f"本地页面测试页：{url}")
+    print(f"排行榜预览：{url}leaderboard")
+    if not args.no_open:
+        webbrowser.open(url)
+    uvicorn.run(
+        "eiketsu_env.server_app:create_dev_preview_app",
+        factory=True,
+        host=args.host,
+        port=args.port,
+        log_level="info",
+    )
 
 
 if __name__ == "__main__":

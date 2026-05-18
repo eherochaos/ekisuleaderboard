@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import html
 import mimetypes
+import os
+import re
 import secrets
 from pathlib import Path
 from string import Template
@@ -166,6 +168,7 @@ def create_app(settings: Settings | None = None):
         contributor: str = "",
         rank_scope: str = RANK_SCOPE_ALL,
         cluster: str = "on",
+        card: str = "",
         offset: int = 0,
         limit: int = LEADERBOARD_HTML_DEFAULT_LIMIT,
         sort: str = "wilson",
@@ -193,6 +196,7 @@ def create_app(settings: Settings | None = None):
             offset=offset,
             limit=limit,
             sort_key=sort,
+            card_filter=card,
         )
 
     @app.get("/downloads/{filename}")
@@ -216,13 +220,7 @@ def create_app(settings: Settings | None = None):
 
     @app.get("/web/static/{filename}")
     def web_static(filename: str):
-        if filename not in LEADERBOARD_STATIC_FILES:
-            raise HTTPException(status_code=404, detail="static file not found")
-        path = WEB_STATIC_ROOT / filename
-        if not path.is_file():
-            raise HTTPException(status_code=404, detail="static file not found")
-        media_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
-        return FileResponse(path, media_type=media_type)
+        return _web_static_response(filename)
 
     @app.get("/", response_class=HTMLResponse)
     def home() -> str:
@@ -348,6 +346,7 @@ def create_app(settings: Settings | None = None):
         contributor: str = "",
         cluster: str = "on",
         rank_scope: str = RANK_SCOPE_ALL,
+        card: str = "",
         limit: int | None = None,
         full: str = "",
     ) -> HTMLResponse:
@@ -379,6 +378,7 @@ def create_app(settings: Settings | None = None):
                 filter_error=filter_error,
                 contributor_name=contributor_value,
                 cluster_enabled=cluster_enabled,
+                card_filter=card,
                 display_limit=display_limit,
             )
         )
@@ -388,6 +388,89 @@ def create_app(settings: Settings | None = None):
             response.set_cookie("eiketsu_contributor_name", contributor_value, httponly=True, samesite="lax")
             response.delete_cookie("eiketsu_user_token")
         return response
+
+    return app
+
+
+def create_dev_preview_app():
+    """创建本地页面预览服务：只使用固定样例数据，不读取或修改真实数据库。"""
+
+    if FastAPI is None:
+        raise RuntimeError("缺少 FastAPI 依赖；请安装 `pip install .[server]` 后再启动本地预览")
+    app = FastAPI(title="Eiketsu Leaderboard Preview", version=__version__)
+
+    @app.get("/health")
+    def health() -> dict[str, str]:
+        return {"status": "ok", "mode": "dev-preview"}
+
+    @app.get("/web/static/{filename}")
+    def web_static(filename: str):
+        return _web_static_response(filename)
+
+    @app.get("/", response_class=HTMLResponse)
+    def preview_home() -> str:
+        return _dev_preview_home_page()
+
+    @app.post("/leaderboard/filter")
+    async def leaderboard_filter(request: Request) -> RedirectResponse:
+        form = _parse_urlencoded_form(await request.body())
+        contributor = form.get("contributor", "").strip()
+        query = {"scope": "contributor"}
+        if contributor:
+            query["contributor"] = contributor
+        return RedirectResponse(f"/leaderboard?{urlencode(query)}", status_code=303)
+
+    @app.post("/leaderboard/filter/clear")
+    def leaderboard_filter_clear() -> RedirectResponse:
+        return RedirectResponse("/leaderboard", status_code=303)
+
+    @app.get("/api/v1/leaderboard/rows")
+    def api_leaderboard_rows(
+        scope: str = "public",
+        contributor: str = "",
+        rank_scope: str = RANK_SCOPE_ALL,
+        cluster: str = "on",
+        card: str = "",
+        offset: int = 0,
+        limit: int = LEADERBOARD_HTML_DEFAULT_LIMIT,
+        sort: str = "wilson",
+    ) -> dict[str, Any]:
+        cluster_enabled = _cluster_enabled(cluster)
+        payload = _dev_leaderboard_payload(scope=scope, contributor=contributor, rank_scope=rank_scope)
+        return _leaderboard_rows_response(
+            payload,
+            cluster_enabled=cluster_enabled,
+            contributor_name=contributor,
+            offset=offset,
+            limit=limit,
+            sort_key=sort,
+            card_filter=card,
+        )
+
+    @app.get("/leaderboard", response_class=HTMLResponse)
+    def leaderboard(
+        scope: str = "public",
+        contributor: str = "",
+        cluster: str = "on",
+        rank_scope: str = RANK_SCOPE_ALL,
+        card: str = "",
+        limit: int | None = None,
+        full: str = "",
+    ) -> HTMLResponse:
+        cluster_enabled = _cluster_enabled(cluster)
+        payload = _dev_leaderboard_payload(scope=scope, contributor=contributor, rank_scope=rank_scope)
+        is_personal_view = payload.get("scope") in {"mine", "contributor"}
+        return HTMLResponse(
+            _leaderboard_visual_page(
+                payload,
+                personal_requested=is_personal_view,
+                filter_error="",
+                contributor_name=contributor or str(payload.get("contributor_name") or ""),
+                cluster_enabled=cluster_enabled,
+                card_filter=card,
+                display_limit=_leaderboard_display_limit(limit, full),
+            )
+        )
 
     return app
 
@@ -470,6 +553,16 @@ def _leaderboard_payload_for_web_request(
 def _parse_urlencoded_form(body: bytes) -> dict[str, str]:
     parsed = parse_qs(body.decode("utf-8"), keep_blank_values=True)
     return {str(key): str(values[-1] if values else "") for key, values in parsed.items()}
+
+
+def _web_static_response(filename: str):
+    if filename not in LEADERBOARD_STATIC_FILES:
+        raise HTTPException(status_code=404, detail="static file not found")
+    path = WEB_STATIC_ROOT / filename
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="static file not found")
+    media_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    return FileResponse(path, media_type=media_type)
 
 
 def _admin_authorized(settings: Settings, token: str) -> bool:
@@ -800,6 +893,184 @@ def _page(title: str, body: str) -> str:
     """
 
 
+def _dev_preview_home_page() -> str:
+    links = [
+        ("聚类榜默认状态", "/leaderboard"),
+        ("普通卡组榜", "/leaderboard?cluster=off"),
+        ("分页/加载更多", "/leaderboard?limit=3"),
+        ("卡牌筛选命中", "/leaderboard?card=Card+A"),
+        ("卡牌筛选空状态", "/leaderboard?card=不存在"),
+        ("贡献者视角", "/leaderboard?scope=contributor&contributor=本地测试者"),
+    ]
+    rows = "".join(f'<li><a href="{_html(href)}">{_html(label)}</a></li>' for label, href in links)
+    return _page(
+        "本地页面测试页",
+        f"""
+        <p>这些入口使用固定样例数据，只用于本地调页面，不会读取或修改真实数据库。</p>
+        <ul>{rows}</ul>
+        <p>常用命令：<code>eiketsu-server dev-preview</code></p>
+        """,
+    )
+
+
+def _dev_leaderboard_payload(scope: str = "public", contributor: str = "", rank_scope: str = RANK_SCOPE_ALL) -> dict[str, Any]:
+    normalized_rank_scope = _normalize_dev_rank_scope(rank_scope)
+    decks = _dev_fixture_decks()
+    archetypes = _dev_fixture_archetypes(decks)
+    scope = str(scope or "public")
+    contributor_name = str(contributor or "本地测试者").strip()
+    payload: dict[str, Any] = {
+        "schema_version": "preview_v1",
+        "target_version": "Ver.preview",
+        "date_from": "2026-05-01",
+        "date_to": "2026-05-18",
+        "include_solo": False,
+        "high_ranker_rank": 100,
+        "scope": "contributor" if scope == "contributor" else "public",
+        "scope_label": f"用户贡献：{contributor_name}" if scope == "contributor" else "本地预览匿名聚合",
+        "rank_scope": normalized_rank_scope,
+        "rank_scope_label": RANK_SCOPE_LABELS[normalized_rank_scope],
+        "upload_count": 4 if scope == "contributor" else 9,
+        "package_count": 4 if scope == "contributor" else 9,
+        "match_count": 48,
+        "side_sample_count": sum(int(deck.get("sample_count") or 0) for deck in decks),
+        "top_decks": decks,
+        "top_cards": _dev_fixture_top_cards(decks),
+        "top_archetypes": archetypes,
+        "generated_at": "2026-05-18T12:00:00",
+    }
+    if scope == "contributor":
+        payload["contributor_name"] = contributor_name
+        payload["contributor_found"] = True
+        payload["user_count"] = 1
+    return payload
+
+
+def _normalize_dev_rank_scope(rank_scope: str) -> str:
+    key = str(rank_scope or RANK_SCOPE_ALL).strip()
+    return key if key in RANK_SCOPE_LABELS else RANK_SCOPE_ALL
+
+
+def _dev_fixture_decks() -> list[dict[str, Any]]:
+    cards = {
+        "a": _dev_card("card-a", "A001", "Card A", "1.0", "槍兵"),
+        "b": _dev_card("card-b", "B001", "Card B", "2.0", "騎兵"),
+        "c": _dev_card("card-c", "C001", "Card C", "3.0", "弓兵"),
+        "d": _dev_card("card-d", "D001", "Card D", "1.5", "鉄砲隊"),
+        "e": _dev_card("card-e", "E001", "Card E", "2.5", "剣豪"),
+        "f": _dev_card("card-f", "F001", "Card F", "2.0", "槍兵"),
+        "g": _dev_card("card-g", "G001", "Card G", "1.0", "騎兵"),
+        "h": _dev_card("card-h", "H001", "Card H", "2.5", "弓兵"),
+    }
+    specs = [
+        ("赤备突击", ["b", "c", "a"], 18, 12, 6, "Player Alpha", 0.56),
+        ("铁炮压制", ["d", "e", "a"], 16, 10, 6, "Player Beta", 0.52),
+        ("弓骑均衡", ["c", "h", "g"], 14, 9, 5, "Player Gamma", 0.51),
+        ("低费周转", ["a", "f", "g"], 13, 8, 5, "Player Delta", 0.49),
+        ("剑豪强攻", ["e", "b", "f"], 12, 7, 5, "Player Echo", 0.47),
+        ("槍兵守势", ["f", "a", "d"], 11, 6, 5, "Player Foxtrot", 0.44),
+        ("骑兵机动", ["b", "g", "h"], 10, 6, 4, "Player Hotel", 0.50),
+        ("远程消耗", ["c", "d", "h"], 9, 5, 4, "Player India", 0.46),
+        ("混色样例", ["a", "c", "e"], 8, 4, 4, "Player Juliett", 0.40),
+    ]
+    return [
+        _dev_deck(name, [cards[key] for key in card_keys], sample, wins, losses, player, wilson)
+        for name, card_keys, sample, wins, losses, player, wilson in specs
+    ]
+
+
+def _dev_fixture_archetypes(decks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        _dev_archetype("Card B / Card C 系", [decks[0], decks[2], decks[6]], ["card-b", "card-c"]),
+        _dev_archetype("Card D / Card E 系", [decks[1], decks[4], decks[7]], ["card-d", "card-e"]),
+        _dev_archetype("Card A / Card F 系", [decks[3], decks[5], decks[8]], ["card-a", "card-f"]),
+    ]
+
+
+def _dev_fixture_top_cards(decks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    counts: dict[str, dict[str, Any]] = {}
+    for deck in decks:
+        for card in deck.get("cards") or []:
+            card_hash = str(card.get("card_hash") or "")
+            row = counts.setdefault(card_hash, {**card, "sample_count": 0, "win_count": 0, "loss_count": 0})
+            row["sample_count"] += int(deck.get("sample_count") or 0)
+            row["win_count"] += int(deck.get("win_count") or 0)
+            row["loss_count"] += int(deck.get("loss_count") or 0)
+    rows = sorted(counts.values(), key=lambda item: int(item.get("sample_count") or 0), reverse=True)
+    for row in rows:
+        row["draw_count"] = 0
+        total = int(row["win_count"]) + int(row["loss_count"])
+        row["win_rate"] = (int(row["win_count"]) / total) if total else 0
+        row["wilson_lower_bound"] = row["win_rate"] * 0.8
+    return rows
+
+
+def _dev_card(card_hash: str, code: str, name: str, cost: str, unit_type: str) -> dict[str, str]:
+    return {
+        "card_hash": card_hash,
+        "card_code": code,
+        "label": f"{name}({cost} {unit_type})",
+        "image_url": "",
+    }
+
+
+def _dev_deck(
+    name: str,
+    cards: list[dict[str, str]],
+    sample_count: int,
+    win_count: int,
+    loss_count: int,
+    top_player: str,
+    wilson: float,
+) -> dict[str, Any]:
+    return {
+        "deck_fingerprint": ",".join(card["card_hash"] for card in cards),
+        "deck_name": f"{name}：{' / '.join(card['label'] for card in cards)}",
+        "sample_count": sample_count,
+        "win_count": win_count,
+        "loss_count": loss_count,
+        "draw_count": 0,
+        "top_player": top_player,
+        "top_player_count": max(1, sample_count // 3),
+        "player_count": max(1, sample_count // 5),
+        "win_rate": win_count / (win_count + loss_count),
+        "wilson_lower_bound": wilson,
+        "cards": cards,
+    }
+
+
+def _dev_archetype(title: str, members: list[dict[str, Any]], core_hashes: list[str]) -> dict[str, Any]:
+    cards_by_hash = {
+        str(card.get("card_hash")): card
+        for deck in members
+        for card in deck.get("cards") or []
+        if isinstance(card, dict)
+    }
+    sample_count = sum(int(deck.get("sample_count") or 0) for deck in members)
+    win_count = sum(int(deck.get("win_count") or 0) for deck in members)
+    loss_count = sum(int(deck.get("loss_count") or 0) for deck in members)
+    return {
+        "archetype_id": title,
+        "title": title,
+        "similar_cost_threshold": 5.0,
+        "representative_deck_fingerprint": members[0].get("deck_fingerprint", ""),
+        "member_count": len(members),
+        "member_deck_count": len(members),
+        "sample_count": sample_count,
+        "win_count": win_count,
+        "loss_count": loss_count,
+        "draw_count": 0,
+        "top_player": members[0].get("top_player", ""),
+        "top_player_count": members[0].get("top_player_count", 0),
+        "player_count": sum(int(deck.get("player_count") or 0) for deck in members),
+        "win_rate": win_count / (win_count + loss_count),
+        "wilson_lower_bound": min(float(deck.get("wilson_lower_bound") or 0) for deck in members),
+        "core_cards": [cards_by_hash[card_hash] for card_hash in core_hashes if card_hash in cards_by_hash],
+        "representative_deck": members[0],
+        "member_decks": members,
+    }
+
+
 def _leaderboard_visual_page(
     payload: dict[str, Any],
     *,
@@ -807,16 +1078,21 @@ def _leaderboard_visual_page(
     filter_error: str = "",
     contributor_name: str = "",
     cluster_enabled: bool = True,
+    card_filter: str = "",
     display_limit: int | None = None,
 ) -> str:
     archetypes = list(payload.get("top_archetypes") or [])
     decks = list(payload.get("top_decks") or [])
+    card_filter = _card_filter_query(card_filter)
     is_archetype_view = bool(cluster_enabled and archetypes)
     is_personal_view = payload.get("scope") in {"mine", "contributor"}
     sort_target = "archetype-ranking" if is_archetype_view else "deck-ranking"
-    all_items = archetypes if is_archetype_view else decks
+    source_items = archetypes if is_archetype_view else decks
+    all_items = _filter_leaderboard_items(source_items, card_filter, archetype_view=is_archetype_view)
     visible_items = _leaderboard_visible_items(all_items, display_limit)
     board = _archetype_ranking_board(visible_items) if is_archetype_view else _ranking_board(visible_items)
+    if card_filter and not board:
+        board = _leaderboard_card_filter_empty(card_filter)
     eyebrow = "MY CONTRIBUTION LEADERBOARD" if is_personal_view else "PUBLIC ANONYMOUS LEADERBOARD"
     title = "我的贡献卡组榜" if is_personal_view else "英杰大战环境卡组榜"
     upload_label = "我的上传批次" if is_personal_view else "上传批次"
@@ -826,7 +1102,15 @@ def _leaderboard_visual_page(
         else "公开页只展示匿名聚合结果，不展示贡献者昵称、token、浏览器信息或本地路径。"
     )
     mobile_summary = _leaderboard_mobile_summary(payload, upload_label)
-    view_controls = _leaderboard_view_controls(payload, cluster_enabled, contributor_name)
+    view_controls = _leaderboard_view_controls(payload, cluster_enabled, contributor_name, card_filter)
+    card_filter_controls = _leaderboard_card_filter_controls(
+        payload,
+        cluster_enabled=cluster_enabled,
+        contributor_name=contributor_name,
+        card_filter=card_filter,
+        matched_count=len(all_items),
+        total_count=len(source_items),
+    )
     display_notice = _leaderboard_display_notice(
         payload,
         cluster_enabled=cluster_enabled,
@@ -858,6 +1142,7 @@ def _leaderboard_visual_page(
             "mobile_summary": mobile_summary,
             "privacy_note": _html(privacy_note),
             "view_controls": view_controls,
+            "card_filter_controls": card_filter_controls,
             "display_notice": display_notice,
             "feature_grid": "",
             "sort_target": _html(sort_target),
@@ -866,6 +1151,7 @@ def _leaderboard_visual_page(
                 payload,
                 cluster_enabled=cluster_enabled,
                 contributor_name=contributor_name,
+                card_filter=card_filter,
                 target_id=sort_target,
                 visible_count=len(visible_items),
                 total_count=len(all_items),
@@ -888,6 +1174,86 @@ def _leaderboard_visible_items(items: list[dict[str, Any]], display_limit: int |
     return items[:display_limit]
 
 
+def _filter_leaderboard_items(
+    items: list[dict[str, Any]],
+    card_filter: str,
+    *,
+    archetype_view: bool,
+) -> list[dict[str, Any]]:
+    tokens = _card_filter_tokens(card_filter)
+    if not tokens:
+        return items
+    matcher = _archetype_matches_card_filter if archetype_view else _deck_matches_card_filter
+    return [item for item in items if matcher(item, tokens)]
+
+
+def _card_filter_query(value: Any) -> str:
+    return " ".join(str(value or "").split())
+
+
+def _card_filter_tokens(value: Any) -> list[str]:
+    return [part.casefold() for part in _card_filter_query(value).split() if part]
+
+
+def _deck_matches_card_filter(deck: dict[str, Any], tokens: list[str]) -> bool:
+    return _search_values_match(_deck_search_values(deck), tokens)
+
+
+def _archetype_matches_card_filter(archetype: dict[str, Any], tokens: list[str]) -> bool:
+    if _search_values_match(_archetype_search_values(archetype), tokens):
+        return True
+    representative = archetype.get("representative_deck")
+    if isinstance(representative, dict) and _deck_matches_card_filter(representative, tokens):
+        return True
+    # 聚类榜按成员构筑继续匹配，避免只搜核心卡时漏掉相关变体。
+    return any(
+        isinstance(deck, dict) and _deck_matches_card_filter(deck, tokens)
+        for deck in archetype.get("member_decks") or []
+    )
+
+
+def _deck_search_values(deck: dict[str, Any]) -> list[Any]:
+    values: list[Any] = [deck.get("deck_name"), deck.get("deck_fingerprint")]
+    for card in deck.get("cards") or []:
+        if isinstance(card, dict):
+            values.extend(_card_search_values(card))
+    return values
+
+
+def _archetype_search_values(archetype: dict[str, Any]) -> list[Any]:
+    values: list[Any] = [
+        archetype.get("title"),
+        archetype.get("archetype_id"),
+        archetype.get("representative_deck_fingerprint"),
+    ]
+    for card in archetype.get("core_cards") or []:
+        if isinstance(card, dict):
+            values.extend(_card_search_values(card))
+    return values
+
+
+def _card_search_values(card: dict[str, Any]) -> list[Any]:
+    return [card.get("label"), card.get("card_code"), card.get("card_hash")]
+
+
+def _search_values_match(values: list[Any], tokens: list[str]) -> bool:
+    haystack = " ".join(str(value or "") for value in values).casefold()
+    compact_haystack = "".join(haystack.split())
+    query = " ".join(tokens)
+    compact_query = "".join(query.split())
+    if query in haystack or compact_query in compact_haystack:
+        return True
+    haystack_words = [word for word in re.split(r"[\s/()（）\[\],，、·.:：-]+", haystack) if word]
+    return all(any(_card_filter_token_matches_word(token, word) for word in haystack_words) for token in tokens)
+
+
+def _card_filter_token_matches_word(token: str, word: str) -> bool:
+    if token == word:
+        return True
+    # 英文单字母太容易误伤；中文/日文单字仍允许匹配“槍兵”这类词。
+    return (len(token) > 1 or any(ord(ch) > 127 for ch in token)) and token in word
+
+
 def _leaderboard_rows_response(
     payload: dict[str, Any],
     *,
@@ -896,9 +1262,11 @@ def _leaderboard_rows_response(
     offset: int,
     limit: int,
     sort_key: str,
+    card_filter: str = "",
 ) -> dict[str, Any]:
     is_archetype_view = bool(cluster_enabled and payload.get("top_archetypes"))
     items = list(payload.get("top_archetypes") or []) if is_archetype_view else list(payload.get("top_decks") or [])
+    items = _filter_leaderboard_items(items, card_filter, archetype_view=is_archetype_view)
     sorted_items = _sort_leaderboard_items(items, sort_key)
     safe_offset = max(0, int(offset or 0))
     page_size = max(1, min(int(limit or LEADERBOARD_HTML_DEFAULT_LIMIT), LEADERBOARD_HTML_MAX_LIMIT))
@@ -945,6 +1313,7 @@ def _leaderboard_load_more_control(
     *,
     cluster_enabled: bool,
     contributor_name: str,
+    card_filter: str,
     target_id: str,
     visible_count: int,
     total_count: int,
@@ -958,13 +1327,13 @@ def _leaderboard_load_more_control(
     endpoint = "/api/v1/leaderboard/rows"
     endpoint += "?" + urlencode(
         {
-            **_leaderboard_base_query(payload, contributor_name),
+            **_leaderboard_base_query(payload, contributor_name, card_filter=card_filter),
             "cluster": "on" if cluster_enabled else "off",
             "rank_scope": rank_scope,
         }
     )
     full_url = _leaderboard_query_url(
-        _leaderboard_base_query(payload, contributor_name),
+        _leaderboard_base_query(payload, contributor_name, card_filter=card_filter),
         cluster="on" if cluster_enabled else "off",
         rank_scope=rank_scope,
         full="1",
@@ -1049,11 +1418,69 @@ def _leaderboard_display_notice(
     return ""
 
 
-def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, contributor_name: str = "") -> str:
+def _leaderboard_card_filter_controls(
+    payload: dict[str, Any],
+    *,
+    cluster_enabled: bool,
+    contributor_name: str,
+    card_filter: str,
+    matched_count: int,
+    total_count: int,
+) -> str:
     rank_scope = str(payload.get("rank_scope") or RANK_SCOPE_ALL)
     if rank_scope not in RANK_SCOPE_LABELS:
         rank_scope = RANK_SCOPE_ALL
-    base_params = _leaderboard_base_query(payload, contributor_name)
+    form_params = {
+        **_leaderboard_base_query(payload, contributor_name),
+        "cluster": "on" if cluster_enabled else "off",
+        "rank_scope": rank_scope,
+    }
+    hidden_inputs = "".join(
+        f'<input type="hidden" name="{_html(key)}" value="{_html(value)}">'
+        for key, value in form_params.items()
+        if value
+    )
+    clear_href = _leaderboard_query_url(form_params)
+    meta = (
+        f'<span class="card-filter-meta">命中 {matched_count} / {total_count}</span>'
+        if card_filter
+        else '<span class="card-filter-meta">按卡牌名、编号或 hash 收窄榜单</span>'
+    )
+    clear_link = f'<a class="card-filter-clear" href="{_html(clear_href)}">清除</a>' if card_filter else ""
+    return "\n".join(
+        [
+            '<section class="card-filter-controls" aria-label="卡牌筛选">',
+            '<form class="card-filter-form" method="get" action="/leaderboard" data-card-filter-form>',
+            hidden_inputs,
+            '<label class="card-filter-label" for="card-filter-input">卡牌筛选</label>',
+            (
+                '<input id="card-filter-input" class="card-filter-input" name="card" '
+                f'type="search" autocomplete="off" value="{_html(card_filter)}" '
+                'placeholder="输入卡牌名 / 编号 / hash" data-card-filter-input>'
+            ),
+            '<button class="card-filter-button" type="submit">筛选</button>',
+            clear_link,
+            "</form>",
+            meta,
+            "</section>",
+        ]
+    )
+
+
+def _leaderboard_card_filter_empty(card_filter: str) -> str:
+    return f'<section class="empty">没有找到包含“{_html(card_filter)}”的卡组或分类。</section>'
+
+
+def _leaderboard_view_controls(
+    payload: dict[str, Any],
+    cluster_enabled: bool,
+    contributor_name: str = "",
+    card_filter: str = "",
+) -> str:
+    rank_scope = str(payload.get("rank_scope") or RANK_SCOPE_ALL)
+    if rank_scope not in RANK_SCOPE_LABELS:
+        rank_scope = RANK_SCOPE_ALL
+    base_params = _leaderboard_base_query(payload, contributor_name, card_filter=card_filter)
     cluster_links = [
         _view_control_link("开", _leaderboard_query_url(base_params, cluster="on", rank_scope=rank_scope), cluster_enabled),
         _view_control_link("关", _leaderboard_query_url(base_params, cluster="off", rank_scope=rank_scope), not cluster_enabled),
@@ -1081,14 +1508,22 @@ def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, c
     )
 
 
-def _leaderboard_base_query(payload: dict[str, Any], contributor_name: str = "") -> dict[str, str]:
+def _leaderboard_base_query(
+    payload: dict[str, Any],
+    contributor_name: str = "",
+    card_filter: str = "",
+) -> dict[str, str]:
     scope = str(payload.get("scope") or "public")
+    base: dict[str, str] = {}
     if scope == "contributor":
         contributor = str(contributor_name or payload.get("contributor_name") or "").strip()
-        return {"scope": "contributor", "contributor": contributor} if contributor else {"scope": "contributor"}
-    if scope == "mine":
-        return {"scope": "mine"}
-    return {}
+        base = {"scope": "contributor", "contributor": contributor} if contributor else {"scope": "contributor"}
+    elif scope == "mine":
+        base = {"scope": "mine"}
+    card_filter = _card_filter_query(card_filter)
+    if card_filter:
+        base["card"] = card_filter
+    return base
 
 
 def _leaderboard_query_url(base_params: dict[str, str], **updates: str) -> str:
@@ -1432,6 +1867,8 @@ def _html(value: Any) -> str:
 
 
 def _load_app():
+    if os.environ.get("EIKETSU_SKIP_AUTO_APP") == "1":
+        return None
     try:
         return create_app()
     except RuntimeError:

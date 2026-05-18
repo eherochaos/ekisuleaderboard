@@ -160,7 +160,38 @@
     });
   };
 
+  const initCardFilter = () => {
+    document.querySelectorAll("[data-card-filter-form]").forEach((form) => {
+      if (form.dataset.cardFilterReady === "1") {
+        return;
+      }
+      form.dataset.cardFilterReady = "1";
+      const input = form.querySelector("[data-card-filter-input]");
+      if (!(input instanceof HTMLInputElement)) {
+        return;
+      }
+      const originalValue = input.value.trim();
+      let submitTimer = null;
+      const submitWithCurrentCard = () => {
+        if (input.value.trim() === originalValue) {
+          return;
+        }
+        if (typeof form.requestSubmit === "function") {
+          form.requestSubmit();
+        } else {
+          form.submit();
+        }
+      };
+      input.addEventListener("input", () => {
+        window.clearTimeout(submitTimer);
+        // 用户停顿后自动刷新服务端筛选，确保未加载的榜单条目也能被搜到。
+        submitTimer = window.setTimeout(submitWithCurrentCard, 650);
+      });
+    });
+  };
+
   initVariantViewers();
   initSortToolbars();
   initLoadMore();
+  initCardFilter();
 })();
