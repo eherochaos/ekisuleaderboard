@@ -14,8 +14,9 @@ Write-Host "Packing server/client source..."
 tar -cf $Archive `
     pyproject.toml `
     README.md `
-    Dockerfile `
-    docker-compose.yml `
+    assets `
+    deploy `
+    frontend `
     alembic.ini `
     alembic `
     src
@@ -29,7 +30,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Upload failed"
 }
 
-$RemoteCommand = "mkdir -p $RemoteDir && tar -xf $RemoteArchive -C $RemoteDir && cd $RemoteDir && docker compose build api && docker compose up -d api && docker compose ps"
+$RemoteCommand = "mkdir -p $RemoteDir && tar -xf $RemoteArchive -C $RemoteDir && cd $RemoteDir && docker compose -f deploy/docker-compose.yml build api && docker compose -f deploy/docker-compose.yml up -d api && docker compose -f deploy/docker-compose.yml ps"
 Write-Host "Deploying on VPS. If prompted, enter the VPS password again."
 ssh $SshTarget $RemoteCommand
 if ($LASTEXITCODE -ne 0) {

@@ -42,7 +42,7 @@ $SafeVersion = Escape-SshSingleQuoted $Version
 $SafeNotes = Escape-SshSingleQuoted $Notes
 $SafeRemoteExe = Escape-SshSingleQuoted $RemoteExe
 
-$Command = "cd $RemoteDir && docker compose run --rm -v '${SafeRemoteExe}:${SafeRemoteExe}:ro' api eiketsu-server admin publish-client --version '$SafeVersion' --file '$SafeRemoteExe' --notes '$SafeNotes'"
+$Command = "cd $RemoteDir && docker compose -f deploy/docker-compose.yml run --rm -v '${SafeRemoteExe}:${SafeRemoteExe}:ro' api eiketsu-server admin publish-client --version '$SafeVersion' --file '$SafeRemoteExe' --notes '$SafeNotes'"
 Write-Host "Publishing client update on VPS..."
 ssh $SshTarget $Command
 if ($LASTEXITCODE -ne 0) {

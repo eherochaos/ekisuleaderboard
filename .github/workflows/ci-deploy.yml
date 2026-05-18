@@ -52,8 +52,9 @@ jobs:
           tar -cf eiketsu-vps-update.tar \
             pyproject.toml \
             README.md \
-            Dockerfile \
-            docker-compose.yml \
+            assets \
+            deploy \
+            frontend \
             alembic.ini \
             alembic \
             src
@@ -169,8 +170,8 @@ jobs:
              mkdir -p $VPS_REMOTE_DIR; \
              tar -xf /tmp/eiketsu-vps-update-${GITHUB_SHA}.tar -C $VPS_REMOTE_DIR; \
              cd $VPS_REMOTE_DIR; \
-             docker compose build api; \
-             docker compose run --rm api alembic upgrade head; \
-             docker compose up -d api; \
-             docker compose ps; \
+             docker compose -f deploy/docker-compose.yml build api; \
+             docker compose -f deploy/docker-compose.yml run --rm api alembic upgrade head; \
+             docker compose -f deploy/docker-compose.yml up -d api; \
+             docker compose -f deploy/docker-compose.yml ps; \
              rm -f /tmp/eiketsu-vps-update-${GITHUB_SHA}.tar"

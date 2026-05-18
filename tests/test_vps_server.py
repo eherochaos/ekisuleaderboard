@@ -17,6 +17,7 @@ from eiketsu_env.server_app import (
     LEADERBOARD_HTML_MAX_LIMIT,
     _admin_invites_response,
     _admin_updates_response,
+    create_app,
     _leaderboard_display_limit,
     _leaderboard_rows_response,
     _leaderboard_visual_page,
@@ -410,7 +411,7 @@ def test_public_leaderboard_persists_snapshot_for_repeated_filters(tmp_path, mon
     def _fail_load_matches(*_args, **_kwargs):
         raise AssertionError("snapshot should avoid live match loading")
 
-    monkeypatch.setattr("eiketsu_env.services.server_share._load_leaderboard_matches", _fail_load_matches)
+    monkeypatch.setattr("eiketsu_env.services.leaderboard._load_leaderboard_matches", _fail_load_matches)
 
     cached = public_leaderboard(settings, include_archetypes=False)
 
@@ -643,6 +644,27 @@ def test_leaderboard_mobile_layout_keeps_personal_filter_collapsed():
     assert "12 对局" in html
     assert "/web/static/leaderboard.css" in html
     assert "/web/static/leaderboard.js" in html
+
+
+def test_web_static_serves_leaderboard_assets_from_frontend(tmp_path):
+    project_root = Path(__file__).resolve().parents[1]
+    settings = Settings(
+        root_dir=project_root,
+        db_url=f"sqlite:///{(tmp_path / 'static-route.db').as_posix()}",
+        card_catalog_path=tmp_path / "cards.json",
+    )
+    app = create_app(settings)
+    static_route = next(route for route in app.routes if getattr(route, "path", "") == "/web/static/{filename}")
+
+    css = static_route.endpoint("leaderboard.css")
+    js = static_route.endpoint("leaderboard.js")
+
+    assert Path(css.path).name == "leaderboard.css"
+    assert Path(css.path).is_file()
+    assert css.media_type == "text/css"
+    assert Path(js.path).name == "leaderboard.js"
+    assert Path(js.path).is_file()
+    assert js.media_type in {"application/javascript", "text/javascript"}
 
 
 def test_leaderboard_html_display_limit_defaults_to_lightweight_mode():

@@ -110,8 +110,9 @@ GitHub Actions 会打包这些文件：
 
 - `pyproject.toml`
 - `README.md`
-- `Dockerfile`
-- `docker-compose.yml`
+- `assets/`
+- `deploy/`
+- `frontend/`
 - `alembic.ini`
 - `alembic/`
 - `src/`
@@ -119,10 +120,10 @@ GitHub Actions 会打包这些文件：
 然后在 VPS 上执行：
 
 ```bash
-docker compose build api
-docker compose run --rm api alembic upgrade head
-docker compose up -d api
-docker compose ps
+docker compose -f deploy/docker-compose.yml build api
+docker compose -f deploy/docker-compose.yml run --rm api alembic upgrade head
+docker compose -f deploy/docker-compose.yml up -d api
+docker compose -f deploy/docker-compose.yml ps
 ```
 
 这样前端页面、服务端接口、数据库迁移都会跟随 `main` 分支自动更新。

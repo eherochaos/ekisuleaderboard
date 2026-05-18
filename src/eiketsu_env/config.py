@@ -67,6 +67,7 @@ def load_settings(root_dir: Path | None = None) -> Settings:
     admin_token = os.environ.get("EIKETSU_ADMIN_TOKEN") or ""
     # 卡牌主数据以相邻的 eki_database_v2 为准；lookup 层会优先读 SQLite，必要时退回 raw official base。
     default_catalog = resolved_root.parent / "eki_database_v2"
+    project_catalog = resolved_root / "assets" / "card_catalog.json"
     packaged_catalog = _packaged_card_catalog_path()
     return Settings(
         root_dir=resolved_root,
@@ -76,7 +77,7 @@ def load_settings(root_dir: Path | None = None) -> Settings:
         auth_source=auth_source,
         browser_profile=Path(browser_profile_value) if browser_profile_value else None,
         login_url=login_url,
-        card_catalog_path=Path(catalog_path) if catalog_path else _first_existing_path(default_catalog, packaged_catalog),
+        card_catalog_path=Path(catalog_path) if catalog_path else _first_existing_path(default_catalog, project_catalog, packaged_catalog),
         admin_token=admin_token,
     )
 

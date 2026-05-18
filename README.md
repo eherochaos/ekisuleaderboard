@@ -57,7 +57,7 @@ python -m eiketsu_env share sync --contributor 你的昵称
 - `EIKETSU_BROWSER_PROFILE`：覆盖 Chrome/Edge/Brave/Firefox profile 路径
 - `EIKETSU_LOGIN_URL`：覆盖自动打开的登录页
 - `EIKETSU_BASE_URL`：覆盖英杰大战.NET 根地址
-- `EIKETSU_CARD_CATALOG_PATH`：覆盖外部卡牌主数据路径；默认读取相邻项目 `E:\eki_database_v2`，优先关联 `data\db\cards.sqlite3`，读不到时退回该库最新的官网 base JSON 快照
+- `EIKETSU_CARD_CATALOG_PATH`：覆盖外部卡牌主数据路径；默认读取相邻项目 `E:\eki_database_v2`，读不到时退回本仓库 `assets/card_catalog.json`
 
 ## 导出阅读性
 
@@ -119,9 +119,9 @@ python -m eiketsu_env share doctor
 服务端首次部署：
 
 ```powershell
-docker compose up -d --build
-docker compose run --rm api eiketsu-server admin set-config --target-version Ver.3.1.0H --date-from 2026-04-22 --date-to 2026-05-11
-docker compose run --rm api eiketsu-server admin create-invite --label 朋友A
+docker compose -f deploy/docker-compose.yml up -d --build
+docker compose -f deploy/docker-compose.yml run --rm api eiketsu-server admin set-config --target-version Ver.3.1.0H --date-from 2026-04-22 --date-to 2026-05-11
+docker compose -f deploy/docker-compose.yml run --rm api eiketsu-server admin create-invite --label 朋友A
 ```
 
 朋友侧推荐使用图形客户端；VPS 地址已内置在应用里，不需要让朋友手动输入：

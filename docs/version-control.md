@@ -5,11 +5,13 @@
 ## 应该进入 Git
 
 - `src/`：客户端、服务端、网页渲染、采集、上传、分析逻辑。
-- `src/eiketsu_env/web/templates/`、`src/eiketsu_env/web/static/`：VPS 网页前端模板、CSS 和 JS，适合频繁迭代并随源码部署。
+- `backend/`：后端职责索引；当前 Python 后端源码仍保留在 `src/eiketsu_env/` 以保持包入口稳定。
+- `frontend/leaderboard/`：VPS 排行榜页面模板、CSS 和 JS。
+- `assets/`：随源码部署的卡牌主数据和 UI/图片素材。
 - `tests/`：回归测试和接口测试。
 - `alembic/`、`alembic.ini`：数据库结构迁移。
 - `scripts/`：构建 exe、部署 VPS、发布更新等可复现脚本。
-- `Dockerfile`、`docker-compose.yml`、`.dockerignore`：服务端部署结构。
+- `deploy/`、`.dockerignore`：服务端部署结构和打包配置。
 - `pyproject.toml`、`README.md`、`.env.example`：项目依赖和配置模板。
 - `shared/share_config.json`：旧本地共享流程的公开配置样例。
 
