@@ -1119,11 +1119,8 @@ def _archetype_feature_grid(archetypes: list[dict[str, Any]]) -> str:
                     _player_summary(archetype),
                     f'<p class="archetype-subnote">共同 Cost >= {_html(archetype.get("similar_cost_threshold", ""))}，{_html(archetype.get("member_count", 0))} 个构筑合并统计</p>',
                     f'<div class="feature-cards">{_card_strip(archetype.get("core_cards") or [])}</div>',
-                    '<div class="feature-stats">',
-                    _score_pill("Wilson", _fmt_rate(archetype.get("wilson_lower_bound"))),
-                    _score_pill("胜率", _fmt_rate(archetype.get("win_rate"))),
-                    _score_pill("样本", archetype.get("sample_count", 0)),
-                    _score_pill("构筑", archetype.get("member_count", 0)),
+                    '<div class="feature-stats signal-panel">',
+                    _signal_groups(archetype),
                     "</div>",
                     _variant_stack(archetype.get("member_decks") or [], limit=2),
                     "</article>",
@@ -1164,11 +1161,8 @@ def _archetype_rank_row(index: int, archetype: dict[str, Any]) -> str:
             _player_summary(archetype),
             _archetype_variant_viewer(archetype),
             "</div>",
-            '<div class="row-signals">',
-            _score_pill("Wilson", _fmt_rate(archetype.get("wilson_lower_bound"))),
-            _score_pill("胜率", _fmt_rate(archetype.get("win_rate"))),
-            _score_pill("样本", archetype.get("sample_count", 0)),
-            _score_pill("战绩", _record_label(archetype)),
+            '<div class="row-signals signal-panel">',
+            _signal_groups(archetype),
             "</div>",
             "</article>",
         ]
@@ -1262,10 +1256,8 @@ def _feature_grid(decks: list[dict[str, Any]]) -> str:
                     f'<h2>{_html(deck.get("deck_name") or deck.get("deck_fingerprint") or "-")}</h2>',
                     _player_summary(deck),
                     f'<div class="feature-cards">{_card_strip(deck.get("cards") or [])}</div>',
-                    '<div class="feature-stats">',
-                    _score_pill("Wilson", _fmt_rate(deck.get("wilson_lower_bound"))),
-                    _score_pill("胜率", _fmt_rate(deck.get("win_rate"))),
-                    _score_pill("样本", deck.get("sample_count", 0)),
+                    '<div class="feature-stats signal-panel">',
+                    _signal_groups(deck),
                     "</div>",
                     "</article>",
                 ]
@@ -1305,11 +1297,8 @@ def _rank_row(index: int, deck: dict[str, Any]) -> str:
             _player_summary(deck),
             _deck_variant_viewer(deck),
             "</div>",
-            '<div class="row-signals">',
-            _score_pill("Wilson", _fmt_rate(deck.get("wilson_lower_bound"))),
-            _score_pill("胜率", _fmt_rate(deck.get("win_rate"))),
-            _score_pill("样本", deck.get("sample_count", 0)),
-            _score_pill("战绩", _record_label(deck)),
+            '<div class="row-signals signal-panel">',
+            _signal_groups(deck),
             "</div>",
             "</article>",
         ]
@@ -1340,6 +1329,160 @@ def _variant_control(variant_count: int) -> str:
     return f'<span class="variant-single">{_html(label)}</span>'
 
 
+def _signal_groups(item: dict[str, Any]) -> str:
+    behavior = item.get("behavior_stats") if isinstance(item.get("behavior_stats"), dict) else {}
+    metric_pills = [
+        _score_pill("胜率", _fmt_rate(item.get("win_rate"))),
+        _score_pill("Wilson", _fmt_rate(item.get("wilson_lower_bound"))),
+        _player_metric_pill(item),
+        _score_pill("样本", item.get("sample_count", 0)),
+    ]
+    metric_pills.extend(_dynamic_signal_pills(behavior))
+    return "\n".join(
+        [
+            f'<div class="signal-group" title="战绩 {_record_label(item)}">',
+            *metric_pills,
+            "</div>",
+            _behavior_panel(behavior),
+        ]
+    )
+
+
+def _dynamic_signal_pills(behavior: dict[str, Any]) -> list[str]:
+    if not behavior:
+        return []
+    pills: list[str] = []
+    trend = behavior.get("trend") if isinstance(behavior.get("trend"), dict) else {}
+    if trend:
+        pills.append(_score_pill("近7日", _trend_compact_label(trend), title=_trend_label(trend)))
+    credibility = behavior.get("credibility") if isinstance(behavior.get("credibility"), dict) else {}
+    if credibility:
+        pills.append(_score_pill("可信度", _credibility_label(credibility), title=_credibility_title(credibility)))
+    return pills
+
+
+def _behavior_panel(behavior: dict[str, Any]) -> str:
+    if not behavior:
+        return ""
+    blocks = [
+        _behavior_block("胜利局战器", behavior.get("weapons") or []),
+        _behavior_block("流派统计", behavior.get("styles") or []),
+        _soul_block(behavior.get("souls") or []),
+    ]
+    blocks = [block for block in blocks if block]
+    return f'<div class="behavior-panel">{"".join(blocks)}</div>' if blocks else ""
+
+
+def _behavior_block(title: str, rows: list[dict[str, Any]]) -> str:
+    # 右侧信号区要保持 A 款短卡片高度，列表只露出 Top3。
+    valid_rows = [row for row in rows if isinstance(row, dict)][:3]
+    if not valid_rows:
+        return ""
+    return "\n".join(
+        [
+            '<section class="behavior-block">',
+            f'<span class="behavior-title">{_html(title)}</span>',
+            *(_behavior_row(row) for row in valid_rows),
+            "</section>",
+        ]
+    )
+
+
+def _behavior_row(row: dict[str, Any]) -> str:
+    win_usage = row.get("win_usage_rate")
+    width = _bar_width(win_usage if win_usage not in {None, ""} else row.get("usage_rate"))
+    usage = _fmt_compact_rate(win_usage) or _fmt_compact_rate(row.get("usage_rate")) or "-"
+    conditional = "样本不足" if row.get("low_sample") else f"胜{_fmt_compact_rate(row.get('conditional_win_rate')) or '-'}"
+    meta = f"{usage} · {conditional}"
+    detail = " / ".join(
+        part
+        for part in (
+            f"{row.get('sample_count', 0)} 样本",
+            f"赢局占比 {_fmt_rate(win_usage) or '-'}",
+            f"总占比 {_fmt_rate(row.get('usage_rate')) or '-'}",
+            "样本不足" if row.get("low_sample") else f"条件胜率 {_fmt_rate(row.get('conditional_win_rate')) or '-'}",
+        )
+        if part
+    )
+    return "\n".join(
+        [
+            f'<div class="behavior-row" title="{_html(detail)}">',
+            f'<span class="behavior-name" title="{_html(row.get("name") or "-")}">{_html(row.get("name") or "-")}</span>',
+            f'<span class="behavior-bar" aria-hidden="true"><span style="width: {width}"></span></span>',
+            f'<span class="behavior-meta">{_html(meta)}</span>',
+            "</div>",
+        ]
+    )
+
+
+def _soul_block(rows: list[dict[str, Any]]) -> str:
+    valid_rows = [row for row in rows if isinstance(row, dict)]
+    if not valid_rows:
+        return ""
+    chips = "".join(
+        f'<span class="score-pill"><strong>{_html(row.get("name") or "英魂")}</strong>{_fmt_rate(row.get("usage_rate")) or "-"}</span>'
+        for row in valid_rows
+    )
+    return f'<section class="behavior-block"><span class="behavior-title">英魂配置</span><div class="signal-group">{chips}</div></section>'
+
+
+def _trend_label(trend: dict[str, Any]) -> str:
+    sample_count = _safe_int(trend.get("last_7d_sample_count"))
+    rate = _fmt_rate(trend.get("last_7d_win_rate")) or "-"
+    delta = _fmt_delta_points(trend.get("delta_7d"))
+    return f"{sample_count} 样本 / {rate} / {delta}"
+
+
+def _trend_compact_label(trend: dict[str, Any]) -> str:
+    delta = _fmt_delta_points(trend.get("delta_7d"))
+    if delta != "-":
+        return delta
+    return _fmt_rate(trend.get("last_7d_win_rate")) or "-"
+
+
+def _credibility_label(credibility: dict[str, Any]) -> str:
+    labels = {"high": "高", "medium": "中", "low": "低"}
+    return labels.get(str(credibility.get("label") or ""), "低")
+
+
+def _credibility_title(credibility: dict[str, Any]) -> str:
+    return " / ".join(
+        part
+        for part in (
+            f"样本 {_safe_int(credibility.get('sample_count'))}",
+            f"玩家 {_safe_int(credibility.get('player_count'))}",
+            f"Top3玩家贡献 {_fmt_rate(credibility.get('top3_player_share')) or '-'}",
+        )
+        if part
+    )
+
+
+def _fmt_delta_points(value: Any) -> str:
+    if value in {None, ""}:
+        return "-"
+    try:
+        return f"{float(value) * 100:+.1f}pt"
+    except (TypeError, ValueError):
+        return "-"
+
+
+def _bar_width(value: Any) -> str:
+    try:
+        percent = max(0.0, min(float(value), 1.0)) * 100
+    except (TypeError, ValueError):
+        percent = 0.0
+    return f"{percent:.1f}%"
+
+
+def _fmt_compact_rate(value: Any) -> str:
+    if value in {None, ""}:
+        return ""
+    try:
+        return f"{float(value) * 100:.0f}%"
+    except (TypeError, ValueError):
+        return ""
+
+
 def _card_strip(cards: list[dict[str, Any]]) -> str:
     return "".join(_unit_figure(card) for card in cards)
 
@@ -1362,6 +1505,15 @@ def _player_summary_text(item: dict[str, Any]) -> str:
         parts.append(f"最多玩家：{_html(top_player)}（{_html(top_player_count)}次）")
     parts.append(f"统计玩家：{_html(player_count)}人")
     return " · ".join(parts)
+
+
+def _player_metric_pill(item: dict[str, Any]) -> str:
+    for key in ("player_normalized_win_rate", "player_normalized_rate", "player_normalized"):
+        rate = _fmt_rate(item.get(key))
+        if rate:
+            return _score_pill("玩家归一化", rate)
+    player_count = _safe_int(item.get("player_count"))
+    return _score_pill("玩家数", f"{player_count}人" if player_count else "-")
 
 
 def _safe_int(value: Any) -> int:
@@ -1401,9 +1553,10 @@ def _summary_item(label: str, value: Any) -> str:
     return f"<div><dt>{_html(label)}</dt><dd>{_html(value)}</dd></div>"
 
 
-def _score_pill(label: str, value: Any) -> str:
+def _score_pill(label: str, value: Any, title: str = "") -> str:
     text = str(value) if value not in {None, ""} else "-"
-    return f'<span class="score-pill"><strong>{_html(label)}</strong>{_html(text)}</span>'
+    title_attr = f' title="{_html(title)}"' if title else ""
+    return f'<span class="score-pill"{title_attr}><strong>{_html(label)}</strong>{_html(text)}</span>'
 
 
 def _fmt_rate(value: Any) -> str:

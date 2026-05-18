@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
@@ -91,6 +91,8 @@ def _detail(
     enemy_name: str = "B",
     player_profile: dict | None = None,
     enemy_profile: dict | None = None,
+    player_selected: dict | None = None,
+    enemy_selected: dict | None = None,
 ) -> dict:
     player_deck = player_deck or ["card-a", "card-b"]
     enemy_deck = enemy_deck or ["card-c"]
@@ -119,6 +121,7 @@ def _detail(
                 "castle_rate": "80.00%",
                 "deck_ids": player_deck,
                 "profile": player_profile,
+                "selected": player_selected or {},
             },
             {
                 "side_index": 2,
@@ -128,6 +131,7 @@ def _detail(
                 "castle_rate": "0.00%",
                 "deck_ids": enemy_deck,
                 "profile": enemy_profile,
+                "selected": enemy_selected or {},
             },
         ],
     }
@@ -154,10 +158,13 @@ def _insert_match(
     player_deck: list[str],
     enemy_deck: list[str],
     played_at: str = "2026-05-11 12:34",
+    result: str = "win",
     player_name: str = "A",
     enemy_name: str = "B",
     player_profile: dict | None = None,
     enemy_profile: dict | None = None,
+    player_selected: dict | None = None,
+    enemy_selected: dict | None = None,
 ) -> None:
     engine = make_engine(settings)
     with Session(engine) as session:
@@ -168,13 +175,23 @@ def _insert_match(
                 player_deck=player_deck,
                 enemy_deck=enemy_deck,
                 played_at=played_at,
+                result=result,
                 player_name=player_name,
                 enemy_name=enemy_name,
                 player_profile=player_profile,
                 enemy_profile=enemy_profile,
+                player_selected=player_selected,
+                enemy_selected=enemy_selected,
             )
         )
         session.commit()
+
+
+def _selected_loadout(weapon: str, style: str) -> dict:
+    return {
+        "weapon": {"name": weapon, "summary": weapon},
+        "school": {"name": style, "summary": style},
+    }
 
 
 def test_invite_binds_once_and_server_stores_only_token_hash(tmp_path):
@@ -778,6 +795,104 @@ def test_public_leaderboard_groups_deck_archetypes_by_shared_cost(tmp_path):
         "card-a,card-b,card-c",
         "card-b,card-c,card-d",
     }
+
+
+def test_public_leaderboard_adds_deck_behavior_stats_and_trend(tmp_path):
+    settings = _settings(tmp_path / "server")
+    _write_card_catalog(settings)
+    _init_db(settings)
+    set_server_config(settings, "Ver.vps", "2099-05-01", "2099-05-14")
+    start = date(2099, 5, 1)
+    results = ["win"] * 5 + ["loss"] * 5 + ["win"] * 9 + ["loss"] + ["win"] * 3 + ["loss"] * 2
+    for index, result in enumerate(results):
+        played_date = start + timedelta(days=index % 7 if index < 10 else 7 + (index - 10) % 7)
+        selected = _selected_loadout("Weapon A", "士气流") if index < 20 else _selected_loadout("Weapon B", "城塞流")
+        _insert_match(
+            settings,
+            f"behavior-{index}",
+            ["card-a", "card-b"],
+            ["card-c"],
+            played_at=f"{played_date.isoformat()} 12:{index:02d}",
+            player_name=f"P{index:02d}",
+            result=result,
+            player_selected=selected,
+        )
+
+    payload = public_leaderboard(settings, include_archetypes=False)
+    deck = payload["top_decks"][0]
+    behavior = deck["behavior_stats"]
+
+    assert behavior["souls"] == []
+    assert behavior["weapons"][0]["name"] == "Weapon A"
+    assert behavior["weapons"][0]["sample_count"] == 20
+    assert behavior["weapons"][0]["win_count"] == 14
+    assert behavior["weapons"][0]["usage_rate"] == pytest.approx(20 / 25)
+    assert behavior["weapons"][0]["win_usage_rate"] == pytest.approx(14 / 17)
+    assert behavior["weapons"][0]["conditional_win_rate"] == pytest.approx(14 / 20)
+    assert behavior["weapons"][0]["low_sample"] is False
+    assert behavior["weapons"][1]["name"] == "Weapon B"
+    assert behavior["weapons"][1]["low_sample"] is True
+    assert behavior["weapons"][1]["conditional_win_rate"] is None
+    assert behavior["styles"][0]["name"] == "士气流"
+    assert behavior["styles"][0]["conditional_win_rate"] == pytest.approx(14 / 20)
+    assert behavior["trend"]["last_7d_sample_count"] == 15
+    assert behavior["trend"]["last_7d_win_rate"] == pytest.approx(12 / 15)
+    assert behavior["trend"]["previous_7d_sample_count"] == 10
+    assert behavior["trend"]["previous_7d_win_rate"] == pytest.approx(5 / 10)
+    assert behavior["trend"]["delta_7d"] == pytest.approx(0.3)
+    assert len(behavior["trend"]["last_30_points"]) == 25
+    assert behavior["credibility"]["label"] == "low"
+    assert behavior["credibility"]["player_count"] == 25
+    assert behavior["credibility"]["top3_player_share"] == pytest.approx(3 / 25)
+
+
+def test_public_leaderboard_aggregates_archetype_behavior_and_html_hides_empty_souls(tmp_path):
+    settings = _settings(tmp_path / "server")
+    _write_card_catalog(settings)
+    _init_db(settings)
+    set_server_config(settings, "Ver.vps", "2026-05-10", "2026-05-12")
+    _insert_match(
+        settings,
+        "archetype-behavior-1",
+        ["card-a", "card-b", "card-c"],
+        ["card-e"],
+        "2026-05-11 09:00",
+        player_selected=_selected_loadout("Weapon A", "士气流"),
+    )
+    _insert_match(
+        settings,
+        "archetype-behavior-2",
+        ["card-b", "card-c", "card-d"],
+        ["card-f"],
+        "2026-05-11 10:00",
+        player_selected=_selected_loadout("Weapon B", "士气流"),
+    )
+
+    payload = public_leaderboard(settings)
+    target = next(
+        archetype
+        for archetype in payload["top_archetypes"]
+        if {"card-b", "card-c"} <= {card["card_hash"] for card in archetype["core_cards"]}
+    )
+    behavior = target["behavior_stats"]
+    weapon_names = {row["name"] for row in behavior["weapons"]}
+
+    assert target["member_count"] == 2
+    assert weapon_names == {"Weapon A", "Weapon B"}
+    assert behavior["styles"][0]["name"] == "士气流"
+    assert behavior["styles"][0]["sample_count"] == 2
+
+    html = _leaderboard_visual_page(payload)
+    assert "胜利局战器" in html
+    assert "Weapon A" in html
+    assert "Weapon B" in html
+    assert "流派统计" in html
+    assert "士气流" in html
+    assert "近7日" in html
+    assert "可信度" in html
+    assert "Top3玩家贡献" in html
+    assert "样本不足" in html
+    assert "英魂配置" not in html
 
 
 def test_upload_rejects_cookie_fields(tmp_path):
