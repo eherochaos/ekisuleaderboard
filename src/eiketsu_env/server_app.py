@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import html
+import mimetypes
 import secrets
+from pathlib import Path
+from string import Template
 from typing import Any
 from urllib.parse import parse_qs, quote, urlencode
 
@@ -34,12 +37,6 @@ from eiketsu_env.services.server_share import (
     public_leaderboard,
     refresh_public_leaderboard_snapshots,
 )
-from eiketsu_env.services.analysis import (
-    _deck_archetype_script,
-    _deck_archetype_visual_css,
-    _deck_visual_css,
-    _visual_sort_script,
-)
 
 try:  # FastAPI 是 server extra；本地只跑采集测试时不强制安装。
     from fastapi import BackgroundTasks, Body, FastAPI, HTTPException, Request
@@ -58,6 +55,11 @@ except ModuleNotFoundError:  # pragma: no cover - 当前开发虚拟环境可能
 
 
 # 手机浏览器不适合一次解析数千个榜单 DOM；HTML 页面默认给轻量榜，API 继续保留全量。
+WEB_ROOT = Path(__file__).resolve().parent / "web"
+WEB_TEMPLATE_ROOT = WEB_ROOT / "templates"
+WEB_STATIC_ROOT = WEB_ROOT / "static"
+LEADERBOARD_STATIC_FILES = {"leaderboard.css", "leaderboard.js"}
+
 LEADERBOARD_HTML_DEFAULT_LIMIT = 80
 LEADERBOARD_HTML_MAX_LIMIT = 500
 
@@ -156,6 +158,43 @@ def create_app(settings: Settings | None = None):
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    @app.get("/api/v1/leaderboard/rows")
+    def api_leaderboard_rows(
+        request: Request,
+        scope: str = "public",
+        token: str = "",
+        contributor: str = "",
+        rank_scope: str = RANK_SCOPE_ALL,
+        cluster: str = "on",
+        offset: int = 0,
+        limit: int = LEADERBOARD_HTML_DEFAULT_LIMIT,
+        sort: str = "wilson",
+    ) -> dict[str, Any]:
+        cluster_enabled = _cluster_enabled(cluster)
+        try:
+            payload, _, _, contributor_value, _ = _leaderboard_payload_for_web_request(
+                settings,
+                request,
+                scope=scope,
+                token=token,
+                contributor=contributor,
+                rank_scope=rank_scope,
+                cluster_enabled=cluster_enabled,
+                service_limit=None,
+            )
+        except ServerAuthError as exc:
+            raise HTTPException(status_code=401, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return _leaderboard_rows_response(
+            payload,
+            cluster_enabled=cluster_enabled,
+            contributor_name=contributor_value,
+            offset=offset,
+            limit=limit,
+            sort_key=sort,
+        )
+
     @app.get("/downloads/{filename}")
     def download_client_update(filename: str):
         try:
@@ -174,6 +213,16 @@ def create_app(settings: Settings | None = None):
             media_type="application/vnd.microsoft.portable-executable",
             filename=str(manifest.get("download_name") or path.name),
         )
+
+    @app.get("/web/static/{filename}")
+    def web_static(filename: str):
+        if filename not in LEADERBOARD_STATIC_FILES:
+            raise HTTPException(status_code=404, detail="static file not found")
+        path = WEB_STATIC_ROOT / filename
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="static file not found")
+        media_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+        return FileResponse(path, media_type=media_type)
 
     @app.get("/", response_class=HTMLResponse)
     def home() -> str:
@@ -302,45 +351,24 @@ def create_app(settings: Settings | None = None):
         limit: int | None = None,
         full: str = "",
     ) -> HTMLResponse:
-        personal_requested = scope in {"mine", "contributor"}
-        token_value = _user_token_from_request(request, token)
-        contributor_value = _contributor_from_request(request, contributor)
         cluster_enabled = _cluster_enabled(cluster)
         display_limit = _leaderboard_display_limit(limit, full)
-        leaderboard_kwargs = {
-            "limit": display_limit,
-            "archetype_limit": display_limit,
-            "rank_scope": rank_scope,
-            "include_archetypes": cluster_enabled,
-        }
-        filter_error = ""
         try:
-            if scope == "contributor":
-                if contributor_value:
-                    payload = contributor_leaderboard(
-                        settings,
-                        contributor_value,
-                        **leaderboard_kwargs,
-                    )
-                    if not payload.get("contributor_found"):
-                        filter_error = f"还没有找到用户名“{contributor_value}”的上传记录。"
-                else:
-                    payload = public_leaderboard(settings, **leaderboard_kwargs)
-                    filter_error = "请输入绑定用户名后查看我的贡献视角。"
-            elif scope == "mine":
-                if token_value:
-                    payload = personal_leaderboard(
-                        settings,
-                        token_value,
-                        **leaderboard_kwargs,
-                    )
-                else:
-                    payload = public_leaderboard(settings, **leaderboard_kwargs)
-                    filter_error = "旧版 token 链接缺少 token；请改用绑定用户名查看贡献。"
-            else:
-                payload = public_leaderboard(settings, **leaderboard_kwargs)
+            payload, personal_requested, token_value, contributor_value, filter_error = _leaderboard_payload_for_web_request(
+                settings,
+                request,
+                scope=scope,
+                token=token,
+                contributor=contributor,
+                rank_scope=rank_scope,
+                cluster_enabled=cluster_enabled,
+                service_limit=None,
+            )
         except ServerAuthError as exc:
-            payload = public_leaderboard(settings, **leaderboard_kwargs)
+            payload = public_leaderboard(settings, rank_scope=rank_scope, include_archetypes=cluster_enabled)
+            personal_requested = scope in {"mine", "contributor"}
+            token_value = _user_token_from_request(request, token)
+            contributor_value = _contributor_from_request(request, contributor)
             filter_error = "旧版 token 链接不可用；请改用绑定用户名查看贡献。" if scope == "mine" else str(exc)
         except ValueError as exc:
             return HTMLResponse(_page("公开聚合榜", f"<p>{html.escape(str(exc))}</p>"))
@@ -389,6 +417,54 @@ def _leaderboard_display_limit(limit: int | None, full: str = "") -> int | None:
     if limit is None:
         return LEADERBOARD_HTML_DEFAULT_LIMIT
     return max(1, min(int(limit), LEADERBOARD_HTML_MAX_LIMIT))
+
+
+def _leaderboard_payload_for_web_request(
+    settings: Settings,
+    request: Any,
+    *,
+    scope: str,
+    token: str,
+    contributor: str,
+    rank_scope: str,
+    cluster_enabled: bool,
+    service_limit: int | None,
+) -> tuple[dict[str, Any], bool, str, str, str]:
+    personal_requested = scope in {"mine", "contributor"}
+    token_value = _user_token_from_request(request, token)
+    contributor_value = _contributor_from_request(request, contributor)
+    leaderboard_kwargs = {
+        "limit": service_limit,
+        "archetype_limit": service_limit,
+        "rank_scope": rank_scope,
+        "include_archetypes": cluster_enabled,
+    }
+    filter_error = ""
+    if scope == "contributor":
+        if contributor_value:
+            payload = contributor_leaderboard(
+                settings,
+                contributor_value,
+                **leaderboard_kwargs,
+            )
+            if not payload.get("contributor_found"):
+                filter_error = f"还没有找到用户名“{contributor_value}”的上传记录。"
+        else:
+            payload = public_leaderboard(settings, **leaderboard_kwargs)
+            filter_error = "请输入绑定用户名后查看我的贡献视角。"
+    elif scope == "mine":
+        if token_value:
+            payload = personal_leaderboard(
+                settings,
+                token_value,
+                **leaderboard_kwargs,
+            )
+        else:
+            payload = public_leaderboard(settings, **leaderboard_kwargs)
+            filter_error = "旧版 token 链接缺少 token；请改用绑定用户名查看贡献。"
+    else:
+        payload = public_leaderboard(settings, **leaderboard_kwargs)
+    return payload, personal_requested, token_value, contributor_value, filter_error
 
 
 def _parse_urlencoded_form(body: bytes) -> dict[str, str]:
@@ -737,10 +813,10 @@ def _leaderboard_visual_page(
     decks = list(payload.get("top_decks") or [])
     is_archetype_view = bool(cluster_enabled and archetypes)
     is_personal_view = payload.get("scope") in {"mine", "contributor"}
-    css = _deck_archetype_visual_css() if is_archetype_view else _deck_visual_css()
     sort_target = "archetype-ranking" if is_archetype_view else "deck-ranking"
-    board = _archetype_ranking_board(archetypes) if is_archetype_view else _ranking_board(decks)
-    extra_script = _deck_archetype_script() if is_archetype_view else ""
+    all_items = archetypes if is_archetype_view else decks
+    visible_items = _leaderboard_visible_items(all_items, display_limit)
+    board = _archetype_ranking_board(visible_items) if is_archetype_view else _ranking_board(visible_items)
     eyebrow = "MY CONTRIBUTION LEADERBOARD" if is_personal_view else "PUBLIC ANONYMOUS LEADERBOARD"
     title = "我的贡献卡组榜" if is_personal_view else "英杰大战环境卡组榜"
     upload_label = "我的上传批次" if is_personal_view else "上传批次"
@@ -756,132 +832,152 @@ def _leaderboard_visual_page(
         cluster_enabled=cluster_enabled,
         contributor_name=contributor_name,
         display_limit=display_limit,
-        shown_count=len(archetypes) if is_archetype_view else len(decks),
+        shown_count=len(visible_items),
+        total_count=len(all_items),
     )
-    return f"""
-    <!doctype html>
-    <html lang="zh-CN">
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>英杰大战环境卡组榜</title>
-          <style>
-            {css}
-          .leaderboard-topbar {{ align-items: center; display: flex; gap: 16px; justify-content: space-between; margin-bottom: 16px; }}
-          .site-nav {{ margin: 0; }}
-          .site-nav a {{ color: var(--accent); font-size: 13px; font-weight: 800; text-decoration: none; }}
-          .site-nav a:hover {{ text-decoration: underline; }}
-          .leaderboard-note {{ color: var(--muted); font-size: 13px; margin: 0 0 16px; }}
-          .leaderboard-display-note {{ background: var(--panel); border: 1px solid var(--line); color: var(--muted); font-size: 13px; font-weight: 700; margin: 0 0 14px; padding: 10px 12px; }}
-          .leaderboard-display-note a {{ color: var(--accent); font-weight: 900; margin-left: 8px; text-decoration: none; }}
-          .leaderboard-display-note a:hover {{ text-decoration: underline; }}
-          .scope-tools {{ align-items: center; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }}
-          .scope-tools form {{ align-items: center; display: flex; gap: 8px; margin: 0; }}
-          .scope-tools input {{ background: var(--panel); border: 1px solid var(--line); color: var(--ink); font: inherit; font-size: 13px; height: 32px; padding: 0 10px; width: 220px; }}
-          .scope-tools button, .scope-tools a, .scope-mobile-drawer summary {{ align-items: center; background: transparent; border: 1px solid var(--line); color: var(--ink); cursor: pointer; display: inline-flex; font: inherit; font-size: 13px; font-weight: 800; height: 32px; padding: 0 12px; text-decoration: none; }}
-          .scope-tools .primary {{ background: var(--ink); border-color: var(--ink); color: var(--panel); }}
-          .scope-chip {{ border: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 800; height: 32px; line-height: 30px; padding: 0 10px; }}
-          .scope-error {{ color: #b42318; font-size: 13px; margin: -8px 0 14px; text-align: right; }}
-          .scope-mobile-drawer {{ display: none; position: relative; }}
-          .scope-mobile-drawer summary {{ list-style: none; }}
-          .scope-mobile-drawer summary::-webkit-details-marker {{ display: none; }}
-          .view-controls {{ align-items: center; display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 14px; }}
-          .view-control-group {{ align-items: center; display: flex; flex-wrap: wrap; gap: 7px; }}
-          .view-control-label {{ color: var(--muted); font-size: 12px; font-weight: 800; }}
-          .view-control-link {{ border: 1px solid #cfd6e1; border-radius: 999px; background: var(--panel); color: #2c3745; font-size: 12px; font-weight: 800; line-height: 1; padding: 8px 11px; text-decoration: none; }}
-          .view-control-link.is-active {{ background: var(--ink); border-color: var(--ink); color: var(--panel); }}
-          .view-control-link:hover {{ border-color: var(--accent); }}
-          .deck-owner {{ color: var(--muted); font-size: 12px; font-weight: 700; margin: 5px 0 8px; overflow-wrap: anywhere; }}
-          .signal-panel {{ align-content: center; display: grid; gap: 6px; min-width: 0; }}
-          .signal-group {{ display: grid; gap: 6px; grid-template-columns: repeat(3, minmax(0, 1fr)); min-width: 0; }}
-          .signal-panel .score-pill {{ min-width: 0; overflow: hidden; padding: 5px 7px; text-overflow: ellipsis; }}
-          .behavior-panel {{ display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }}
-          .behavior-block {{ border-top: 1px solid var(--line); display: grid; gap: 3px; min-width: 0; padding-top: 5px; }}
-          .behavior-title {{ color: var(--muted); font-size: 10px; font-weight: 900; letter-spacing: 0.06em; line-height: 1.2; text-transform: uppercase; }}
-          .behavior-row {{ align-items: center; display: grid; gap: 5px; grid-template-columns: minmax(42px, 1fr) 40px minmax(76px, auto); min-height: 18px; min-width: 0; overflow: hidden; }}
-          .behavior-name {{ color: var(--ink); font-size: 12px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
-          .behavior-bar {{ background: #e8edf4; border-radius: 999px; height: 6px; overflow: hidden; }}
-          .behavior-bar span {{ background: var(--accent); display: block; height: 100%; min-width: 2px; }}
-          .behavior-meta {{ color: var(--muted); font-size: 10px; font-weight: 800; line-height: 1.2; overflow: hidden; text-align: right; text-overflow: ellipsis; white-space: nowrap; }}
-          .leaderboard-mobile-summary {{ display: none; }}
-          @media (max-width: 720px) {{
-            body {{ background: var(--paper); }}
-            .page {{ width: min(100% - 18px, 1280px); padding-top: 10px; }}
-            .leaderboard-topbar {{ align-items: center; flex-direction: row; gap: 8px; margin-bottom: 10px; }}
-            .site-nav a {{ font-size: 12px; }}
-            .scope-tools {{ flex: 1; justify-content: flex-end; min-width: 0; }}
-            .scope-form-desktop {{ display: none !important; }}
-            .scope-mobile-drawer {{ display: block; }}
-            .scope-mobile-drawer[open] form {{ background: var(--panel); border: 1px solid var(--line); box-shadow: 0 14px 32px rgba(23, 29, 37, 0.16); display: grid; gap: 8px; padding: 10px; position: absolute; right: 0; top: 38px; width: min(86vw, 320px); z-index: 20; }}
-            .scope-mobile-drawer input {{ width: 100%; }}
-            .scope-mobile-drawer button {{ justify-content: center; margin: 0; width: 100%; }}
-            .scope-chip {{ max-width: 58vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
-            .scope-error {{ margin: -4px 0 8px; text-align: left; }}
-            .report-header {{ border-bottom-width: 1px; margin-bottom: 8px; padding-bottom: 8px; }}
-            .title-block p {{ display: none; }}
-            h1 {{ font-size: 25px; line-height: 1.15; }}
-            .summary {{ display: none; }}
-            .leaderboard-mobile-summary {{ color: var(--muted); display: flex; flex-wrap: wrap; font-size: 13px; font-weight: 800; gap: 4px 10px; margin: 8px 0 0; }}
-            .leaderboard-note {{ display: none; }}
-            .leaderboard-display-note {{ font-size: 12px; line-height: 1.5; margin-bottom: 10px; padding: 9px 10px; }}
-            .leaderboard-display-note a {{ display: inline-block; margin-left: 0; }}
-            .view-controls {{ gap: 6px 10px; margin: 8px 0 10px; }}
-            .view-control-group {{ gap: 6px; }}
-            .view-control-link {{ padding: 7px 9px; }}
-            .deck-owner {{ font-size: 12px; margin: 4px 0 7px; }}
-            .sort-toolbar {{ gap: 6px; margin: 8px 0 10px; }}
-            .sort-toolbar button {{ padding: 7px 10px; }}
-            .archetype-board, .ranking-board {{ border-radius: 6px; }}
-            .archetype-row, .rank-row {{ gap: 8px; padding: 10px; }}
-            .row-rank strong {{ font-size: 26px; }}
-            .row-rank span {{ font-size: 12px; }}
-            h3 {{ font-size: 16px; line-height: 1.3; }}
-            .variant-viewer {{ margin: 8px 0 0; }}
-            .variant-toolbar {{ margin-bottom: 8px; }}
-            .variant-name, .variant-statline {{ display: none; }}
-            .signal-group {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
-            .behavior-panel {{ display: none; }}
-          }}
-        </style>
-      </head>
-      <body>
-        <main class="page">
-          <div class="leaderboard-topbar">
-            <nav class="site-nav"><a href="/">← 返回首页</a></nav>
-            {_leaderboard_scope_tools(personal_requested, is_personal_view, contributor_name or str(payload.get("contributor_name") or ""))}
-          </div>
-          {_leaderboard_filter_error(filter_error)}
-          <header class="report-header">
-            <div class="title-block">
-              <p>{eyebrow}</p>
-              <h1>{title}</h1>
-            </div>
-            <dl class="summary">
-              {_summary_item("目标版本", payload.get("target_version", ""))}
-              {_summary_item("采集日期", f"{payload.get('date_from', '')} 至 {payload.get('date_to', '')}")}
-              {_summary_item(upload_label, payload.get("upload_count", 0))}
-              {_summary_item("对局数", payload.get("match_count", 0))}
-              {_summary_item("双方样本", payload.get("side_sample_count", 0))}
-              {_summary_item("生成时间", payload.get("generated_at", ""))}
-            </dl>
-            <p class="leaderboard-mobile-summary">{mobile_summary}</p>
-          </header>
-          <p class="leaderboard-note">{privacy_note}</p>
-          {view_controls}
-          {display_notice}
-          {"" if is_archetype_view else _feature_grid(decks[:3])}
-          <div class="sort-toolbar" data-sort-toolbar data-sort-target="{sort_target}">
-            <span>排序</span>
-            <button type="button" data-sort-button data-sort-key="wilson" aria-pressed="true">Wilson 下限</button>
-            <button type="button" data-sort-button data-sort-key="sample" aria-pressed="false">样本数</button>
-          </div>
-          {board}
-        </main>
-        {extra_script}
-        {_visual_sort_script()}
-      </body>
-    </html>
-    """
+    summary_items = "".join(
+        [
+            _summary_item("目标版本", payload.get("target_version", "")),
+            _summary_item("采集日期", f"{payload.get('date_from', '')} 至 {payload.get('date_to', '')}"),
+            _summary_item(upload_label, payload.get("upload_count", 0)),
+            _summary_item("对局数", payload.get("match_count", 0)),
+            _summary_item("双方样本", payload.get("side_sample_count", 0)),
+            _summary_item("生成时间", payload.get("generated_at", "")),
+        ]
+    )
+    return _render_web_template(
+        "leaderboard.html",
+        {
+            "page_title": _html(title),
+            "asset_version": _html(__version__),
+            "scope_tools": _leaderboard_scope_tools(personal_requested, is_personal_view, contributor_name or str(payload.get("contributor_name") or "")),
+            "filter_error": _leaderboard_filter_error(filter_error),
+            "eyebrow": _html(eyebrow),
+            "title": _html(title),
+            "summary_items": summary_items,
+            "mobile_summary": mobile_summary,
+            "privacy_note": _html(privacy_note),
+            "view_controls": view_controls,
+            "display_notice": display_notice,
+            "feature_grid": "",
+            "sort_target": _html(sort_target),
+            "board": board,
+            "load_more": _leaderboard_load_more_control(
+                payload,
+                cluster_enabled=cluster_enabled,
+                contributor_name=contributor_name,
+                target_id=sort_target,
+                visible_count=len(visible_items),
+                total_count=len(all_items),
+                page_size=display_limit,
+            ),
+        },
+    )
+
+
+def _render_web_template(name: str, context: dict[str, Any]) -> str:
+    template_path = WEB_TEMPLATE_ROOT / name
+    if not template_path.is_file():
+        raise RuntimeError(f"web template not found: {name}")
+    return Template(template_path.read_text(encoding="utf-8")).safe_substitute(context)
+
+
+def _leaderboard_visible_items(items: list[dict[str, Any]], display_limit: int | None) -> list[dict[str, Any]]:
+    if display_limit is None:
+        return items
+    return items[:display_limit]
+
+
+def _leaderboard_rows_response(
+    payload: dict[str, Any],
+    *,
+    cluster_enabled: bool,
+    contributor_name: str,
+    offset: int,
+    limit: int,
+    sort_key: str,
+) -> dict[str, Any]:
+    is_archetype_view = bool(cluster_enabled and payload.get("top_archetypes"))
+    items = list(payload.get("top_archetypes") or []) if is_archetype_view else list(payload.get("top_decks") or [])
+    sorted_items = _sort_leaderboard_items(items, sort_key)
+    safe_offset = max(0, int(offset or 0))
+    page_size = max(1, min(int(limit or LEADERBOARD_HTML_DEFAULT_LIMIT), LEADERBOARD_HTML_MAX_LIMIT))
+    page_items = sorted_items[safe_offset : safe_offset + page_size]
+    next_offset = safe_offset + len(page_items)
+    html_rows = (
+        _archetype_rows(page_items, start=safe_offset + 1)
+        if is_archetype_view
+        else _deck_rows(page_items, start=safe_offset + 1)
+    )
+    return {
+        "html": html_rows,
+        "offset": safe_offset,
+        "next_offset": next_offset,
+        "limit": page_size,
+        "total": len(sorted_items),
+        "has_more": next_offset < len(sorted_items),
+        "scope": payload.get("scope", "public"),
+        "contributor_name": contributor_name,
+    }
+
+
+def _sort_leaderboard_items(items: list[dict[str, Any]], sort_key: str) -> list[dict[str, Any]]:
+    primary = "sample_count" if str(sort_key or "").lower() == "sample" else "wilson_lower_bound"
+    secondary = "wilson_lower_bound" if primary == "sample_count" else "sample_count"
+
+    def _metric(item: dict[str, Any], key: str) -> float:
+        try:
+            return float(item.get(key) or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    return [
+        item
+        for _, item in sorted(
+            enumerate(items),
+            key=lambda pair: (-_metric(pair[1], primary), -_metric(pair[1], secondary), pair[0]),
+        )
+    ]
+
+
+def _leaderboard_load_more_control(
+    payload: dict[str, Any],
+    *,
+    cluster_enabled: bool,
+    contributor_name: str,
+    target_id: str,
+    visible_count: int,
+    total_count: int,
+    page_size: int | None,
+) -> str:
+    if page_size is None or visible_count >= total_count:
+        return ""
+    rank_scope = str(payload.get("rank_scope") or RANK_SCOPE_ALL)
+    if rank_scope not in RANK_SCOPE_LABELS:
+        rank_scope = RANK_SCOPE_ALL
+    endpoint = "/api/v1/leaderboard/rows"
+    endpoint += "?" + urlencode(
+        {
+            **_leaderboard_base_query(payload, contributor_name),
+            "cluster": "on" if cluster_enabled else "off",
+            "rank_scope": rank_scope,
+        }
+    )
+    full_url = _leaderboard_query_url(
+        _leaderboard_base_query(payload, contributor_name),
+        cluster="on" if cluster_enabled else "off",
+        rank_scope=rank_scope,
+        full="1",
+    )
+    return "\n".join(
+        [
+            f'<div class="leaderboard-loadmore" data-load-more data-target="{_html(target_id)}" data-endpoint="{_html(endpoint)}" data-next-offset="{visible_count}" data-page-size="{page_size}">',
+            f'<button type="button" data-load-more-button>加载更多</button>',
+            f'<span data-load-more-status>已显示 {visible_count} / {total_count}</span>',
+            f'<noscript><a href="{_html(full_url)}">查看完整榜</a></noscript>',
+            "</div>",
+        ]
+    )
 
 
 def _leaderboard_scope_tools(
@@ -948,24 +1044,9 @@ def _leaderboard_display_notice(
     contributor_name: str,
     display_limit: int | None,
     shown_count: int,
+    total_count: int,
 ) -> str:
-    if display_limit is None or shown_count < display_limit:
-        return ""
-    rank_scope = str(payload.get("rank_scope") or RANK_SCOPE_ALL)
-    if rank_scope not in RANK_SCOPE_LABELS:
-        rank_scope = RANK_SCOPE_ALL
-    full_url = _leaderboard_query_url(
-        _leaderboard_base_query(payload, contributor_name),
-        cluster="on" if cluster_enabled else "off",
-        rank_scope=rank_scope,
-        full="1",
-    )
-    return (
-        f'<p class="leaderboard-display-note">'
-        f"轻量模式已显示 Top {display_limit}，完整榜体积较大。"
-        f'<a href="{_html(full_url)}">查看完整榜</a>'
-        f"</p>"
-    )
+    return ""
 
 
 def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, contributor_name: str = "") -> str:
@@ -1052,15 +1133,18 @@ def _archetype_feature_grid(archetypes: list[dict[str, Any]]) -> str:
 def _archetype_ranking_board(archetypes: list[dict[str, Any]]) -> str:
     if not archetypes:
         return ""
-    rows = "".join(_archetype_rank_row(index, archetype) for index, archetype in enumerate(archetypes, start=1))
     return "\n".join(
         [
             '<section class="archetype-board" id="archetype-ranking" data-sort-root>',
             '<div class="board-head"><span>Rank</span><span>Archetype</span><span>Signal</span></div>',
-            rows,
+            _archetype_rows(archetypes),
             "</section>",
         ]
     )
+
+
+def _archetype_rows(archetypes: list[dict[str, Any]], start: int = 1) -> str:
+    return "".join(_archetype_rank_row(index, archetype) for index, archetype in enumerate(archetypes, start=start))
 
 
 def _archetype_rank_row(index: int, archetype: dict[str, Any]) -> str:
@@ -1070,7 +1154,7 @@ def _archetype_rank_row(index: int, archetype: dict[str, Any]) -> str:
             f'<article class="archetype-row" {_sort_item_attrs(title, archetype.get("wilson_lower_bound"), archetype.get("sample_count"))}>',
             '<div class="row-rank">',
             f'<strong data-rank-value>{index:02d}</strong>',
-            f'<span>{_html(archetype.get("member_count", 0))} 个构筑</span>',
+            f'<span>{_record_label(archetype)}</span>',
             "</div>",
             '<div class="row-deck">',
             f"<h3>{_html(title)}</h3>",
@@ -1095,17 +1179,13 @@ def _archetype_variant_viewer(archetype: dict[str, Any]) -> str:
         representative = archetype.get("representative_deck")
         if isinstance(representative, dict):
             variants = [_archetype_variant(representative, 0)]
-    button = (
-        '<button type="button" class="variant-button" data-variant-button>Change</button>'
-        if len(variants) > 1
-        else '<span class="variant-single">Single</span>'
-    )
+    variant_count = len(variants)
     return "\n".join(
         [
             '<div class="variant-viewer" data-variant-root>',
             '<div class="variant-toolbar">',
-            '<span class="variant-label" data-variant-label>代表构筑</span>',
-            button,
+            f'<span class="variant-label" data-variant-label>构筑 1/{max(variant_count, 1)}</span>',
+            _variant_control(variant_count),
             "</div>",
             '<div class="variant-stage">',
             *variants,
@@ -1189,22 +1269,25 @@ def _feature_grid(decks: list[dict[str, Any]]) -> str:
 def _ranking_board(decks: list[dict[str, Any]]) -> str:
     if not decks:
         return ""
-    rows = "".join(_rank_row(index, deck) for index, deck in enumerate(decks, start=1))
     return "\n".join(
         [
-            '<section class="ranking-board" id="deck-ranking">',
+            '<section class="archetype-board" id="deck-ranking" data-sort-root>',
             '<div class="board-head"><span>Rank</span><span>Deck</span><span>Signals</span></div>',
-            rows,
+            _deck_rows(decks),
             "</section>",
         ]
     )
+
+
+def _deck_rows(decks: list[dict[str, Any]], start: int = 1) -> str:
+    return "".join(_rank_row(index, deck) for index, deck in enumerate(decks, start=start))
 
 
 def _rank_row(index: int, deck: dict[str, Any]) -> str:
     title = str(deck.get("deck_name") or deck.get("deck_fingerprint") or "")
     return "\n".join(
         [
-            f'<article class="rank-row" {_sort_item_attrs(title, deck.get("wilson_lower_bound"), deck.get("sample_count"))}>',
+            f'<article class="archetype-row" {_sort_item_attrs(title, deck.get("wilson_lower_bound"), deck.get("sample_count"))}>',
             '<div class="row-rank">',
             f'<strong data-rank-value>{index:02d}</strong>',
             f'<span>{_record_label(deck)}</span>',
@@ -1212,7 +1295,7 @@ def _rank_row(index: int, deck: dict[str, Any]) -> str:
             '<div class="row-deck">',
             f"<h3>{_html(title)}</h3>",
             _player_summary(deck),
-            f'<div class="card-strip">{_card_strip(deck.get("cards") or [])}</div>',
+            _deck_variant_viewer(deck),
             "</div>",
             '<div class="row-signals signal-panel">',
             _signal_groups(deck),
@@ -1220,6 +1303,30 @@ def _rank_row(index: int, deck: dict[str, Any]) -> str:
             "</article>",
         ]
     )
+
+
+def _deck_variant_viewer(deck: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            '<div class="variant-viewer" data-variant-root>',
+            '<div class="variant-toolbar">',
+            '<span class="variant-label" data-variant-label>构筑 1/1</span>',
+            _variant_control(1),
+            "</div>",
+            '<div class="variant-stage">',
+            _archetype_variant(deck, 0),
+            "</div>",
+            "</div>",
+        ]
+    )
+
+
+def _variant_control(variant_count: int) -> str:
+    safe_count = max(1, int(variant_count or 0))
+    label = f"{'Change' if safe_count > 1 else 'Single'} · {safe_count} 构筑"
+    if safe_count > 1:
+        return f'<button type="button" class="variant-button" data-variant-button>{_html(label)}</button>'
+    return f'<span class="variant-single">{_html(label)}</span>'
 
 
 def _signal_groups(item: dict[str, Any]) -> str:
@@ -1233,7 +1340,7 @@ def _signal_groups(item: dict[str, Any]) -> str:
     metric_pills.extend(_dynamic_signal_pills(behavior))
     return "\n".join(
         [
-            '<div class="signal-group">',
+            f'<div class="signal-group" title="战绩 {_record_label(item)}">',
             *metric_pills,
             "</div>",
             _behavior_panel(behavior),
