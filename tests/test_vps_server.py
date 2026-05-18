@@ -38,6 +38,7 @@ from eiketsu_env.services.server_share import (
     set_server_config,
 )
 from eiketsu_env.services.share import ShareConfig, export_contribution
+from eiketsu_env.utils import sha256_text
 
 
 def _settings(tmp_path: Path) -> Settings:
@@ -72,6 +73,33 @@ def _write_card_catalog(settings: Settings) -> None:
         ),
         encoding="utf-8",
     )
+
+
+def _legacy_leaderboard_snapshot_key(
+    scope: str,
+    subject: str,
+    config: ShareConfig,
+    upload_watermark: int,
+    limit: int | None,
+    archetype_limit: int | None,
+    rank_scope: str,
+    include_archetypes: bool,
+) -> str:
+    identity = {
+        "scope": scope,
+        "subject": subject,
+        "target_version": config.target_version,
+        "date_from": config.date_from,
+        "date_to": config.date_to,
+        "include_solo": bool(config.include_solo),
+        "upload_watermark": upload_watermark,
+        "limit": limit,
+        "archetype_limit": archetype_limit,
+        "rank_scope": rank_scope,
+        "cluster_enabled": bool(include_archetypes),
+    }
+    digest = sha256_text(json.dumps(identity, ensure_ascii=False, sort_keys=True))[:32]
+    return f"lb:{scope}:{digest}"
 
 
 def _init_db(settings: Settings):
@@ -387,6 +415,57 @@ def test_public_leaderboard_persists_snapshot_for_repeated_filters(tmp_path, mon
     cached = public_leaderboard(settings, include_archetypes=False)
 
     assert cached["top_decks"] == payload["top_decks"]
+
+
+def test_public_leaderboard_ignores_legacy_snapshot_without_payload_version(tmp_path):
+    settings = _settings(tmp_path / "server")
+    engine = _init_db(settings)
+    set_server_config(settings, "Ver.vps", "2026-05-10", "2026-05-12")
+    _insert_match(
+        settings,
+        "snapshot-version-1",
+        ["card-a", "card-b"],
+        ["card-c"],
+        played_at="2026-05-11 12:00",
+        player_selected=_selected_loadout("Weapon A", "士气流"),
+    )
+    config = ShareConfig(target_version="Ver.vps", date_from="2026-05-10", date_to="2026-05-12")
+    legacy_key = _legacy_leaderboard_snapshot_key(
+        "public",
+        "",
+        config,
+        upload_watermark=0,
+        limit=None,
+        archetype_limit=None,
+        rank_scope="all",
+        include_archetypes=False,
+    )
+
+    with Session(engine) as session:
+        session.add(
+            ServerLeaderboardSnapshot(
+                snapshot_key=legacy_key,
+                scope="public",
+                subject="",
+                rank_scope="all",
+                cluster_enabled=0,
+                target_version="Ver.vps",
+                date_from="2026-05-10",
+                date_to="2026-05-12",
+                upload_watermark=0,
+                payload_json={"top_decks": [{"deck_name": "STALE SNAPSHOT"}]},
+            )
+        )
+        session.commit()
+
+    payload = public_leaderboard(settings, include_archetypes=False)
+
+    assert payload["payload_version"] >= 2
+    assert payload["top_decks"][0]["deck_name"] != "STALE SNAPSHOT"
+    assert "behavior_stats" in payload["top_decks"][0]
+    with Session(engine) as session:
+        snapshots = session.scalars(select(ServerLeaderboardSnapshot)).all()
+        assert len(snapshots) == 2
 
 
 def test_refresh_public_leaderboard_snapshots_builds_filter_matrix(tmp_path):
