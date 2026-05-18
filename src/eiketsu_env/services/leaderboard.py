@@ -33,6 +33,7 @@ from eiketsu_env.utils import sha256_text
 
 DEFAULT_ARCHETYPE_SIMILAR_COST = 5.0
 LEADERBOARD_CACHE_TTL_SECONDS = 300.0
+LEADERBOARD_SNAPSHOT_LIMIT = 500
 RANK_SCOPE_ALL = "all"
 RANK_SCOPE_TRAVELER_DOWN = "traveler_down"
 RANK_SCOPE_KNIGHT_DOWN = "knight_down"
@@ -375,7 +376,13 @@ def refresh_public_leaderboard_snapshots(settings: Settings) -> dict[str, Any]:
     for rank_scope in RANK_SCOPE_LABELS:
         for include_archetypes in (True, False):
             try:
-                public_leaderboard(settings, rank_scope=rank_scope, include_archetypes=include_archetypes)
+                public_leaderboard(
+                    settings,
+                    limit=LEADERBOARD_SNAPSHOT_LIMIT,
+                    archetype_limit=LEADERBOARD_SNAPSHOT_LIMIT,
+                    rank_scope=rank_scope,
+                    include_archetypes=include_archetypes,
+                )
             except ValueError as exc:
                 return {"status": "skipped", "reason": str(exc), "refreshed": refreshed}
             cluster_label = "cluster" if include_archetypes else "deck"

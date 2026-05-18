@@ -170,8 +170,28 @@ jobs:
              mkdir -p $VPS_REMOTE_DIR; \
              tar -xf /tmp/eiketsu-vps-update-${GITHUB_SHA}.tar -C $VPS_REMOTE_DIR; \
              cd $VPS_REMOTE_DIR; \
-             docker compose -f deploy/docker-compose.yml build api; \
-             docker compose -f deploy/docker-compose.yml run --rm api alembic upgrade head; \
-             docker compose -f deploy/docker-compose.yml up -d api; \
-             docker compose -f deploy/docker-compose.yml ps; \
+             docker compose -p eiketsu-env-db -f deploy/docker-compose.yml build api; \
+             docker compose -p eiketsu-env-db -f deploy/docker-compose.yml run --rm api alembic upgrade head; \
+             docker compose -p eiketsu-env-db -f deploy/docker-compose.yml up -d api; \
+             docker compose -p eiketsu-env-db -f deploy/docker-compose.yml ps; \
              rm -f /tmp/eiketsu-vps-update-${GITHUB_SHA}.tar"
+
+      - name: Smoke check deployed service
+        run: |
+          ssh eiketsu-vps '
+            set -e
+            for attempt in $(seq 1 30); do
+              if curl -fsS --max-time 5 http://127.0.0.1:8000/health >/dev/null; then
+                break
+              fi
+              if [ "$attempt" -eq 30 ]; then
+                echo "health check failed after deploy" >&2
+                exit 1
+              fi
+              sleep 2
+            done
+            curl -fsS --max-time 10 http://127.0.0.1:8000/api/v1/config >/dev/null
+            curl -fsS --max-time 10 http://127.0.0.1:8000/web/static/leaderboard.css >/dev/null
+            curl -fsS --max-time 120 "http://127.0.0.1:8000/leaderboard?cluster=off&limit=1" >/dev/null
+            echo "deploy smoke check ok"
+          '

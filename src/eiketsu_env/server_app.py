@@ -18,6 +18,7 @@ from eiketsu_env.services.client_update import (
     resolve_client_update_file,
 )
 from eiketsu_env.services.leaderboard import (
+    LEADERBOARD_SNAPSHOT_LIMIT,
     RANK_SCOPE_ALL,
     contributor_leaderboard,
     personal_leaderboard,
@@ -139,14 +140,23 @@ def create_app(settings: Settings | None = None):
         contributor: str = "",
         rank_scope: str = RANK_SCOPE_ALL,
         cluster: str = "on",
+        limit: int | None = LEADERBOARD_SNAPSHOT_LIMIT,
+        full: str = "",
     ) -> dict[str, Any]:
         include_archetypes = _cluster_enabled(cluster)
+        service_limit = _leaderboard_service_limit(limit, full)
+        leaderboard_kwargs = {
+            "limit": service_limit,
+            "archetype_limit": service_limit,
+            "rank_scope": rank_scope,
+            "include_archetypes": include_archetypes,
+        }
         try:
             if scope == "contributor":
-                return contributor_leaderboard(settings, contributor, rank_scope=rank_scope, include_archetypes=include_archetypes)
+                return contributor_leaderboard(settings, contributor, **leaderboard_kwargs)
             if scope == "mine":
-                return personal_leaderboard(settings, _bearer_token(request), rank_scope=rank_scope, include_archetypes=include_archetypes)
-            return public_leaderboard(settings, rank_scope=rank_scope, include_archetypes=include_archetypes)
+                return personal_leaderboard(settings, _bearer_token(request), **leaderboard_kwargs)
+            return public_leaderboard(settings, **leaderboard_kwargs)
         except ServerAuthError as exc:
             raise HTTPException(status_code=401, detail=str(exc)) from exc
         except ValueError as exc:
@@ -174,7 +184,7 @@ def create_app(settings: Settings | None = None):
                 contributor=contributor,
                 rank_scope=rank_scope,
                 cluster_enabled=cluster_enabled,
-                service_limit=None,
+                service_limit=LEADERBOARD_SNAPSHOT_LIMIT,
             )
         except ServerAuthError as exc:
             raise HTTPException(status_code=401, detail=str(exc)) from exc
@@ -356,10 +366,17 @@ def create_app(settings: Settings | None = None):
                 contributor=contributor,
                 rank_scope=rank_scope,
                 cluster_enabled=cluster_enabled,
-                service_limit=None,
+                service_limit=_leaderboard_page_service_limit(display_limit, full),
             )
         except ServerAuthError as exc:
-            payload = public_leaderboard(settings, rank_scope=rank_scope, include_archetypes=cluster_enabled)
+            fallback_limit = _leaderboard_page_service_limit(display_limit, full)
+            payload = public_leaderboard(
+                settings,
+                limit=fallback_limit,
+                archetype_limit=fallback_limit,
+                rank_scope=rank_scope,
+                include_archetypes=cluster_enabled,
+            )
             personal_requested = scope in {"mine", "contributor"}
             token_value = _user_token_from_request(request, token)
             contributor_value = _contributor_from_request(request, contributor)
@@ -403,6 +420,20 @@ def _contributor_from_request(request, query_contributor: str = "") -> str:
 
 def _cluster_enabled(value: str) -> bool:
     return str(value or "on").strip().lower() not in {"0", "false", "off", "deck", "none"}
+
+
+def _leaderboard_page_service_limit(display_limit: int | None, full: str = "") -> int | None:
+    if display_limit is None or str(full or "").strip().lower() in {"1", "true", "yes", "all"}:
+        return None
+    return LEADERBOARD_SNAPSHOT_LIMIT
+
+
+def _leaderboard_service_limit(limit: int | None, full: str = "") -> int | None:
+    if str(full or "").strip().lower() in {"1", "true", "yes", "all"}:
+        return None
+    if limit is None:
+        return LEADERBOARD_SNAPSHOT_LIMIT
+    return max(1, min(int(limit), LEADERBOARD_SNAPSHOT_LIMIT))
 
 
 def _leaderboard_payload_for_web_request(

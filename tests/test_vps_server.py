@@ -15,11 +15,14 @@ from eiketsu_env.db.session import make_engine
 from eiketsu_env.server_app import (
     LEADERBOARD_HTML_DEFAULT_LIMIT,
     LEADERBOARD_HTML_MAX_LIMIT,
+    LEADERBOARD_SNAPSHOT_LIMIT,
     _admin_invites_response,
     _admin_updates_response,
     create_app,
     _leaderboard_display_limit,
+    _leaderboard_page_service_limit,
     _leaderboard_rows_response,
+    _leaderboard_service_limit,
     _leaderboard_visual_page,
 )
 from eiketsu_env.services.client_update import publish_client_update
@@ -39,6 +42,7 @@ from eiketsu_env.services.server_share import (
     set_server_config,
 )
 from eiketsu_env.services.share import ShareConfig, export_contribution
+from eiketsu_env.web import leaderboard_view
 from eiketsu_env.utils import sha256_text
 
 
@@ -667,11 +671,28 @@ def test_web_static_serves_leaderboard_assets_from_frontend(tmp_path):
     assert js.media_type in {"application/javascript", "text/javascript"}
 
 
+def test_leaderboard_root_prefers_env_root(monkeypatch):
+    project_root = Path(__file__).resolve().parents[1]
+
+    monkeypatch.setenv("EIKETSU_ENV_ROOT", str(project_root))
+
+    assert leaderboard_view._leaderboard_root() == project_root / "frontend" / "leaderboard"
+
+
 def test_leaderboard_html_display_limit_defaults_to_lightweight_mode():
     assert _leaderboard_display_limit(None, "") == LEADERBOARD_HTML_DEFAULT_LIMIT
     assert _leaderboard_display_limit(9999, "") == LEADERBOARD_HTML_MAX_LIMIT
     assert _leaderboard_display_limit(0, "") == 1
     assert _leaderboard_display_limit(20, "1") is None
+
+
+def test_leaderboard_http_service_limit_caps_default_payload():
+    assert _leaderboard_service_limit(None, "") == LEADERBOARD_SNAPSHOT_LIMIT
+    assert _leaderboard_service_limit(9999, "") == LEADERBOARD_SNAPSHOT_LIMIT
+    assert _leaderboard_service_limit(20, "") == 20
+    assert _leaderboard_service_limit(20, "1") is None
+    assert _leaderboard_page_service_limit(LEADERBOARD_HTML_DEFAULT_LIMIT, "") == LEADERBOARD_SNAPSHOT_LIMIT
+    assert _leaderboard_page_service_limit(None, "1") is None
 
 
 def test_leaderboard_limited_html_uses_load_more_without_top_notice():

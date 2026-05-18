@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import os
 from pathlib import Path
 from string import Template
 from typing import Any
@@ -19,10 +20,16 @@ from eiketsu_env.services.leaderboard import (
 
 
 def _leaderboard_root() -> Path:
+    configured_root = os.environ.get("EIKETSU_ENV_ROOT")
+    candidates = []
+    if configured_root:
+        candidates.append(Path(configured_root).expanduser().resolve() / "frontend" / "leaderboard")
+    candidates.append(Path.cwd().resolve() / "frontend" / "leaderboard")
     project_root = Path(__file__).resolve().parents[3]
-    frontend_root = project_root / "frontend" / "leaderboard"
-    if frontend_root.is_dir():
-        return frontend_root
+    candidates.append(project_root / "frontend" / "leaderboard")
+    for frontend_root in candidates:
+        if frontend_root.is_dir():
+            return frontend_root
     return Path(__file__).resolve().parent
 
 

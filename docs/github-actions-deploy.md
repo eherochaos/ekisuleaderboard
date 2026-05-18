@@ -128,6 +128,8 @@ docker compose -f deploy/docker-compose.yml ps
 
 这样前端页面、服务端接口、数据库迁移都会跟随 `main` 分支自动更新。
 
+`deploy/docker-compose.yml` 固定了 Compose 项目名 `eiketsu-env-db`，避免配置文件移动到 `deploy/` 后生成新的空数据库 volume。
+
 ## 注意
 
 GitHub Actions 不会上传：
