@@ -7,7 +7,7 @@ import secrets
 import time
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -72,6 +72,8 @@ RANK_SCOPE_ALIASES = {
     "knight-above": RANK_SCOPE_KNIGHT_UP,
 }
 _LEADERBOARD_CACHE: dict[tuple[Any, ...], tuple[float, dict[str, Any]]] = {}
+BEHAVIOR_TOP_LIMIT = 3
+BEHAVIOR_MIN_CONDITIONAL_SAMPLE = 20
 
 
 @dataclass(slots=True)
@@ -102,18 +104,37 @@ class UploadResult:
 
 
 @dataclass(slots=True)
+class _LeaderboardSideSample:
+    result: str
+    played_at: str
+    player_name: str
+    weapon_name: str
+    style_name: str
+
+
+@dataclass(slots=True)
 class _LeaderboardBucket:
     sample_count: int = 0
     win_count: int = 0
     loss_count: int = 0
     draw_count: int = 0
     player_counts: Counter[str] = field(default_factory=Counter)
+    samples: list[_LeaderboardSideSample] = field(default_factory=list)
 
-    def add(self, result: str, side: MatchSide | None = None) -> None:
+    def add(self, result: str, side: MatchSide | None = None, played_at: str = "") -> None:
         self.sample_count += 1
         player_name = _bucket_player_name(side)
         if player_name:
             self.player_counts[player_name] += 1
+        self.samples.append(
+            _LeaderboardSideSample(
+                result=result,
+                played_at=str(played_at or ""),
+                player_name=player_name,
+                weapon_name=_selected_name(side, "weapon"),
+                style_name=_selected_name(side, "school"),
+            )
+        )
         if result == "win":
             self.win_count += 1
         elif result == "loss":
@@ -127,6 +148,7 @@ class _LeaderboardBucket:
         self.loss_count += other.loss_count
         self.draw_count += other.draw_count
         self.player_counts.update(other.player_counts)
+        self.samples.extend(other.samples)
 
     @property
     def win_rate(self) -> float | None:
@@ -860,10 +882,10 @@ def _leaderboard_payload(
                 continue
             result = _result_for_side(match, deck.side_index)
             included_match_ids.add(int(match.id or 0))
-            deck_buckets.setdefault(deck.deck_fingerprint, _LeaderboardBucket()).add(result, side)
+            deck_buckets.setdefault(deck.deck_fingerprint, _LeaderboardBucket()).add(result, side, match.played_at or "")
             # 同一侧同一卡只计一次，避免异常重复 slot 放大卡牌使用率。
             for card_hash in {unit.card_hash for unit in deck.units if unit.card_hash}:
-                card_buckets.setdefault(card_hash, _LeaderboardBucket()).add(result, side)
+                card_buckets.setdefault(card_hash, _LeaderboardBucket()).add(result, side, match.played_at or "")
     return {
         **_config_to_payload(config),
         "scope": scope,
@@ -874,10 +896,10 @@ def _leaderboard_payload(
         "package_count": package_count,
         "match_count": len(scoped) if normalized_rank_scope == RANK_SCOPE_ALL else len(included_match_ids),
         "side_sample_count": sum(bucket.sample_count for bucket in deck_buckets.values()),
-        "top_decks": _top_decks(deck_buckets, lookup, seen_names, limit),
+        "top_decks": _top_decks(deck_buckets, lookup, seen_names, limit, config.date_to),
         "top_cards": _top_cards(card_buckets, lookup, seen_names, limit),
         "top_archetypes": (
-            _top_archetypes(deck_buckets, lookup, seen_names, archetype_limit if archetype_limit is not None else limit)
+            _top_archetypes(deck_buckets, lookup, seen_names, archetype_limit if archetype_limit is not None else limit, config.date_to)
             if include_archetypes
             else []
         ),
@@ -988,9 +1010,10 @@ def _top_decks(
     lookup,
     seen_names: dict[str, str],
     limit: int | None,
+    trend_anchor: str,
 ) -> list[dict[str, Any]]:
     return [
-        _deck_payload(fingerprint, bucket, lookup, seen_names)
+        _deck_payload(fingerprint, bucket, lookup, seen_names, trend_anchor)
         for fingerprint, bucket in _sorted_buckets(buckets, limit)
     ]
 
@@ -1022,10 +1045,11 @@ def _top_archetypes(
     lookup,
     seen_names: dict[str, str],
     limit: int | None,
+    trend_anchor: str,
 ) -> list[dict[str, Any]]:
     archetypes = _deck_archetypes(buckets, lookup)
     return [
-        _archetype_payload(archetype, buckets, lookup, seen_names)
+        _archetype_payload(archetype, buckets, lookup, seen_names, trend_anchor)
         for archetype in _apply_optional_limit(archetypes, limit)
     ]
 
@@ -1120,6 +1144,7 @@ def _archetype_payload(
     buckets: dict[str, _LeaderboardBucket],
     lookup,
     seen_names: dict[str, str],
+    trend_anchor: str,
 ) -> dict[str, Any]:
     summary = archetype.summary
     core_cards = [_card_payload(card_hash, lookup, seen_names) for card_hash in archetype.core_hashes]
@@ -1140,11 +1165,12 @@ def _archetype_payload(
         "win_rate": summary.win_rate,
         "wilson_lower_bound": _wilson_lower_bound(summary.win_count, summary.loss_count),
         "core_cards": core_cards,
-        "representative_deck": _deck_payload(archetype.representative, buckets[archetype.representative], lookup, seen_names),
+        "representative_deck": _deck_payload(archetype.representative, buckets[archetype.representative], lookup, seen_names, trend_anchor),
         "member_decks": [
-            _deck_payload(fingerprint, buckets[fingerprint], lookup, seen_names)
+            _deck_payload(fingerprint, buckets[fingerprint], lookup, seen_names, trend_anchor)
             for fingerprint in archetype.members[:8]
         ],
+        "behavior_stats": _behavior_stats(summary, trend_anchor),
     }
 
 
@@ -1158,6 +1184,7 @@ def _deck_payload(
     bucket: _LeaderboardBucket,
     lookup,
     seen_names: dict[str, str],
+    trend_anchor: str,
 ) -> dict[str, Any]:
     card_hashes = _card_hashes_by_cost_desc(fingerprint.split(",") if fingerprint else [], lookup)
     cards = [_card_payload(card_hash, lookup, seen_names) for card_hash in card_hashes]
@@ -1175,7 +1202,188 @@ def _deck_payload(
         "win_rate": bucket.win_rate,
         "wilson_lower_bound": _wilson_lower_bound(bucket.win_count, bucket.loss_count),
         "cards": cards,
+        "behavior_stats": _behavior_stats(bucket, trend_anchor),
     }
+
+
+def _behavior_stats(bucket: _LeaderboardBucket, trend_anchor: str) -> dict[str, Any]:
+    return {
+        "weapons": _behavior_category_rows(bucket.samples, "weapon_name"),
+        "styles": _behavior_category_rows(bucket.samples, "style_name"),
+        "trend": _trend_stats(bucket.samples, trend_anchor),
+        "credibility": _credibility_stats(bucket),
+        "souls": [],
+    }
+
+
+def _behavior_category_rows(samples: list[_LeaderboardSideSample], attr: str) -> list[dict[str, Any]]:
+    buckets: dict[str, dict[str, int]] = {}
+    for sample in samples:
+        name = _normalize_behavior_name(getattr(sample, attr))
+        if not name:
+            continue
+        row = buckets.setdefault(name, {"sample_count": 0, "win_count": 0, "loss_count": 0, "draw_count": 0})
+        row["sample_count"] += 1
+        if sample.result == "win":
+            row["win_count"] += 1
+        elif sample.result == "loss":
+            row["loss_count"] += 1
+        elif sample.result == "draw":
+            row["draw_count"] += 1
+
+    total_sample = sum(row["sample_count"] for row in buckets.values())
+    total_win = sum(row["win_count"] for row in buckets.values())
+    if total_sample <= 0:
+        return []
+
+    sorted_rows = sorted(
+        buckets.items(),
+        key=lambda item: (-item[1]["sample_count"], -item[1]["win_count"], item[0]),
+    )
+    visible = sorted_rows[:BEHAVIOR_TOP_LIMIT]
+    hidden = sorted_rows[BEHAVIOR_TOP_LIMIT:]
+    result = [_behavior_category_payload(name, row, total_sample, total_win) for name, row in visible]
+    if hidden:
+        other = {"sample_count": 0, "win_count": 0, "loss_count": 0, "draw_count": 0}
+        for _name, row in hidden:
+            other["sample_count"] += row["sample_count"]
+            other["win_count"] += row["win_count"]
+            other["loss_count"] += row["loss_count"]
+            other["draw_count"] += row["draw_count"]
+        result.append(_behavior_category_payload("其他", other, total_sample, total_win))
+    return result
+
+
+def _behavior_category_payload(name: str, row: dict[str, int], total_sample: int, total_win: int) -> dict[str, Any]:
+    sample_count = int(row["sample_count"])
+    win_count = int(row["win_count"])
+    loss_count = int(row["loss_count"])
+    low_sample = sample_count < BEHAVIOR_MIN_CONDITIONAL_SAMPLE
+    # 小样本只展示频率，不给条件胜率，避免把偶然结果包装成强度结论。
+    conditional_win_rate = None if low_sample else _win_rate(win_count, loss_count)
+    return {
+        "name": name,
+        "sample_count": sample_count,
+        "win_count": win_count,
+        "usage_rate": sample_count / total_sample if total_sample else None,
+        "win_usage_rate": win_count / total_win if total_win else None,
+        "conditional_win_rate": conditional_win_rate,
+        "low_sample": low_sample,
+    }
+
+
+def _trend_stats(samples: list[_LeaderboardSideSample], trend_anchor: str) -> dict[str, Any]:
+    dated_samples = [(sample, _sample_date(sample.played_at)) for sample in samples]
+    dated_samples = [(sample, sample_date) for sample, sample_date in dated_samples if sample_date is not None]
+    anchor = _trend_anchor_date(trend_anchor, dated_samples)
+    if anchor is None:
+        return {
+            "last_7d_sample_count": 0,
+            "last_7d_win_rate": None,
+            "previous_7d_sample_count": 0,
+            "previous_7d_win_rate": None,
+            "delta_7d": None,
+            "last_30_points": [],
+        }
+
+    # 趋势以服务端配置 date_to 为锚点，而不是机器当天日期，保证历史快照可复现。
+    last_start = anchor - timedelta(days=6)
+    previous_start = anchor - timedelta(days=13)
+    previous_end = anchor - timedelta(days=7)
+    last_samples = [sample for sample, sample_date in dated_samples if last_start <= sample_date <= anchor]
+    previous_samples = [sample for sample, sample_date in dated_samples if previous_start <= sample_date <= previous_end]
+    last_win_rate = _samples_win_rate(last_samples)
+    previous_win_rate = _samples_win_rate(previous_samples)
+    return {
+        "last_7d_sample_count": len(last_samples),
+        "last_7d_win_rate": last_win_rate,
+        "previous_7d_sample_count": len(previous_samples),
+        "previous_7d_win_rate": previous_win_rate,
+        "delta_7d": last_win_rate - previous_win_rate if last_win_rate is not None and previous_win_rate is not None else None,
+        "last_30_points": _last_30_trend_points(dated_samples),
+    }
+
+
+def _last_30_trend_points(dated_samples: list[tuple[_LeaderboardSideSample, date]]) -> list[dict[str, Any]]:
+    recent = sorted(
+        dated_samples,
+        key=lambda item: (item[1], item[0].played_at, item[0].player_name, item[0].weapon_name, item[0].style_name),
+    )[-30:]
+    wins = 0
+    losses = 0
+    points: list[dict[str, Any]] = []
+    for index, (sample, sample_date) in enumerate(recent, start=1):
+        if sample.result == "win":
+            wins += 1
+        elif sample.result == "loss":
+            losses += 1
+        points.append(
+            {
+                "index": index,
+                "date": sample_date.isoformat(),
+                "played_at": sample.played_at,
+                "result": sample.result,
+                "rolling_win_rate": _win_rate(wins, losses),
+            }
+        )
+    return points
+
+
+def _credibility_stats(bucket: _LeaderboardBucket) -> dict[str, Any]:
+    top3_count = sum(count for _player, count in bucket.player_counts.most_common(3))
+    top3_share = top3_count / bucket.sample_count if bucket.sample_count else 0.0
+    if bucket.sample_count >= 500 and bucket.player_count >= 30 and top3_share < 0.5:
+        label = "high"
+    elif bucket.sample_count >= 200 and bucket.player_count >= 15 and top3_share < 0.7:
+        label = "medium"
+    else:
+        label = "low"
+    return {
+        "label": label,
+        "top3_player_share": top3_share,
+        "player_count": bucket.player_count,
+        "sample_count": bucket.sample_count,
+    }
+
+
+def _selected_name(side: MatchSide | None, key: str) -> str:
+    selected = getattr(side, "selected_json", None)
+    if not isinstance(selected, dict):
+        return ""
+    raw = selected.get(key)
+    if isinstance(raw, dict):
+        return _normalize_behavior_name(raw.get("name") or raw.get("label") or raw.get("summary"))
+    return _normalize_behavior_name(raw)
+
+
+def _normalize_behavior_name(value: Any) -> str:
+    text = " ".join(str(value or "").split())
+    return "" if text in {"", "-", "None", "none", "未選択", "未选择"} else text
+
+
+def _sample_date(value: str) -> date | None:
+    try:
+        return datetime.strptime(str(value or "")[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def _trend_anchor_date(trend_anchor: str, dated_samples: list[tuple[_LeaderboardSideSample, date]]) -> date | None:
+    anchor = _sample_date(trend_anchor)
+    if anchor is not None:
+        return anchor
+    return max((sample_date for _sample, sample_date in dated_samples), default=None)
+
+
+def _samples_win_rate(samples: list[_LeaderboardSideSample]) -> float | None:
+    win_count = sum(1 for sample in samples if sample.result == "win")
+    loss_count = sum(1 for sample in samples if sample.result == "loss")
+    return _win_rate(win_count, loss_count)
+
+
+def _win_rate(win_count: int, loss_count: int) -> float | None:
+    total = win_count + loss_count
+    return win_count / total if total else None
 
 
 def _sorted_buckets(buckets: dict[str, _LeaderboardBucket], limit: int | None) -> list[tuple[str, _LeaderboardBucket]]:
