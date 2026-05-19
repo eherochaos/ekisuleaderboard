@@ -9,6 +9,7 @@ __pycache__/
 data/
 .tmp/
 .pytest-tmp/
+.pytest-tmp-*/
 .pytest-tmp-run/
 .test-tmp/
 .test-tmp2/

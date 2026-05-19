@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import hashlib
 import os
 from pathlib import Path
 from string import Template
@@ -40,6 +41,26 @@ LEADERBOARD_STATIC_FILES = {"leaderboard.css", "leaderboard.js"}
 
 LEADERBOARD_HTML_DEFAULT_LIMIT = 80
 LEADERBOARD_HTML_MAX_LIMIT = 500
+
+
+def _leaderboard_asset_version() -> str:
+    digest = hashlib.sha256()
+    digest.update(__version__.encode("utf-8"))
+    has_static_asset = False
+    for filename in sorted(LEADERBOARD_STATIC_FILES):
+        path = WEB_STATIC_ROOT / filename
+        if not path.is_file():
+            continue
+        try:
+            content = path.read_bytes()
+        except OSError:
+            continue
+        has_static_asset = True
+        digest.update(filename.encode("utf-8"))
+        digest.update(content)
+    if not has_static_asset:
+        return __version__
+    return f"{__version__}-{digest.hexdigest()[:12]}"
 
 
 def _leaderboard_display_limit(limit: int | None, full: str = "") -> int | None:
@@ -106,7 +127,7 @@ def _leaderboard_visual_page(
         "leaderboard.html",
         {
             "page_title": _html(title),
-            "asset_version": _html(__version__),
+            "asset_version": _html(_leaderboard_asset_version()),
             "scope_tools": _leaderboard_scope_tools(personal_requested, is_personal_view, contributor_name or str(payload.get("contributor_name") or "")),
             "filter_error": _leaderboard_filter_error(filter_error),
             "eyebrow": _html(eyebrow),

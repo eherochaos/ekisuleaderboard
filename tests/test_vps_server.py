@@ -737,6 +737,23 @@ def test_web_static_serves_leaderboard_assets_from_frontend(tmp_path):
     assert js.media_type in {"application/javascript", "text/javascript"}
 
 
+def test_leaderboard_asset_version_changes_with_static_content(monkeypatch, tmp_path):
+    static_root = tmp_path / "static"
+    static_root.mkdir()
+    (static_root / "leaderboard.css").write_text(".board{color:#123456}", encoding="utf-8")
+    (static_root / "leaderboard.js").write_text("console.log('one')", encoding="utf-8")
+    monkeypatch.setattr(leaderboard_view, "WEB_STATIC_ROOT", static_root)
+    monkeypatch.setattr(leaderboard_view, "LEADERBOARD_STATIC_FILES", {"leaderboard.css", "leaderboard.js"})
+
+    version_before = leaderboard_view._leaderboard_asset_version()
+    (static_root / "leaderboard.css").write_text(".board{color:#654321}", encoding="utf-8")
+    version_after = leaderboard_view._leaderboard_asset_version()
+
+    assert version_before.startswith(f"{leaderboard_view.__version__}-")
+    assert version_after.startswith(f"{leaderboard_view.__version__}-")
+    assert version_after != version_before
+
+
 def test_leaderboard_root_prefers_env_root(monkeypatch):
     project_root = Path(__file__).resolve().parents[1]
 
