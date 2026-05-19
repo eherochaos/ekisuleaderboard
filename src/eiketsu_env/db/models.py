@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, func
+from sqlalchemy import DateTime, Float, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -389,6 +389,88 @@ class ServerLeaderboardSnapshot(TimestampMixin, Base):
     upload_watermark: Mapped[int] = mapped_column(Integer, nullable=False, default=0, index=True)
     payload_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
+
+
+class ServerLeaderboardRun(TimestampMixin, Base):
+    """一次公开排行榜物化生成记录。"""
+
+    __tablename__ = "server_leaderboard_runs"
+    __table_args__ = (
+        Index(
+            "ix_server_leaderboard_runs_current",
+            "scope",
+            "status",
+            "payload_version",
+            "target_version",
+            "date_from",
+            "date_to",
+            "include_solo",
+            "upload_watermark",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    scope: Mapped[str] = mapped_column(String(32), nullable=False, default="public", index=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="building", index=True)
+    payload_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, index=True)
+    target_version: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    date_from: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    date_to: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    include_solo: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    upload_watermark: Mapped[int] = mapped_column(Integer, nullable=False, default=0, index=True)
+    upload_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    package_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    match_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    side_sample_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    row_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    error_text: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
+    generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False))
+
+    rows: Mapped[list["ServerLeaderboardRow"]] = relationship(
+        back_populates="run",
+        cascade="all, delete-orphan",
+    )
+
+
+class ServerLeaderboardRow(Base):
+    """公开排行榜物化行；页面分页只读取这里。"""
+
+    __tablename__ = "server_leaderboard_rows"
+    __table_args__ = (
+        UniqueConstraint("run_id", "row_type", "rank_scope", "cluster_enabled", "rank", name="uq_server_leaderboard_row_rank"),
+        Index("ix_server_leaderboard_rows_rank", "run_id", "row_type", "rank_scope", "cluster_enabled", "rank"),
+        Index(
+            "ix_server_leaderboard_rows_wilson",
+            "run_id",
+            "row_type",
+            "rank_scope",
+            "cluster_enabled",
+            "wilson_lower_bound",
+            "sample_count",
+        ),
+        Index(
+            "ix_server_leaderboard_rows_sample",
+            "run_id",
+            "row_type",
+            "rank_scope",
+            "cluster_enabled",
+            "sample_count",
+            "wilson_lower_bound",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey("server_leaderboard_runs.id", ondelete="CASCADE"), nullable=False)
+    row_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    rank_scope: Mapped[str] = mapped_column(String(32), nullable=False)
+    cluster_enabled: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    rank: Mapped[int] = mapped_column(Integer, nullable=False)
+    sample_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    wilson_lower_bound: Mapped[float | None] = mapped_column(Float)
+    row_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+
+    run: Mapped[ServerLeaderboardRun] = relationship(back_populates="rows")
 
 
 class ServerUser(TimestampMixin, Base):

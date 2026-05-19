@@ -18,11 +18,12 @@ from eiketsu_env.services.client_update import (
     resolve_client_update_file,
 )
 from eiketsu_env.services.leaderboard import (
+    LEADERBOARD_DEFAULT_PAGE_LIMIT,
     LEADERBOARD_SNAPSHOT_LIMIT,
     RANK_SCOPE_ALL,
     contributor_leaderboard,
     personal_leaderboard,
-    public_leaderboard,
+    public_leaderboard_page,
     refresh_public_leaderboard_snapshots,
 )
 from eiketsu_env.services.server_share import (
@@ -140,7 +141,10 @@ def create_app(settings: Settings | None = None):
         contributor: str = "",
         rank_scope: str = RANK_SCOPE_ALL,
         cluster: str = "on",
-        limit: int | None = LEADERBOARD_SNAPSHOT_LIMIT,
+        row_type: str = "",
+        offset: int = 0,
+        limit: int | None = LEADERBOARD_DEFAULT_PAGE_LIMIT,
+        sort: str = "wilson",
         full: str = "",
     ) -> dict[str, Any]:
         include_archetypes = _cluster_enabled(cluster)
@@ -156,7 +160,15 @@ def create_app(settings: Settings | None = None):
                 return contributor_leaderboard(settings, contributor, **leaderboard_kwargs)
             if scope == "mine":
                 return personal_leaderboard(settings, _bearer_token(request), **leaderboard_kwargs)
-            return public_leaderboard(settings, **leaderboard_kwargs)
+            return public_leaderboard_page(
+                settings,
+                row_type=row_type,
+                offset=offset,
+                limit=limit,
+                sort_key=sort,
+                rank_scope=rank_scope,
+                include_archetypes=include_archetypes,
+            )
         except ServerAuthError as exc:
             raise HTTPException(status_code=401, detail=str(exc)) from exc
         except ValueError as exc:
@@ -170,22 +182,35 @@ def create_app(settings: Settings | None = None):
         contributor: str = "",
         rank_scope: str = RANK_SCOPE_ALL,
         cluster: str = "on",
+        row_type: str = "",
         offset: int = 0,
         limit: int = LEADERBOARD_HTML_DEFAULT_LIMIT,
         sort: str = "wilson",
     ) -> dict[str, Any]:
         cluster_enabled = _cluster_enabled(cluster)
         try:
-            payload, _, _, contributor_value, _ = _leaderboard_payload_for_web_request(
-                settings,
-                request,
-                scope=scope,
-                token=token,
-                contributor=contributor,
-                rank_scope=rank_scope,
-                cluster_enabled=cluster_enabled,
-                service_limit=LEADERBOARD_SNAPSHOT_LIMIT,
-            )
+            if scope == "public":
+                payload = public_leaderboard_page(
+                    settings,
+                    row_type=row_type,
+                    offset=offset,
+                    limit=limit,
+                    sort_key=sort,
+                    rank_scope=rank_scope,
+                    include_archetypes=cluster_enabled,
+                )
+                contributor_value = ""
+            else:
+                payload, _, _, contributor_value, _ = _leaderboard_payload_for_web_request(
+                    settings,
+                    request,
+                    scope=scope,
+                    token=token,
+                    contributor=contributor,
+                    rank_scope=rank_scope,
+                    cluster_enabled=cluster_enabled,
+                    service_limit=LEADERBOARD_SNAPSHOT_LIMIT,
+                )
         except ServerAuthError as exc:
             raise HTTPException(status_code=401, detail=str(exc)) from exc
         except ValueError as exc:
@@ -347,6 +372,7 @@ def create_app(settings: Settings | None = None):
     @app.get("/leaderboard", response_class=HTMLResponse)
     def leaderboard(
         request: Request,
+        background_tasks: BackgroundTasks,
         scope: str = "public",
         token: str = "",
         contributor: str = "",
@@ -356,27 +382,45 @@ def create_app(settings: Settings | None = None):
         full: str = "",
     ) -> HTMLResponse:
         cluster_enabled = _cluster_enabled(cluster)
-        display_limit = _leaderboard_display_limit(limit, full)
+        public_scope = scope not in {"mine", "contributor"}
+        display_limit = _leaderboard_display_limit(limit, "" if public_scope else full)
         try:
-            payload, personal_requested, token_value, contributor_value, filter_error = _leaderboard_payload_for_web_request(
-                settings,
-                request,
-                scope=scope,
-                token=token,
-                contributor=contributor,
-                rank_scope=rank_scope,
-                cluster_enabled=cluster_enabled,
-                service_limit=_leaderboard_page_service_limit(display_limit, full),
-            )
+            if public_scope:
+                payload = public_leaderboard_page(
+                    settings,
+                    limit=display_limit,
+                    rank_scope=rank_scope,
+                    include_archetypes=cluster_enabled,
+                )
+                if payload.get("leaderboard_status") != "ready":
+                    background_tasks.add_task(refresh_public_leaderboard_snapshots, settings)
+                personal_requested = False
+                token_value = _user_token_from_request(request, token)
+                contributor_value = _contributor_from_request(request, contributor)
+                filter_error = ""
+            else:
+                payload, personal_requested, token_value, contributor_value, filter_error = _leaderboard_payload_for_web_request(
+                    settings,
+                    request,
+                    scope=scope,
+                    token=token,
+                    contributor=contributor,
+                    rank_scope=rank_scope,
+                    cluster_enabled=cluster_enabled,
+                    service_limit=_leaderboard_page_service_limit(display_limit, full),
+                )
+                if payload.get("scope") == "public" and payload.get("leaderboard_status") != "ready":
+                    background_tasks.add_task(refresh_public_leaderboard_snapshots, settings)
         except ServerAuthError as exc:
             fallback_limit = _leaderboard_page_service_limit(display_limit, full)
-            payload = public_leaderboard(
+            payload = public_leaderboard_page(
                 settings,
                 limit=fallback_limit,
-                archetype_limit=fallback_limit,
                 rank_scope=rank_scope,
                 include_archetypes=cluster_enabled,
             )
+            if payload.get("leaderboard_status") != "ready":
+                background_tasks.add_task(refresh_public_leaderboard_snapshots, settings)
             personal_requested = scope in {"mine", "contributor"}
             token_value = _user_token_from_request(request, token)
             contributor_value = _contributor_from_request(request, contributor)
@@ -467,7 +511,12 @@ def _leaderboard_payload_for_web_request(
             if not payload.get("contributor_found"):
                 filter_error = f"还没有找到用户名“{contributor_value}”的上传记录。"
         else:
-            payload = public_leaderboard(settings, **leaderboard_kwargs)
+            payload = public_leaderboard_page(
+                settings,
+                limit=service_limit,
+                rank_scope=rank_scope,
+                include_archetypes=cluster_enabled,
+            )
             filter_error = "请输入绑定用户名后查看我的贡献视角。"
     elif scope == "mine":
         if token_value:
@@ -477,10 +526,20 @@ def _leaderboard_payload_for_web_request(
                 **leaderboard_kwargs,
             )
         else:
-            payload = public_leaderboard(settings, **leaderboard_kwargs)
+            payload = public_leaderboard_page(
+                settings,
+                limit=service_limit,
+                rank_scope=rank_scope,
+                include_archetypes=cluster_enabled,
+            )
             filter_error = "旧版 token 链接缺少 token；请改用绑定用户名查看贡献。"
     else:
-        payload = public_leaderboard(settings, **leaderboard_kwargs)
+        payload = public_leaderboard_page(
+            settings,
+            limit=service_limit,
+            rank_scope=rank_scope,
+            include_archetypes=cluster_enabled,
+        )
     return payload, personal_requested, token_value, contributor_value, filter_error
 
 

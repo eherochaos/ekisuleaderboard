@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import json
+import logging
 import time
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
+from threading import Lock
 from typing import Any
 from urllib.parse import quote
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import and_, delete, func, select
 from sqlalchemy.orm import selectinload
 
 from eiketsu_env.config import Settings
@@ -18,6 +20,8 @@ from eiketsu_env.db.models import (
     Match,
     MatchDeck,
     MatchSide,
+    ServerLeaderboardRow,
+    ServerLeaderboardRun,
     ServerLeaderboardSnapshot,
     ServerUpload,
     ServerUser,
@@ -34,6 +38,11 @@ from eiketsu_env.utils import sha256_text
 DEFAULT_ARCHETYPE_SIMILAR_COST = 5.0
 LEADERBOARD_CACHE_TTL_SECONDS = 300.0
 LEADERBOARD_SNAPSHOT_LIMIT = 500
+LEADERBOARD_DEFAULT_PAGE_LIMIT = 80
+LEADERBOARD_MAX_PAGE_LIMIT = 500
+LEADERBOARD_ROW_DECK = "deck"
+LEADERBOARD_ROW_CARD = "card"
+LEADERBOARD_ROW_ARCHETYPE = "archetype"
 RANK_SCOPE_ALL = "all"
 RANK_SCOPE_TRAVELER_DOWN = "traveler_down"
 RANK_SCOPE_KNIGHT_DOWN = "knight_down"
@@ -59,9 +68,11 @@ RANK_SCOPE_ALIASES = {
     "knight-above": RANK_SCOPE_KNIGHT_UP,
 }
 _LEADERBOARD_CACHE: dict[tuple[Any, ...], tuple[float, dict[str, Any]]] = {}
+_LEADERBOARD_REFRESH_LOCK = Lock()
 LEADERBOARD_PAYLOAD_VERSION = 2
 BEHAVIOR_TOP_LIMIT = 3
 BEHAVIOR_MIN_CONDITIONAL_SAMPLE = 20
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -80,22 +91,30 @@ class _LeaderboardBucket:
     loss_count: int = 0
     draw_count: int = 0
     player_counts: Counter[str] = field(default_factory=Counter)
-    samples: list[_LeaderboardSideSample] = field(default_factory=list)
+    weapon_counts: dict[str, dict[str, int]] = field(default_factory=dict)
+    style_counts: dict[str, dict[str, int]] = field(default_factory=dict)
+    date_counts: dict[str, dict[str, int]] = field(default_factory=dict)
+    recent_samples: list[_LeaderboardSideSample] = field(default_factory=list)
 
     def add(self, result: str, side: MatchSide | None = None, played_at: str = "") -> None:
         self.sample_count += 1
         player_name = _bucket_player_name(side)
         if player_name:
             self.player_counts[player_name] += 1
-        self.samples.append(
-            _LeaderboardSideSample(
-                result=result,
-                played_at=str(played_at or ""),
-                player_name=player_name,
-                weapon_name=_selected_name(side, "weapon"),
-                style_name=_selected_name(side, "school"),
-            )
+        sample = _LeaderboardSideSample(
+            result=result,
+            played_at=str(played_at or ""),
+            player_name=player_name,
+            weapon_name=_selected_name(side, "weapon"),
+            style_name=_selected_name(side, "school"),
         )
+        _add_behavior_counter(self.weapon_counts, sample.weapon_name, result)
+        _add_behavior_counter(self.style_counts, sample.style_name, result)
+        sample_date = _sample_date(sample.played_at)
+        if sample_date is not None:
+            _add_behavior_counter(self.date_counts, sample_date.isoformat(), result)
+        self.recent_samples.append(sample)
+        _trim_recent_samples(self.recent_samples)
         if result == "win":
             self.win_count += 1
         elif result == "loss":
@@ -109,7 +128,11 @@ class _LeaderboardBucket:
         self.loss_count += other.loss_count
         self.draw_count += other.draw_count
         self.player_counts.update(other.player_counts)
-        self.samples.extend(other.samples)
+        _merge_behavior_counts(self.weapon_counts, other.weapon_counts)
+        _merge_behavior_counts(self.style_counts, other.style_counts)
+        _merge_behavior_counts(self.date_counts, other.date_counts)
+        self.recent_samples.extend(other.recent_samples)
+        _trim_recent_samples(self.recent_samples)
 
     @property
     def win_rate(self) -> float | None:
@@ -138,6 +161,13 @@ class _DeckArchetype:
     members: list[str]
     summary: _LeaderboardBucket
     core_hashes: list[str]
+
+
+@dataclass(slots=True)
+class _LeaderboardSideView:
+    player_name: str
+    profile_json: dict[str, Any]
+    selected_json: dict[str, Any]
 
 
 def _server_share_config(session) -> ShareConfig:
@@ -369,25 +399,161 @@ def contributor_leaderboard(
         return _leaderboard_cache_set(cache_key, payload)
 
 
-def refresh_public_leaderboard_snapshots(settings: Settings) -> dict[str, Any]:
-    """后台预热公共榜单筛选组合，避免用户点击时现场重算。"""
+def public_leaderboard_page(
+    settings: Settings,
+    *,
+    row_type: str = "",
+    offset: int = 0,
+    limit: int | None = LEADERBOARD_DEFAULT_PAGE_LIMIT,
+    sort_key: str = "wilson",
+    rank_scope: str = RANK_SCOPE_ALL,
+    include_archetypes: bool = True,
+) -> dict[str, Any]:
+    factory = make_session_factory(settings)
+    with factory() as session:
+        config = _server_share_config(session)
+        upload_watermark = _leaderboard_upload_watermark(session)
+        run = _current_public_leaderboard_run(session, config, upload_watermark, status="ready")
+        latest = run or _current_public_leaderboard_run(session, config, upload_watermark, status="")
+        normalized_rank_scope = _normalize_rank_scope(rank_scope)
+        active_row_type = _normalize_leaderboard_row_type(row_type, include_archetypes)
+        safe_offset = max(0, int(offset or 0))
+        safe_limit = _leaderboard_page_limit(limit)
+        payload = _materialized_base_payload(
+            config,
+            upload_watermark=upload_watermark,
+            run=latest,
+            rank_scope=normalized_rank_scope,
+            row_type=active_row_type,
+        )
+        if run is None:
+            payload["leaderboard_status"] = str(getattr(latest, "status", "") or "missing")
+            payload["pagination"] = {
+                "offset": safe_offset,
+                "limit": safe_limit,
+                "total": 0,
+                "has_more": False,
+            }
+            return payload
 
-    refreshed: list[str] = []
-    for rank_scope in RANK_SCOPE_LABELS:
-        for include_archetypes in (True, False):
+        total = _materialized_row_total(session, int(run.id), active_row_type, normalized_rank_scope)
+        rows = _materialized_page_rows(
+            session,
+            int(run.id),
+            active_row_type,
+            normalized_rank_scope,
+            offset=safe_offset,
+            limit=safe_limit,
+            sort_key=sort_key,
+        )
+        next_offset = safe_offset + len(rows)
+        row_items = [dict(row.row_json or {}) for row in rows]
+        if active_row_type == LEADERBOARD_ROW_CARD:
+            payload["top_cards"] = row_items
+        elif active_row_type == LEADERBOARD_ROW_ARCHETYPE:
+            payload["top_archetypes"] = row_items
+        else:
+            payload["top_decks"] = row_items
+        payload["match_count"] = int(run.match_count or 0)
+        payload["side_sample_count"] = _materialized_scope_sample_count(session, int(run.id), normalized_rank_scope)
+        payload["leaderboard_status"] = "ready"
+        payload["pagination"] = {
+            "offset": safe_offset,
+            "limit": safe_limit,
+            "total": total,
+            "has_more": next_offset < total,
+        }
+        payload["totals"] = {
+            active_row_type: total,
+            "row_count": int(run.row_count or 0),
+        }
+        return payload
+
+
+def refresh_public_leaderboard_materialized(settings: Settings, rank_scope: str = "all", cluster: str = "all") -> dict[str, Any]:
+    """Regenerate derived public leaderboard rows without keeping one huge JSON payload in memory."""
+
+    if not _LEADERBOARD_REFRESH_LOCK.acquire(blocking=False):
+        return {"status": "running", "reason": "leaderboard refresh already in progress"}
+    started = time.monotonic()
+    summary: dict[str, int] = {}
+    try:
+        _clear_leaderboard_cache()
+        factory = make_session_factory(settings)
+        with factory() as session:
             try:
-                public_leaderboard(
-                    settings,
-                    limit=LEADERBOARD_SNAPSHOT_LIMIT,
-                    archetype_limit=LEADERBOARD_SNAPSHOT_LIMIT,
-                    rank_scope=rank_scope,
-                    include_archetypes=include_archetypes,
-                )
+                config = _server_share_config(session)
             except ValueError as exc:
-                return {"status": "skipped", "reason": str(exc), "refreshed": refreshed}
-            cluster_label = "cluster" if include_archetypes else "deck"
-            refreshed.append(f"{rank_scope}:{cluster_label}")
-    return {"status": "completed", "refreshed": refreshed}
+                return {"status": "skipped", "reason": str(exc)}
+            upload_watermark = _leaderboard_upload_watermark(session)
+            run = ServerLeaderboardRun(
+                scope="public",
+                status="building",
+                payload_version=LEADERBOARD_PAYLOAD_VERSION,
+                target_version=config.target_version,
+                date_from=config.date_from,
+                date_to=config.date_to,
+                include_solo=1 if config.include_solo else 0,
+                upload_watermark=upload_watermark,
+                upload_count=int(session.scalar(select(func.count(ServerUpload.id))) or 0),
+                package_count=int(session.scalar(select(func.count(SharedContributionPackage.package_id))) or 0),
+                started_at=datetime.utcnow(),
+                error_text="",
+            )
+            session.add(run)
+            session.flush()
+            try:
+                rows, counts = _build_materialized_public_leaderboard_rows(settings, session, config, rank_scope, cluster)
+                for row in rows:
+                    row.run_id = int(run.id)
+                session.add_all(rows)
+                run.status = "ready"
+                run.match_count = int(counts.get("match_count") or 0)
+                run.side_sample_count = int(counts.get("side_sample_count") or 0)
+                run.row_count = len(rows)
+                run.generated_at = datetime.utcnow()
+                _prune_old_public_leaderboard_runs(session, keep_run_id=int(run.id))
+                summary = {
+                    "run_id": int(run.id),
+                    "row_count": int(run.row_count or 0),
+                    "match_count": int(run.match_count or 0),
+                    "side_sample_count": int(run.side_sample_count or 0),
+                }
+                session.commit()
+            except Exception as exc:
+                run.status = "failed"
+                run.error_text = str(exc)[:4000]
+                run.generated_at = datetime.utcnow()
+                session.commit()
+                LOGGER.exception("public leaderboard materialized refresh failed")
+                raise
+        elapsed = time.monotonic() - started
+        rss_mb = _current_rss_mb()
+        LOGGER.info(
+            "public leaderboard materialized refresh completed rows=%s matches=%s samples=%s elapsed=%.2fs rss_mb=%s",
+            summary.get("row_count", 0),
+            summary.get("match_count", 0),
+            summary.get("side_sample_count", 0),
+            elapsed,
+            rss_mb,
+        )
+        return {
+            "status": "completed",
+            "run_id": summary.get("run_id", 0),
+            "row_count": summary.get("row_count", 0),
+            "match_count": summary.get("match_count", 0),
+            "side_sample_count": summary.get("side_sample_count", 0),
+            "elapsed_seconds": round(elapsed, 3),
+            "rss_mb": rss_mb,
+        }
+    finally:
+        _LEADERBOARD_REFRESH_LOCK.release()
+
+
+def refresh_public_leaderboard_snapshots(settings: Settings) -> dict[str, Any]:
+    """兼容旧调用名：后台预热公共榜物化分页行，避免用户请求里现场重算。"""
+
+    return refresh_public_leaderboard_materialized(settings)
 
 
 def _leaderboard_snapshot_key(
@@ -490,8 +656,371 @@ def _clear_leaderboard_snapshots(settings: Settings) -> None:
     _clear_leaderboard_cache()
     factory = make_session_factory(settings)
     with factory() as session:
+        session.execute(delete(ServerLeaderboardRow))
+        session.execute(delete(ServerLeaderboardRun))
         session.execute(delete(ServerLeaderboardSnapshot))
         session.commit()
+
+
+def prune_legacy_leaderboard_snapshots(settings: Settings) -> dict[str, Any]:
+    """Delete only the deprecated JSON snapshot cache; source matches/uploads stay untouched."""
+
+    _clear_leaderboard_cache()
+    factory = make_session_factory(settings)
+    with factory() as session:
+        deleted = int(session.scalar(select(func.count(ServerLeaderboardSnapshot.snapshot_key))) or 0)
+        session.execute(delete(ServerLeaderboardSnapshot))
+        session.commit()
+    return {"status": "completed", "deleted_snapshots": deleted}
+
+
+def _build_materialized_public_leaderboard_rows(
+    settings: Settings,
+    session,
+    config: ShareConfig,
+    rank_scope: str,
+    cluster: str,
+) -> tuple[list[ServerLeaderboardRow], dict[str, int]]:
+    del cluster
+    lookup = load_card_lookup(settings)
+    rank_scopes = _materialized_rank_scopes(rank_scope)
+    deck_buckets: dict[str, dict[str, _LeaderboardBucket]] = {scope: {} for scope in rank_scopes}
+    card_buckets: dict[str, dict[str, _LeaderboardBucket]] = {scope: {} for scope in rank_scopes}
+    match_ids_by_scope: dict[str, set[int]] = {scope: set() for scope in rank_scopes}
+    seen_names: dict[str, str] = {}
+
+    for row in _iter_materialized_leaderboard_side_rows(session, config):
+        if not is_environment_mode(str(row.mode or ""), include_solo=config.include_solo):
+            continue
+        deck_fingerprint = str(row.deck_fingerprint or "")
+        if not deck_fingerprint:
+            continue
+        selected = row.selected_json if isinstance(row.selected_json, dict) else {}
+        profile = row.profile_json if isinstance(row.profile_json, dict) else {}
+        _collect_selected_card_names(seen_names, selected)
+        side = _LeaderboardSideView(
+            player_name=str(row.player_name or ""),
+            profile_json=profile,
+            selected_json=selected,
+        )
+        order = _rank_order_from_profile(profile)
+        scopes = [scope for scope in rank_scopes if _rank_order_matches_scope(order, scope)]
+        if not scopes:
+            continue
+        match_id = int(row.match_id or 0)
+        result = _result_for_side_values(str(row.match_result or ""), int(row.side_index or 0), str(row.side_result or ""))
+        played_at = str(row.played_at or "")
+        card_hashes = {card_hash for card_hash in deck_fingerprint.split(",") if card_hash}
+        for scope in scopes:
+            match_ids_by_scope[scope].add(match_id)
+            deck_buckets[scope].setdefault(deck_fingerprint, _LeaderboardBucket()).add(result, side, played_at)
+            for card_hash in card_hashes:
+                card_buckets[scope].setdefault(card_hash, _LeaderboardBucket()).add(result, side, played_at)
+
+    rows: list[ServerLeaderboardRow] = []
+    for scope in rank_scopes:
+        rows.extend(
+            _materialized_rows_for_items(
+                LEADERBOARD_ROW_DECK,
+                scope,
+                cluster_enabled=0,
+                items=_top_decks(deck_buckets[scope], lookup, seen_names, None, config.date_to),
+            )
+        )
+        rows.extend(
+            _materialized_rows_for_items(
+                LEADERBOARD_ROW_CARD,
+                scope,
+                cluster_enabled=0,
+                items=_top_cards(card_buckets[scope], lookup, seen_names, None),
+            )
+        )
+        rows.extend(
+            _materialized_rows_for_items(
+                LEADERBOARD_ROW_ARCHETYPE,
+                scope,
+                cluster_enabled=1,
+                items=_top_archetypes(deck_buckets[scope], lookup, seen_names, None, config.date_to),
+            )
+        )
+
+    all_scope = RANK_SCOPE_ALL if RANK_SCOPE_ALL in deck_buckets else rank_scopes[0]
+    return rows, {
+        "match_count": len(match_ids_by_scope.get(all_scope, set())),
+        "side_sample_count": sum(bucket.sample_count for bucket in deck_buckets.get(all_scope, {}).values()),
+    }
+
+
+def _iter_materialized_leaderboard_side_rows(session, config: ShareConfig):
+    statement = (
+        select(
+            Match.id.label("match_id"),
+            Match.played_at.label("played_at"),
+            Match.mode.label("mode"),
+            Match.result.label("match_result"),
+            MatchDeck.side_index.label("side_index"),
+            MatchDeck.deck_fingerprint.label("deck_fingerprint"),
+            MatchSide.player_name.label("player_name"),
+            MatchSide.result.label("side_result"),
+            MatchSide.profile_json.label("profile_json"),
+            MatchSide.selected_json.label("selected_json"),
+        )
+        .join(MatchDeck, MatchDeck.match_id == Match.id)
+        .join(MatchSide, and_(MatchSide.match_id == Match.id, MatchSide.side_index == MatchDeck.side_index))
+        .where(Match.version == config.target_version)
+        .where(func.substr(Match.played_at, 1, 10) >= config.date_from)
+        .where(func.substr(Match.played_at, 1, 10) <= config.date_to)
+        .order_by(Match.played_at, Match.id, MatchDeck.side_index)
+        .execution_options(yield_per=1000, stream_results=True)
+    )
+    return session.execute(statement)
+
+
+def _materialized_rows_for_items(
+    row_type: str,
+    rank_scope: str,
+    *,
+    cluster_enabled: int,
+    items: list[dict[str, Any]],
+) -> list[ServerLeaderboardRow]:
+    rows: list[ServerLeaderboardRow] = []
+    for rank, item in enumerate(items, start=1):
+        row_json = {**item, "rank": rank}
+        rows.append(
+            ServerLeaderboardRow(
+                run_id=0,
+                row_type=row_type,
+                rank_scope=rank_scope,
+                cluster_enabled=cluster_enabled,
+                rank=rank,
+                sample_count=int(item.get("sample_count") or 0),
+                wilson_lower_bound=item.get("wilson_lower_bound"),
+                row_json=row_json,
+            )
+        )
+    return rows
+
+
+def _materialized_rank_scopes(rank_scope: str) -> list[str]:
+    del rank_scope
+    # A ready run must contain every public rank scope, otherwise a later UI toggle
+    # could hit an empty table while the run still looks current.
+    return list(RANK_SCOPE_LABELS)
+
+
+def _normalize_leaderboard_row_type(row_type: str, include_archetypes: bool) -> str:
+    key = str(row_type or "").strip().lower()
+    aliases = {
+        "deck": LEADERBOARD_ROW_DECK,
+        "decks": LEADERBOARD_ROW_DECK,
+        "card": LEADERBOARD_ROW_CARD,
+        "cards": LEADERBOARD_ROW_CARD,
+        "archetype": LEADERBOARD_ROW_ARCHETYPE,
+        "archetypes": LEADERBOARD_ROW_ARCHETYPE,
+    }
+    if key in aliases:
+        return aliases[key]
+    return LEADERBOARD_ROW_ARCHETYPE if include_archetypes else LEADERBOARD_ROW_DECK
+
+
+def _leaderboard_page_limit(limit: int | None) -> int:
+    if limit is None:
+        return LEADERBOARD_DEFAULT_PAGE_LIMIT
+    return max(1, min(int(limit), LEADERBOARD_MAX_PAGE_LIMIT))
+
+
+def _current_public_leaderboard_run(
+    session,
+    config: ShareConfig,
+    upload_watermark: int,
+    *,
+    status: str,
+) -> ServerLeaderboardRun | None:
+    statement = (
+        select(ServerLeaderboardRun)
+        .where(ServerLeaderboardRun.scope == "public")
+        .where(ServerLeaderboardRun.payload_version == LEADERBOARD_PAYLOAD_VERSION)
+        .where(ServerLeaderboardRun.target_version == config.target_version)
+        .where(ServerLeaderboardRun.date_from == config.date_from)
+        .where(ServerLeaderboardRun.date_to == config.date_to)
+        .where(ServerLeaderboardRun.include_solo == (1 if config.include_solo else 0))
+        .where(ServerLeaderboardRun.upload_watermark == upload_watermark)
+        .order_by(ServerLeaderboardRun.id.desc())
+        .limit(1)
+    )
+    if status:
+        statement = statement.where(ServerLeaderboardRun.status == status)
+    return session.scalar(statement)
+
+
+def _materialized_base_payload(
+    config: ShareConfig,
+    *,
+    upload_watermark: int,
+    run: ServerLeaderboardRun | None,
+    rank_scope: str,
+    row_type: str,
+) -> dict[str, Any]:
+    generated_at = _datetime_to_iso(run.generated_at) if run and run.generated_at else ""
+    return {
+        **_config_to_payload(config),
+        "payload_version": LEADERBOARD_PAYLOAD_VERSION,
+        "scope": "public",
+        "scope_label": "公开匿名聚合",
+        "rank_scope": rank_scope,
+        "rank_scope_label": RANK_SCOPE_LABELS[rank_scope],
+        "row_type": row_type,
+        "upload_count": int(run.upload_count or 0) if run else 0,
+        "package_count": int(run.package_count or 0) if run else 0,
+        "match_count": int(run.match_count or 0) if run else 0,
+        "side_sample_count": int(run.side_sample_count or 0) if run else 0,
+        "top_decks": [],
+        "top_cards": [],
+        "top_archetypes": [],
+        "generated_at": generated_at,
+        "run": {
+            "id": int(run.id) if run else None,
+            "status": str(run.status) if run else "missing",
+            "generated_at": generated_at,
+            "upload_watermark": upload_watermark,
+            "error": str(run.error_text or "") if run else "",
+        },
+    }
+
+
+def _materialized_row_query(run_id: int, row_type: str, rank_scope: str):
+    return (
+        select(ServerLeaderboardRow)
+        .where(ServerLeaderboardRow.run_id == run_id)
+        .where(ServerLeaderboardRow.row_type == row_type)
+        .where(ServerLeaderboardRow.rank_scope == rank_scope)
+        .where(ServerLeaderboardRow.cluster_enabled == (1 if row_type == LEADERBOARD_ROW_ARCHETYPE else 0))
+    )
+
+
+def _materialized_row_total(session, run_id: int, row_type: str, rank_scope: str) -> int:
+    statement = (
+        select(func.count(ServerLeaderboardRow.id))
+        .where(ServerLeaderboardRow.run_id == run_id)
+        .where(ServerLeaderboardRow.row_type == row_type)
+        .where(ServerLeaderboardRow.rank_scope == rank_scope)
+        .where(ServerLeaderboardRow.cluster_enabled == (1 if row_type == LEADERBOARD_ROW_ARCHETYPE else 0))
+    )
+    return int(session.scalar(statement) or 0)
+
+
+def _materialized_page_rows(
+    session,
+    run_id: int,
+    row_type: str,
+    rank_scope: str,
+    *,
+    offset: int,
+    limit: int,
+    sort_key: str,
+) -> list[ServerLeaderboardRow]:
+    statement = _materialized_row_query(run_id, row_type, rank_scope)
+    if str(sort_key or "").strip().lower() == "sample":
+        statement = statement.order_by(
+            ServerLeaderboardRow.sample_count.desc(),
+            func.coalesce(ServerLeaderboardRow.wilson_lower_bound, 0).desc(),
+            ServerLeaderboardRow.rank.asc(),
+        )
+    else:
+        statement = statement.order_by(ServerLeaderboardRow.rank.asc())
+    return list(session.scalars(statement.offset(offset).limit(limit)).all())
+
+
+def _materialized_scope_sample_count(session, run_id: int, rank_scope: str) -> int:
+    statement = (
+        select(func.coalesce(func.sum(ServerLeaderboardRow.sample_count), 0))
+        .where(ServerLeaderboardRow.run_id == run_id)
+        .where(ServerLeaderboardRow.row_type == LEADERBOARD_ROW_DECK)
+        .where(ServerLeaderboardRow.rank_scope == rank_scope)
+        .where(ServerLeaderboardRow.cluster_enabled == 0)
+    )
+    return int(session.scalar(statement) or 0)
+
+
+def _prune_old_public_leaderboard_runs(session, keep_run_id: int) -> None:
+    old_ids = list(
+        session.scalars(
+            select(ServerLeaderboardRun.id)
+            .where(ServerLeaderboardRun.scope == "public")
+            .where(ServerLeaderboardRun.id != keep_run_id)
+        ).all()
+    )
+    if not old_ids:
+        return
+    session.execute(delete(ServerLeaderboardRow).where(ServerLeaderboardRow.run_id.in_(old_ids)))
+    session.execute(delete(ServerLeaderboardRun).where(ServerLeaderboardRun.id.in_(old_ids)))
+
+
+def _collect_selected_card_names(seen_names: dict[str, str], selected: dict[str, Any]) -> None:
+    generals = selected.get("generals") if isinstance(selected, dict) else []
+    if not isinstance(generals, list):
+        return
+    for general in generals:
+        if not isinstance(general, dict):
+            continue
+        card_hash = str(general.get("hash_id") or "")
+        raw_name = str(general.get("raw_name") or "").strip()
+        if card_hash and raw_name:
+            seen_names.setdefault(card_hash, raw_name)
+
+
+def _result_for_side_values(match_result: str, side_index: int, side_result: str) -> str:
+    result = _normalize_result(match_result if side_index == 1 else _reverse_result(match_result))
+    return result if result != "unknown" else _normalize_result(side_result)
+
+
+def _rank_order_from_profile(profile: dict[str, Any]) -> int | None:
+    label = _rank_label_from_profile(profile)
+    label_order = _rank_order_from_label(label)
+    if label_order is not None:
+        return label_order
+    certificate = _rank_certificate(profile)
+    if certificate is None:
+        return None
+    if certificate <= 9:
+        return 20
+    if certificate < 50:
+        return 40
+    if certificate < 100:
+        return 50
+    return 60
+
+
+def _rank_order_matches_scope(order: int | None, rank_scope: str) -> bool:
+    if rank_scope == RANK_SCOPE_ALL:
+        return True
+    if order is None:
+        return False
+    if rank_scope == RANK_SCOPE_TRAVELER_DOWN:
+        return order <= 20
+    if rank_scope == RANK_SCOPE_KNIGHT_DOWN:
+        return order <= 50
+    if rank_scope == RANK_SCOPE_KNIGHT_UP:
+        return order >= 50
+    return True
+
+
+def _datetime_to_iso(value: datetime | None) -> str:
+    return value.isoformat(timespec="seconds") if value else ""
+
+
+def _current_rss_mb() -> float | None:
+    try:
+        import resource
+    except ModuleNotFoundError:
+        return None
+    try:
+        rss = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    except (AttributeError, ValueError):
+        return None
+    if rss > 10_000_000:
+        return round(rss / (1024 * 1024), 1)
+    return round(rss / 1024, 1)
 
 
 def _load_leaderboard_matches(session, match_ids: set[int] | None = None) -> list[Match]:
@@ -871,29 +1400,15 @@ def _deck_payload(
 
 def _behavior_stats(bucket: _LeaderboardBucket, trend_anchor: str) -> dict[str, Any]:
     return {
-        "weapons": _behavior_category_rows(bucket.samples, "weapon_name"),
-        "styles": _behavior_category_rows(bucket.samples, "style_name"),
-        "trend": _trend_stats(bucket.samples, trend_anchor),
+        "weapons": _behavior_category_rows(bucket.weapon_counts),
+        "styles": _behavior_category_rows(bucket.style_counts),
+        "trend": _trend_stats(bucket, trend_anchor),
         "credibility": _credibility_stats(bucket),
         "souls": [],
     }
 
 
-def _behavior_category_rows(samples: list[_LeaderboardSideSample], attr: str) -> list[dict[str, Any]]:
-    buckets: dict[str, dict[str, int]] = {}
-    for sample in samples:
-        name = _normalize_behavior_name(getattr(sample, attr))
-        if not name:
-            continue
-        row = buckets.setdefault(name, {"sample_count": 0, "win_count": 0, "loss_count": 0, "draw_count": 0})
-        row["sample_count"] += 1
-        if sample.result == "win":
-            row["win_count"] += 1
-        elif sample.result == "loss":
-            row["loss_count"] += 1
-        elif sample.result == "draw":
-            row["draw_count"] += 1
-
+def _behavior_category_rows(buckets: dict[str, dict[str, int]]) -> list[dict[str, Any]]:
     total_sample = sum(row["sample_count"] for row in buckets.values())
     total_win = sum(row["win_count"] for row in buckets.values())
     if total_sample <= 0:
@@ -935,10 +1450,43 @@ def _behavior_category_payload(name: str, row: dict[str, int], total_sample: int
     }
 
 
-def _trend_stats(samples: list[_LeaderboardSideSample], trend_anchor: str) -> dict[str, Any]:
-    dated_samples = [(sample, _sample_date(sample.played_at)) for sample in samples]
+def _add_behavior_counter(buckets: dict[str, dict[str, int]], name: str, result: str) -> None:
+    normalized = _normalize_behavior_name(name)
+    if not normalized:
+        return
+    row = buckets.setdefault(normalized, {"sample_count": 0, "win_count": 0, "loss_count": 0, "draw_count": 0})
+    row["sample_count"] += 1
+    if result == "win":
+        row["win_count"] += 1
+    elif result == "loss":
+        row["loss_count"] += 1
+    elif result == "draw":
+        row["draw_count"] += 1
+
+
+def _merge_behavior_counts(target: dict[str, dict[str, int]], source: dict[str, dict[str, int]]) -> None:
+    for name, counts in source.items():
+        row = target.setdefault(name, {"sample_count": 0, "win_count": 0, "loss_count": 0, "draw_count": 0})
+        row["sample_count"] += int(counts.get("sample_count") or 0)
+        row["win_count"] += int(counts.get("win_count") or 0)
+        row["loss_count"] += int(counts.get("loss_count") or 0)
+        row["draw_count"] += int(counts.get("draw_count") or 0)
+
+
+def _trim_recent_samples(samples: list[_LeaderboardSideSample]) -> None:
+    if len(samples) <= 30:
+        return
+    samples[:] = sorted(samples, key=_sample_sort_key)[-30:]
+
+
+def _sample_sort_key(sample: _LeaderboardSideSample) -> tuple[str, str, str, str]:
+    return (str(sample.played_at or ""), sample.player_name, sample.weapon_name, sample.style_name)
+
+
+def _trend_stats(bucket: _LeaderboardBucket, trend_anchor: str) -> dict[str, Any]:
+    dated_samples = [(sample, _sample_date(sample.played_at)) for sample in bucket.recent_samples]
     dated_samples = [(sample, sample_date) for sample, sample_date in dated_samples if sample_date is not None]
-    anchor = _trend_anchor_date(trend_anchor, dated_samples)
+    anchor = _trend_anchor_date(trend_anchor, dated_samples, bucket.date_counts)
     if anchor is None:
         return {
             "last_7d_sample_count": 0,
@@ -953,14 +1501,14 @@ def _trend_stats(samples: list[_LeaderboardSideSample], trend_anchor: str) -> di
     last_start = anchor - timedelta(days=6)
     previous_start = anchor - timedelta(days=13)
     previous_end = anchor - timedelta(days=7)
-    last_samples = [sample for sample, sample_date in dated_samples if last_start <= sample_date <= anchor]
-    previous_samples = [sample for sample, sample_date in dated_samples if previous_start <= sample_date <= previous_end]
-    last_win_rate = _samples_win_rate(last_samples)
-    previous_win_rate = _samples_win_rate(previous_samples)
+    last_counts = _sum_date_counts(bucket.date_counts, last_start, anchor)
+    previous_counts = _sum_date_counts(bucket.date_counts, previous_start, previous_end)
+    last_win_rate = _win_rate(last_counts["win_count"], last_counts["loss_count"])
+    previous_win_rate = _win_rate(previous_counts["win_count"], previous_counts["loss_count"])
     return {
-        "last_7d_sample_count": len(last_samples),
+        "last_7d_sample_count": last_counts["sample_count"],
         "last_7d_win_rate": last_win_rate,
-        "previous_7d_sample_count": len(previous_samples),
+        "previous_7d_sample_count": previous_counts["sample_count"],
         "previous_7d_win_rate": previous_win_rate,
         "delta_7d": last_win_rate - previous_win_rate if last_win_rate is not None and previous_win_rate is not None else None,
         "last_30_points": _last_30_trend_points(dated_samples),
@@ -1031,11 +1579,35 @@ def _sample_date(value: str) -> date | None:
         return None
 
 
-def _trend_anchor_date(trend_anchor: str, dated_samples: list[tuple[_LeaderboardSideSample, date]]) -> date | None:
+def _trend_anchor_date(
+    trend_anchor: str,
+    dated_samples: list[tuple[_LeaderboardSideSample, date]],
+    date_counts: dict[str, dict[str, int]] | None = None,
+) -> date | None:
     anchor = _sample_date(trend_anchor)
     if anchor is not None:
         return anchor
-    return max((sample_date for _sample, sample_date in dated_samples), default=None)
+    counted_dates = [_sample_date(value) for value in (date_counts or {}).keys()]
+    return max(
+        (
+            *[sample_date for _sample, sample_date in dated_samples],
+            *[sample_date for sample_date in counted_dates if sample_date is not None],
+        ),
+        default=None,
+    )
+
+
+def _sum_date_counts(date_counts: dict[str, dict[str, int]], start: date, end: date) -> dict[str, int]:
+    total = {"sample_count": 0, "win_count": 0, "loss_count": 0, "draw_count": 0}
+    for date_text, counts in date_counts.items():
+        sample_date = _sample_date(date_text)
+        if sample_date is None or sample_date < start or sample_date > end:
+            continue
+        total["sample_count"] += int(counts.get("sample_count") or 0)
+        total["win_count"] += int(counts.get("win_count") or 0)
+        total["loss_count"] += int(counts.get("loss_count") or 0)
+        total["draw_count"] += int(counts.get("draw_count") or 0)
+    return total
 
 
 def _samples_win_rate(samples: list[_LeaderboardSideSample]) -> float | None:

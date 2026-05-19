@@ -10,7 +10,16 @@ from sqlalchemy.orm import Session
 
 from eiketsu_env.config import Settings
 from eiketsu_env.db.base import Base
-from eiketsu_env.db.models import Match, ServerApiToken, ServerInvite, ServerLeaderboardSnapshot, ServerUpload, SharedContributionPackage
+from eiketsu_env.db.models import (
+    Match,
+    ServerApiToken,
+    ServerInvite,
+    ServerLeaderboardRow,
+    ServerLeaderboardRun,
+    ServerLeaderboardSnapshot,
+    ServerUpload,
+    SharedContributionPackage,
+)
 from eiketsu_env.db.session import make_engine
 from eiketsu_env.server_app import (
     LEADERBOARD_HTML_DEFAULT_LIMIT,
@@ -35,7 +44,10 @@ from eiketsu_env.services.server_share import (
     import_uploaded_package,
     list_invites,
     personal_leaderboard,
+    prune_legacy_leaderboard_snapshots,
     public_leaderboard,
+    public_leaderboard_page,
+    refresh_public_leaderboard_materialized,
     refresh_public_leaderboard_snapshots,
     _clear_leaderboard_cache,
     _effective_share_config,
@@ -482,12 +494,43 @@ def test_refresh_public_leaderboard_snapshots_builds_filter_matrix(tmp_path):
     result = refresh_public_leaderboard_snapshots(settings)
 
     assert result["status"] == "completed"
-    assert len(result["refreshed"]) == 8
+    assert result["row_count"] > 0
     with Session(engine) as session:
-        snapshots = session.scalars(select(ServerLeaderboardSnapshot)).all()
-        assert len(snapshots) == 8
-        assert {snapshot.rank_scope for snapshot in snapshots} == {"all", "traveler_down", "knight_down", "knight_up"}
-        assert {snapshot.cluster_enabled for snapshot in snapshots} == {0, 1}
+        [run] = session.scalars(select(ServerLeaderboardRun)).all()
+        rows = session.scalars(select(ServerLeaderboardRow)).all()
+        assert run.status == "ready"
+        assert run.row_count == len(rows)
+        assert {row.row_type for row in rows} >= {"deck", "card", "archetype"}
+        assert {row.rank_scope for row in rows} >= {"all"}
+        assert session.scalars(select(ServerLeaderboardSnapshot)).all() == []
+
+
+def test_public_leaderboard_page_reads_materialized_rows_with_pagination(tmp_path):
+    settings = _settings(tmp_path / "server")
+    _init_db(settings)
+    set_server_config(settings, "Ver.vps", "2026-05-10", "2026-05-12")
+    for index in range(3):
+        _insert_match(
+            settings,
+            f"materialized-page-{index}",
+            [f"player-card-{index}"],
+            [f"enemy-card-{index}"],
+            played_at=f"2026-05-11 10:{index:02d}",
+        )
+
+    missing = public_leaderboard_page(settings, include_archetypes=False, limit=2)
+    assert missing["leaderboard_status"] == "missing"
+    assert missing["top_decks"] == []
+
+    refresh_public_leaderboard_materialized(settings)
+    first = public_leaderboard_page(settings, include_archetypes=False, limit=2)
+    second = public_leaderboard_page(settings, include_archetypes=False, offset=2, limit=2)
+
+    assert first["leaderboard_status"] == "ready"
+    assert first["pagination"]["total"] == 6
+    assert first["pagination"]["has_more"] is True
+    assert [item["rank"] for item in first["top_decks"]] == [1, 2]
+    assert [item["rank"] for item in second["top_decks"]] == [3, 4]
 
 
 def test_upload_clears_leaderboard_snapshots(tmp_path):
@@ -497,14 +540,37 @@ def test_upload_clears_leaderboard_snapshots(tmp_path):
     token = bind_invite(settings, create_invite(settings, "friend", code="SNAP-CLEAR").code, "alice").api_token
     import_uploaded_package(settings, token, _package_text(tmp_path / "snap-source-a", "alice", replay_id="snap-a"))
     public_leaderboard(settings, include_archetypes=False)
+    refresh_public_leaderboard_materialized(settings)
 
     with Session(engine) as session:
         assert session.scalar(select(ServerLeaderboardSnapshot)) is not None
+        assert session.scalar(select(ServerLeaderboardRun)) is not None
 
     import_uploaded_package(settings, token, _package_text(tmp_path / "snap-source-b", "alice", replay_id="snap-b"))
 
     with Session(engine) as session:
         assert session.scalars(select(ServerLeaderboardSnapshot)).all() == []
+        assert session.scalars(select(ServerLeaderboardRun)).all() == []
+        assert session.scalars(select(ServerLeaderboardRow)).all() == []
+
+
+def test_prune_legacy_leaderboard_snapshots_keeps_source_data(tmp_path):
+    settings = _settings(tmp_path / "server")
+    engine = _init_db(settings)
+    set_server_config(settings, "Ver.vps", "2026-05-10", "2026-05-12")
+    token = bind_invite(settings, create_invite(settings, "friend", code="SNAP-PRUNE").code, "alice").api_token
+    import_uploaded_package(settings, token, _package_text(tmp_path / "prune-source", "alice", replay_id="prune-a"))
+    public_leaderboard(settings, include_archetypes=False)
+
+    result = prune_legacy_leaderboard_snapshots(settings)
+
+    assert result["status"] == "completed"
+    assert result["deleted_snapshots"] == 1
+    with Session(engine) as session:
+        assert session.scalars(select(ServerLeaderboardSnapshot)).all() == []
+        assert session.scalar(select(Match)) is not None
+        assert session.scalar(select(ServerUpload)) is not None
+        assert session.scalar(select(SharedContributionPackage)) is not None
 
 
 def test_leaderboard_rank_scope_filters_sides_and_counts_players(tmp_path):

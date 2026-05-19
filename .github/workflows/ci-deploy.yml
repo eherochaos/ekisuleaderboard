@@ -172,6 +172,7 @@ jobs:
              cd $VPS_REMOTE_DIR; \
              docker compose -p eiketsu-env-db -f deploy/docker-compose.yml build api; \
              docker compose -p eiketsu-env-db -f deploy/docker-compose.yml run --rm api alembic upgrade head; \
+             docker compose -p eiketsu-env-db -f deploy/docker-compose.yml run --rm api eiketsu-server admin refresh-leaderboard; \
              docker compose -p eiketsu-env-db -f deploy/docker-compose.yml up -d api; \
              docker compose -p eiketsu-env-db -f deploy/docker-compose.yml ps; \
              rm -f /tmp/eiketsu-vps-update-${GITHUB_SHA}.tar"

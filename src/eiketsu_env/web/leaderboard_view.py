@@ -66,6 +66,13 @@ def _leaderboard_visual_page(
     sort_target = "archetype-ranking" if is_archetype_view else "deck-ranking"
     all_items = archetypes if is_archetype_view else decks
     visible_items = _leaderboard_visible_items(all_items, display_limit)
+    pagination = payload.get("pagination") if isinstance(payload.get("pagination"), dict) else {}
+    pagination_total = _safe_int(pagination.get("total")) if pagination else len(all_items)
+    total_count = pagination_total if pagination_total > 0 else len(all_items)
+    shown_count = _safe_int(pagination.get("offset")) + len(visible_items) if pagination else len(visible_items)
+    page_size = _safe_int(pagination.get("limit")) if pagination else display_limit
+    if page_size is not None and page_size <= 0:
+        page_size = display_limit
     board = _archetype_ranking_board(visible_items) if is_archetype_view else _ranking_board(visible_items)
     eyebrow = "MY CONTRIBUTION LEADERBOARD" if is_personal_view else "PUBLIC ANONYMOUS LEADERBOARD"
     title = "我的贡献卡组榜" if is_personal_view else "英杰大战环境卡组榜"
@@ -82,8 +89,8 @@ def _leaderboard_visual_page(
         cluster_enabled=cluster_enabled,
         contributor_name=contributor_name,
         display_limit=display_limit,
-        shown_count=len(visible_items),
-        total_count=len(all_items),
+        shown_count=shown_count,
+        total_count=total_count,
     )
     summary_items = "".join(
         [
@@ -117,9 +124,9 @@ def _leaderboard_visual_page(
                 cluster_enabled=cluster_enabled,
                 contributor_name=contributor_name,
                 target_id=sort_target,
-                visible_count=len(visible_items),
-                total_count=len(all_items),
-                page_size=display_limit,
+                visible_count=shown_count,
+                total_count=total_count,
+                page_size=page_size,
             ),
         },
     )
@@ -149,11 +156,22 @@ def _leaderboard_rows_response(
 ) -> dict[str, Any]:
     is_archetype_view = bool(cluster_enabled and payload.get("top_archetypes"))
     items = list(payload.get("top_archetypes") or []) if is_archetype_view else list(payload.get("top_decks") or [])
-    sorted_items = _sort_leaderboard_items(items, sort_key)
-    safe_offset = max(0, int(offset or 0))
-    page_size = max(1, min(int(limit or LEADERBOARD_HTML_DEFAULT_LIMIT), LEADERBOARD_HTML_MAX_LIMIT))
-    page_items = sorted_items[safe_offset : safe_offset + page_size]
-    next_offset = safe_offset + len(page_items)
+    pagination = payload.get("pagination") if isinstance(payload.get("pagination"), dict) else {}
+    if pagination:
+        safe_offset = max(0, _safe_int(pagination.get("offset")))
+        page_size = max(1, min(_safe_int(pagination.get("limit")) or LEADERBOARD_HTML_DEFAULT_LIMIT, LEADERBOARD_HTML_MAX_LIMIT))
+        page_items = items
+        total = max(0, _safe_int(pagination.get("total")))
+        next_offset = safe_offset + len(page_items)
+        has_more = bool(pagination.get("has_more")) and next_offset < total
+    else:
+        sorted_items = _sort_leaderboard_items(items, sort_key)
+        safe_offset = max(0, int(offset or 0))
+        page_size = max(1, min(int(limit or LEADERBOARD_HTML_DEFAULT_LIMIT), LEADERBOARD_HTML_MAX_LIMIT))
+        page_items = sorted_items[safe_offset : safe_offset + page_size]
+        next_offset = safe_offset + len(page_items)
+        total = len(sorted_items)
+        has_more = next_offset < total
     html_rows = (
         _archetype_rows(page_items, start=safe_offset + 1)
         if is_archetype_view
@@ -164,8 +182,8 @@ def _leaderboard_rows_response(
         "offset": safe_offset,
         "next_offset": next_offset,
         "limit": page_size,
-        "total": len(sorted_items),
-        "has_more": next_offset < len(sorted_items),
+        "total": total,
+        "has_more": has_more,
         "scope": payload.get("scope", "public"),
         "contributor_name": contributor_name,
     }
@@ -211,6 +229,7 @@ def _leaderboard_load_more_control(
             **_leaderboard_base_query(payload, contributor_name),
             "cluster": "on" if cluster_enabled else "off",
             "rank_scope": rank_scope,
+            "row_type": str(payload.get("row_type") or ("archetype" if cluster_enabled else "deck")),
         }
     )
     full_url = _leaderboard_query_url(
@@ -296,6 +315,11 @@ def _leaderboard_display_notice(
     shown_count: int,
     total_count: int,
 ) -> str:
+    status = str(payload.get("leaderboard_status") or "")
+    if status in {"missing", "building", "running"}:
+        return '<section class="empty">榜单生成中，请稍后刷新。当前不会在页面请求里同步重算。</section>'
+    if status == "failed":
+        return '<section class="empty">榜单生成失败，请在服务端重新执行刷新命令。</section>'
     return ""
 
 

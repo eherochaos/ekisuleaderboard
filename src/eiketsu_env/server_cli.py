@@ -10,6 +10,7 @@ from pathlib import Path
 from eiketsu_env.config import load_settings
 from eiketsu_env.db.migrations import upgrade_database
 from eiketsu_env.services.client_update import client_update_payload, publish_client_update
+from eiketsu_env.services.leaderboard import prune_legacy_leaderboard_snapshots, refresh_public_leaderboard_materialized
 from eiketsu_env.services.server_share import create_invite, get_server_config, list_invites, set_server_config
 
 
@@ -34,6 +35,11 @@ def build_parser() -> argparse.ArgumentParser:
     config.add_argument("--high-ranker-rank", type=int, default=100)
 
     admin_sub.add_parser("show-config", help="查看当前服务端采集配置")
+
+    refresh = admin_sub.add_parser("refresh-leaderboard", help="预生成公开聚合榜物化分页数据")
+    refresh.add_argument("--rank-scope", default="all", help="兼容参数；当前一次刷新会生成全部公开段位视图")
+    refresh.add_argument("--cluster", default="all", choices=["all", "on", "off"], help="兼容参数；当前会同时生成聚类和非聚类行")
+    admin_sub.add_parser("prune-leaderboard-snapshots", help="只清理旧 JSON 榜单快照缓存")
 
     update = admin_sub.add_parser("publish-client", help="发布 Windows 客户端 exe 更新包")
     update.add_argument("--version", required=True, help="客户端版本号，例如 0.1.2")
@@ -73,6 +79,17 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.command == "admin" and args.admin_command == "show-config":
         print(json.dumps(get_server_config(settings), ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "admin" and args.admin_command == "refresh-leaderboard":
+        result = refresh_public_leaderboard_materialized(settings, rank_scope=args.rank_scope, cluster=args.cluster)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if result.get("status") != "completed":
+            raise SystemExit(1)
+        return
+
+    if args.command == "admin" and args.admin_command == "prune-leaderboard-snapshots":
+        print(json.dumps(prune_legacy_leaderboard_snapshots(settings), ensure_ascii=False, indent=2))
         return
 
     if args.command == "admin" and args.admin_command == "publish-client":
