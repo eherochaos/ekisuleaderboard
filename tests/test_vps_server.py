@@ -889,18 +889,33 @@ def test_leaderboard_view_controls_can_disable_clustering():
     assert "段位" in html
     assert "feature-grid" not in html
     assert "feature-card" not in html
-    assert 'class="archetype-board" id="deck-ranking" data-sort-root' in html
-    assert 'class="archetype-row"' in html
+    assert 'class="archetype-board report-card-board" id="deck-ranking" data-sort-root' in html
+    assert 'class="deck-report-card archetype-row"' in html
+    assert "rank-block" in html
+    assert "deck-identity-block" in html
+    assert "strength-metrics-block" in html
+    assert "equipment-style-block" in html
+    assert "matchup-summary-block" in html
+    assert "data-sort-wilson" in html
+    assert "data-sort-sample" in html
+    assert "data-rank-value" in html
     assert "variant-viewer" in html
     assert "构筑 1/1" in html
     assert "Single · 1 构筑" in html
-    assert "战绩" in html
+    assert "2 win / 1 lose" in html
     assert "平局" not in html
     assert 'class="card-strip"' not in html
     assert "id=\"deck-ranking\"" in html
     assert "id=\"archetype-ranking\"" not in html
-    assert "最多玩家：Player One（2次）" in html
-    assert "统计玩家：2人" in html
+    assert "最多玩家" in html
+    assert "Player One（2次）" in html
+    assert "统计玩家" in html
+    assert "2人" in html
+    assert "玩家归一化" in html
+    assert "暂无战器统计" in html
+    assert "暂无流派统计" in html
+    assert "暂无英魂配置" in html
+    assert "暂无对局矩阵" in html
     assert "rank_scope=traveler_down" in html
     assert "cluster=off" in html
 
@@ -1071,16 +1086,19 @@ def test_public_leaderboard_aggregates_archetype_behavior_and_html_hides_empty_s
     assert behavior["styles"][0]["sample_count"] == 2
 
     html = _leaderboard_visual_page(payload)
-    assert "胜利局战器" in html
+    assert "deck-report-card" in html
+    assert "主流战器" in html
+    assert "战器采用率" in html
+    assert "战器胜率" in html
     assert "Weapon A" in html
-    assert "Weapon B" in html
-    assert "流派统计" in html
+    assert "主流流派" in html
+    assert "流派采用率" in html
     assert "士气流" in html
-    assert "近7日" in html
+    assert "近7日趋势" in html
     assert "可信度" in html
     assert "Top3玩家贡献" in html
     assert "样本不足" in html
-    assert "英魂配置" not in html
+    assert "暂无英魂配置" in html
 
 
 def test_upload_rejects_cookie_fields(tmp_path):

@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>英杰大战环境卡组榜</title>
+    <link rel="stylesheet" href="frontend/leaderboard/static/leaderboard.css?v=0.1.8">
+    <script defer src="frontend/leaderboard/static/leaderboard.js?v=0.1.8"></script>
+  </head>
+  <body>
+    <main class="page">
+      <div class="leaderboard-topbar">
+        <nav class="site-nav"><a href="/">← 返回首页</a></nav>
+        
+        <div class="scope-tools">
+          <form class="scope-form-desktop" method="post" action="/leaderboard/filter">
+            <input name="contributor" type="text" autocomplete="off" placeholder="绑定用户名">
+            <button class="primary" type="submit">我的贡献</button>
+          </form>
+          <details class="scope-mobile-drawer">
+            <summary>我的贡献</summary>
+            <form method="post" action="/leaderboard/filter">
+              <input name="contributor" type="text" autocomplete="off" placeholder="绑定用户名">
+              <button class="primary" type="submit">查看</button>
+            </form>
+          </details>
+        </div>
+    
+      </div>
+      
+      <header class="report-header">
+        <div class="title-block">
+          <p>PUBLIC ANONYMOUS LEADERBOARD</p>
+          <h1>英杰大战环境卡组榜</h1>
+        </div>
+        <dl class="summary">
+          <div><dt>目标版本</dt><dd>Ver.preview-rich</dd></div><div><dt>采集日期</dt><dd>2026-05-01 至 2026-05-18</dd></div><div><dt>上传批次</dt><dd>38</dd></div><div><dt>对局数</dt><dd>2894</dd></div><div><dt>双方样本</dt><dd>5788</dd></div><div><dt>生成时间</dt><dd>2026-05-19T10:45:00</dd></div>
+        </dl>
+        <p class="leaderboard-mobile-summary">Ver.preview-rich · 2026-05-01 至 2026-05-18 · 2894 对局 · 5788 样本 · 上传批次 38</p>
+      </header>
+      <p class="leaderboard-note">公开页只展示匿名聚合结果，不展示贡献者昵称、token、浏览器信息或本地路径。</p>
+      <section class="view-controls" aria-label="榜单视图设置">
+<div class="view-control-group"><span class="view-control-label">聚类</span>
+<a class="view-control-link is-active" href="/leaderboard?cluster=on&amp;rank_scope=all">开</a>
+<a class="view-control-link" href="/leaderboard?cluster=off&amp;rank_scope=all">关</a>
+</div>
+<div class="view-control-group"><span class="view-control-label">段位</span>
+<a class="view-control-link is-active" href="/leaderboard?cluster=on&amp;rank_scope=all">全部段位</a>
+<a class="view-control-link" href="/leaderboard?cluster=on&amp;rank_scope=traveler_down">旅人以下</a>
+<a class="view-control-link" href="/leaderboard?cluster=on&amp;rank_scope=knight_down">騎士以下</a>
+<a class="view-control-link" href="/leaderboard?cluster=on&amp;rank_scope=knight_up">騎士以上</a>
+</div>
+</section>
+      
+      
+      <div class="sort-toolbar" data-sort-toolbar data-sort-target="archetype-ranking">
+        <span>排序</span>
+        <button type="button" data-sort-button data-sort-key="wilson" aria-pressed="true">Wilson 下限</button>
+        <button type="button" data-sort-button data-sort-key="sample" aria-pressed="false">样本数</button>
+      </div>
+      <section class="archetype-board report-card-board" id="archetype-ranking" data-sort-root>
+<article class="deck-report-card archetype-row" data-sort-item data-sort-title="funada control archetype" data-sort-wilson="0.65182171" data-sort-sample="645.00000000">
+<section class="rank-block report-card-block" aria-label="排名">
+<span class="rank-kicker">Rank</span>
+<strong data-rank-value>01</strong>
+<span class="rank-record">443 win / 202 lose</span>
+<span class="rank-trend trend-up" title="排名变化 +2">▲ 2</span>
+</section>
+<section class="deck-identity-block report-card-block" aria-label="卡组身份">
+<div class="identity-heading">
+<h3>Funada Control Archetype</h3>
+<span class="identity-archetype">Funada Control Archetype</span>
+</div>
+<div class="identity-meta">
+<span class="identity-pill"><strong>最多玩家</strong>Player Alpha（210次）</span>
+<span class="identity-pill"><strong>统计玩家</strong>29人</span>
+<span class="identity-pill"><strong>构筑</strong>1/3</span>
+</div>
+<div class="variant-viewer" data-variant-root>
+<div class="variant-toolbar">
+<span class="variant-label" data-variant-label>构筑 1/3</span>
+<button type="button" class="variant-button" data-variant-button>Change · 3 构筑</button>
+</div>
+<div class="variant-stage">
+<div class="variant is-active" data-variant data-variant-index="0">
+<div class="variant-cards"><figure class="unit" title="Funada(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3EF%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EFunada%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Funada(2.0 Bow)" loading="lazy">
+<figcaption>Funada(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Chigusa(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d7f7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230f766e%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%230f766e%22%3EC%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EChigusa%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Chigusa(2.0 Rider)" loading="lazy">
+<figcaption>Chigusa(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Komatsu(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dbeafe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231d4ed8%22%3EK%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EKomatsu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Komatsu(2.0 Sword)" loading="lazy">
+<figcaption>Komatsu(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Kawaji(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23e2e8f0%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23475569%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23475569%22%3EK%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EKawaji%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Kawaji(1.5 Gun)" loading="lazy">
+<figcaption>Kawaji(1.5 Gun)</figcaption>
+</figure><figure class="unit" title="Nanbu(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fef3c7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a16207%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23a16207%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENanbu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nanbu(1.5 Spear)" loading="lazy">
+<figcaption>Nanbu(1.5 Spear)</figcaption>
+</figure></div>
+<p class="variant-name">Funada / Chigusa / Komatsu Control</p>
+<div class="variant-statline">
+<span>645 样本</span>
+<span>最多玩家：Player Alpha（210次） · 统计玩家：29人</span>
+<span>68.68% 胜率</span>
+<span>65.18% Wilson</span>
+<span>443 win / 202 lose</span>
+</div>
+</div>
+<div class="variant" data-variant data-variant-index="1">
+<div class="variant-cards"><figure class="unit" title="Funada(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3EF%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EFunada%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Funada(2.0 Bow)" loading="lazy">
+<figcaption>Funada(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Chigusa(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d7f7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230f766e%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%230f766e%22%3EC%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EChigusa%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Chigusa(2.0 Rider)" loading="lazy">
+<figcaption>Chigusa(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Komatsu(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dbeafe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231d4ed8%22%3EK%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EKomatsu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Komatsu(2.0 Sword)" loading="lazy">
+<figcaption>Komatsu(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Kawaji(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23e2e8f0%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23475569%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23475569%22%3EK%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EKawaji%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Kawaji(1.5 Gun)" loading="lazy">
+<figcaption>Kawaji(1.5 Gun)</figcaption>
+</figure><figure class="unit" title="Yamanami(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d7f7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230f766e%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%230f766e%22%3EY%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EYamanami%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Yamanami(1.5 Spear)" loading="lazy">
+<figcaption>Yamanami(1.5 Spear)</figcaption>
+</figure></div>
+<p class="variant-name">Funada / Chigusa / Komatsu Control Variant 2</p>
+<div class="variant-statline">
+<span>215 样本</span>
+<span>最多玩家：Player Alpha（210次） · 统计玩家：29人</span>
+<span>68.68% 胜率</span>
+<span>65.18% Wilson</span>
+<span>443 win / 202 lose</span>
+</div>
+</div>
+<div class="variant" data-variant data-variant-index="2">
+<div class="variant-cards"><figure class="unit" title="Funada(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3EF%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EFunada%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Funada(2.0 Bow)" loading="lazy">
+<figcaption>Funada(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Chigusa(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d7f7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230f766e%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%230f766e%22%3EC%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EChigusa%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Chigusa(2.0 Rider)" loading="lazy">
+<figcaption>Chigusa(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Komatsu(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dbeafe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231d4ed8%22%3EK%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EKomatsu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Komatsu(2.0 Sword)" loading="lazy">
+<figcaption>Komatsu(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Nanbu(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fef3c7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a16207%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23a16207%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENanbu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nanbu(1.5 Spear)" loading="lazy">
+<figcaption>Nanbu(1.5 Spear)</figcaption>
+</figure><figure class="unit" title="Saito(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3ES%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ESaito%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Saito(1.5 Gun)" loading="lazy">
+<figcaption>Saito(1.5 Gun)</figcaption>
+</figure></div>
+<p class="variant-name">Funada / Chigusa / Komatsu Control Variant 3</p>
+<div class="variant-statline">
+<span>161 样本</span>
+<span>最多玩家：Player Alpha（210次） · 统计玩家：29人</span>
+<span>68.68% 胜率</span>
+<span>65.18% Wilson</span>
+<span>443 win / 202 lose</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="strength-metrics-block report-card-block" aria-label="强度指标">
+<div class="block-title">强度指标</div>
+<div class="metric-card-grid">
+<div class="metric-card is-primary">
+<span>胜率</span>
+<strong>68.68%</strong>
+</div>
+<div class="metric-card">
+<span>Wilson</span>
+<strong>65.18%</strong>
+</div>
+<div class="metric-card">
+<span>玩家归一化</span>
+<strong>-</strong>
+</div>
+<div class="metric-card">
+<span>样本数</span>
+<strong>645</strong>
+</div>
+<div class="metric-card">
+<span>玩家数</span>
+<strong>29人</strong>
+</div>
+<div class="metric-card is-trend" title="80 样本 / 52.78% / -15.9pt">
+<span>近7日趋势</span>
+<strong>-15.9pt</strong>
+</div>
+<div class="metric-card is-credibility credibility-medium" title="样本 645 / 玩家 29 / Top3玩家贡献 35.35%">
+<span>可信度</span>
+<strong>中</strong>
+</div>
+</div>
+</section>
+<section class="equipment-style-block report-card-block" aria-label="战器与流派">
+<div class="block-title">主流战器 / 流派</div>
+<div class="equipment-grid">
+<div class="equipment-section">
+<span class="equipment-title">战器统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流战器</strong>Tenmoku Bowl</span>
+<span class="equipment-cell"><strong>战器采用率</strong>48.00%</span>
+<span class="equipment-cell"><strong>战器胜率</strong>73.00%</span>
+</div>
+</div>
+<div class="equipment-section">
+<span class="equipment-title">英魂配置</span>
+<div class="soul-chip-row"><span class="soul-chip"><strong>HP +5%</strong>72.00%</span><span class="soul-chip"><strong>HP +5%</strong>68.00%</span><span class="soul-chip"><strong>Speed +3%</strong>44.00%</span></div>
+</div>
+<div class="equipment-section">
+<span class="equipment-title">流派统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流流派</strong>Kohaku</span>
+<span class="equipment-cell"><strong>流派采用率</strong>100.00%</span>
+<span class="equipment-cell"><strong>流派胜率</strong>69.00%</span>
+</div>
+</div>
+</div>
+</section>
+<section class="matchup-summary-block" aria-label="对局摘要">
+<div class="matchup-group is-advantage">
+<span class="matchup-title">优势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-advantage">Kohaku Order 76.68%</span><span class="matchup-chip is-advantage">Midrange 72.68%</span><span class="matchup-chip is-advantage">Rider Core 70.68%</span></div>
+</div>
+<div class="matchup-group is-disadvantage">
+<span class="matchup-title">劣势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-disadvantage">Opening Rush 50.68%</span><span class="matchup-chip is-disadvantage">Wara Swarm 57.68%</span></div>
+</div>
+</section>
+</article><article class="deck-report-card archetype-row" data-sort-item data-sort-title="sword rush archetype" data-sort-wilson="0.60269531" data-sort-sample="1024.00000000">
+<section class="rank-block report-card-block" aria-label="排名">
+<span class="rank-kicker">Rank</span>
+<strong data-rank-value>02</strong>
+<span class="rank-record">653 win / 371 lose</span>
+<span class="rank-trend trend-up" title="排名变化 +5">▲ 5</span>
+</section>
+<section class="deck-identity-block report-card-block" aria-label="卡组身份">
+<div class="identity-heading">
+<h3>Sword Rush Archetype</h3>
+<span class="identity-archetype">Sword Rush Archetype</span>
+</div>
+<div class="identity-meta">
+<span class="identity-pill"><strong>最多玩家</strong>Player Sakura（88次）</span>
+<span class="identity-pill"><strong>统计玩家</strong>52人</span>
+<span class="identity-pill"><strong>构筑</strong>1/2</span>
+</div>
+<div class="variant-viewer" data-variant-root>
+<div class="variant-toolbar">
+<span class="variant-label" data-variant-label>构筑 1/2</span>
+<button type="button" class="variant-button" data-variant-button>Change · 2 构筑</button>
+</div>
+<div class="variant-stage">
+<div class="variant is-active" data-variant data-variant-index="0">
+<div class="variant-cards"><figure class="unit" title="Hijikata(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ede9fe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237c3aed%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%237c3aed%22%3EH%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EHijikata%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Hijikata(2.0 Bow)" loading="lazy">
+<figcaption>Hijikata(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Okita(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dcfce7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2315803d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%2315803d%22%3EO%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EOkita%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Okita(2.0 Rider)" loading="lazy">
+<figcaption>Okita(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Nagakura(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffe4e6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23be123c%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23be123c%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENagakura%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nagakura(2.0 Sword)" loading="lazy">
+<figcaption>Nagakura(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Saito(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3ES%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ESaito%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Saito(1.5 Gun)" loading="lazy">
+<figcaption>Saito(1.5 Gun)</figcaption>
+</figure><figure class="unit" title="Yamanami(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d7f7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230f766e%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%230f766e%22%3EY%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EYamanami%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Yamanami(1.5 Spear)" loading="lazy">
+<figcaption>Yamanami(1.5 Spear)</figcaption>
+</figure></div>
+<p class="variant-name">Shinsengumi Sword Rush</p>
+<div class="variant-statline">
+<span>1024 样本</span>
+<span>最多玩家：Player Sakura（88次） · 统计玩家：52人</span>
+<span>63.77% 胜率</span>
+<span>60.27% Wilson</span>
+<span>653 win / 371 lose</span>
+</div>
+</div>
+<div class="variant" data-variant data-variant-index="1">
+<div class="variant-cards"><figure class="unit" title="Hijikata(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ede9fe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237c3aed%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%237c3aed%22%3EH%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EHijikata%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Hijikata(2.0 Bow)" loading="lazy">
+<figcaption>Hijikata(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Okita(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dcfce7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2315803d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%2315803d%22%3EO%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EOkita%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Okita(2.0 Rider)" loading="lazy">
+<figcaption>Okita(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Nagakura(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffe4e6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23be123c%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23be123c%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENagakura%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nagakura(2.0 Sword)" loading="lazy">
+<figcaption>Nagakura(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Saito(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3ES%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ESaito%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Saito(1.5 Gun)" loading="lazy">
+<figcaption>Saito(1.5 Gun)</figcaption>
+</figure><figure class="unit" title="Shizuka(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d7f7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230f766e%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%230f766e%22%3ES%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EShizuka%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Shizuka(2.0 Sword)" loading="lazy">
+<figcaption>Shizuka(2.0 Sword)</figcaption>
+</figure></div>
+<p class="variant-name">Shinsengumi Sword Rush Variant 2</p>
+<div class="variant-statline">
+<span>341 样本</span>
+<span>最多玩家：Player Sakura（88次） · 统计玩家：52人</span>
+<span>63.77% 胜率</span>
+<span>60.27% Wilson</span>
+<span>653 win / 371 lose</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="strength-metrics-block report-card-block" aria-label="强度指标">
+<div class="block-title">强度指标</div>
+<div class="metric-card-grid">
+<div class="metric-card is-primary">
+<span>胜率</span>
+<strong>63.77%</strong>
+</div>
+<div class="metric-card">
+<span>Wilson</span>
+<strong>60.27%</strong>
+</div>
+<div class="metric-card">
+<span>玩家归一化</span>
+<strong>-</strong>
+</div>
+<div class="metric-card">
+<span>样本数</span>
+<strong>1024</strong>
+</div>
+<div class="metric-card">
+<span>玩家数</span>
+<strong>52人</strong>
+</div>
+<div class="metric-card is-trend" title="128 样本 / 66.97% / +3.2pt">
+<span>近7日趋势</span>
+<strong>+3.2pt</strong>
+</div>
+<div class="metric-card is-credibility credibility-high" title="样本 1024 / 玩家 52 / Top3玩家贡献 10.35%">
+<span>可信度</span>
+<strong>高</strong>
+</div>
+</div>
+</section>
+<section class="equipment-style-block report-card-block" aria-label="战器与流派">
+<div class="block-title">主流战器 / 流派</div>
+<div class="equipment-grid">
+<div class="equipment-section">
+<span class="equipment-title">战器统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流战器</strong>Ame-no-Habakiri</span>
+<span class="equipment-cell"><strong>战器采用率</strong>41.00%</span>
+<span class="equipment-cell"><strong>战器胜率</strong>66.00%</span>
+</div>
+</div>
+<div class="equipment-section">
+<span class="equipment-title">英魂配置</span>
+<div class="soul-chip-row"><span class="soul-chip"><strong>Power +1</strong>58.00%</span><span class="soul-chip"><strong>Speed +3%</strong>52.00%</span></div>
+</div>
+<div class="equipment-section">
+<span class="equipment-title">流派统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流流派</strong>New Gov</span>
+<span class="equipment-cell"><strong>流派采用率</strong>44.00%</span>
+<span class="equipment-cell"><strong>流派胜率</strong>64.00%</span>
+</div>
+</div>
+</div>
+</section>
+<section class="matchup-summary-block" aria-label="对局摘要">
+<div class="matchup-group is-advantage">
+<span class="matchup-title">优势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-advantage">Kohaku Order 71.77%</span><span class="matchup-chip is-advantage">Midrange 67.77%</span><span class="matchup-chip is-advantage">Rider Core 65.77%</span></div>
+</div>
+<div class="matchup-group is-disadvantage">
+<span class="matchup-title">劣势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-disadvantage">Opening Rush 45.77%</span><span class="matchup-chip is-disadvantage">Wara Swarm 52.77%</span></div>
+</div>
+</section>
+</article><article class="deck-report-card archetype-row" data-sort-item data-sort-title="fireline archetype" data-sort-wilson="0.57155738" data-sort-sample="488.00000000">
+<section class="rank-block report-card-block" aria-label="排名">
+<span class="rank-kicker">Rank</span>
+<strong data-rank-value>03</strong>
+<span class="rank-record">296 win / 192 lose</span>
+<span class="rank-trend trend-down" title="排名变化 -1">▼ 1</span>
+</section>
+<section class="deck-identity-block report-card-block" aria-label="卡组身份">
+<div class="identity-heading">
+<h3>Fireline Archetype</h3>
+<span class="identity-archetype">Fireline Archetype</span>
+</div>
+<div class="identity-meta">
+<span class="identity-pill"><strong>最多玩家</strong>Player Redwall（73次）</span>
+<span class="identity-pill"><strong>统计玩家</strong>31人</span>
+<span class="identity-pill"><strong>构筑</strong>1/2</span>
+</div>
+<div class="variant-viewer" data-variant-root>
+<div class="variant-toolbar">
+<span class="variant-label" data-variant-label>构筑 1/2</span>
+<button type="button" class="variant-button" data-variant-button>Change · 2 构筑</button>
+</div>
+<div class="variant-stage">
+<div class="variant is-active" data-variant data-variant-index="0">
+<div class="variant-cards"><figure class="unit" title="Sun Ce(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dbeafe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231d4ed8%22%3ESC%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ESun%20Ce%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Sun Ce(2.0 Bow)" loading="lazy">
+<figcaption>Sun Ce(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Zhou Yu(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23e2e8f0%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23475569%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23475569%22%3EZY%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EZhou%20Yu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Zhou Yu(2.0 Rider)" loading="lazy">
+<figcaption>Zhou Yu(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Taishi Ci(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fef3c7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a16207%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23a16207%22%3ETC%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ETaishi%20Ci%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Taishi Ci(2.0 Sword)" loading="lazy">
+<figcaption>Taishi Ci(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Da Qiao(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ede9fe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237c3aed%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%237c3aed%22%3EDQ%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EDa%20Qiao%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Da Qiao(1.5 Gun)" loading="lazy">
+<figcaption>Da Qiao(1.5 Gun)</figcaption>
+</figure><figure class="unit" title="Xiao Qiao(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dcfce7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2315803d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%2315803d%22%3EXQ%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EXiao%20Qiao%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Xiao Qiao(1.5 Spear)" loading="lazy">
+<figcaption>Xiao Qiao(1.5 Spear)</figcaption>
+</figure></div>
+<p class="variant-name">Sun Ce / Zhou Yu Fireline</p>
+<div class="variant-statline">
+<span>488 样本</span>
+<span>最多玩家：Player Redwall（73次） · 统计玩家：31人</span>
+<span>60.66% 胜率</span>
+<span>57.16% Wilson</span>
+<span>296 win / 192 lose</span>
+</div>
+</div>
+<div class="variant" data-variant data-variant-index="1">
+<div class="variant-cards"><figure class="unit" title="Sun Ce(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dbeafe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231d4ed8%22%3ESC%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ESun%20Ce%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Sun Ce(2.0 Bow)" loading="lazy">
+<figcaption>Sun Ce(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Zhou Yu(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23e2e8f0%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23475569%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23475569%22%3EZY%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EZhou%20Yu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Zhou Yu(2.0 Rider)" loading="lazy">
+<figcaption>Zhou Yu(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Taishi Ci(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fef3c7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a16207%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23a16207%22%3ETC%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ETaishi%20Ci%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Taishi Ci(2.0 Sword)" loading="lazy">
+<figcaption>Taishi Ci(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Xiao Qiao(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dcfce7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2315803d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%2315803d%22%3EXQ%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EXiao%20Qiao%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Xiao Qiao(1.5 Spear)" loading="lazy">
+<figcaption>Xiao Qiao(1.5 Spear)</figcaption>
+</figure><figure class="unit" title="Nasu(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dbeafe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231d4ed8%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENasu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nasu(1.5 Gun)" loading="lazy">
+<figcaption>Nasu(1.5 Gun)</figcaption>
+</figure></div>
+<p class="variant-name">Sun Ce / Zhou Yu Fireline Variant 2</p>
+<div class="variant-statline">
+<span>162 样本</span>
+<span>最多玩家：Player Redwall（73次） · 统计玩家：31人</span>
+<span>60.66% 胜率</span>
+<span>57.16% Wilson</span>
+<span>296 win / 192 lose</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="strength-metrics-block report-card-block" aria-label="强度指标">
+<div class="block-title">强度指标</div>
+<div class="metric-card-grid">
+<div class="metric-card is-primary">
+<span>胜率</span>
+<strong>60.66%</strong>
+</div>
+<div class="metric-card">
+<span>Wilson</span>
+<strong>57.16%</strong>
+</div>
+<div class="metric-card">
+<span>玩家归一化</span>
+<strong>-</strong>
+</div>
+<div class="metric-card">
+<span>样本数</span>
+<strong>488</strong>
+</div>
+<div class="metric-card">
+<span>玩家数</span>
+<strong>31人</strong>
+</div>
+<div class="metric-card is-trend" title="61 样本 / 62.46% / +1.8pt">
+<span>近7日趋势</span>
+<strong>+1.8pt</strong>
+</div>
+<div class="metric-card is-credibility credibility-medium" title="样本 488 / 玩家 31 / Top3玩家贡献 18.65%">
+<span>可信度</span>
+<strong>中</strong>
+</div>
+</div>
+</section>
+<section class="equipment-style-block report-card-block" aria-label="战器与流派">
+<div class="block-title">主流战器 / 流派</div>
+<div class="equipment-grid">
+<div class="equipment-section">
+<span class="equipment-title">战器统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流战器</strong>Revive Tactic</span>
+<span class="equipment-cell"><strong>战器采用率</strong>33.00%</span>
+<span class="equipment-cell"><strong>战器胜率</strong>61.00%</span>
+</div>
+</div>
+<div class="equipment-section">
+<span class="equipment-title">英魂配置</span>
+<div class="soul-chip-row"><span class="soul-chip"><strong>INT +2</strong>49.00%</span></div>
+</div>
+<div class="equipment-section">
+<span class="equipment-title">流派统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流流派</strong>Fire Plan</span>
+<span class="equipment-cell"><strong>流派采用率</strong>67.00%</span>
+<span class="equipment-cell"><strong>流派胜率</strong>62.00%</span>
+</div>
+</div>
+</div>
+</section>
+<section class="matchup-summary-block" aria-label="对局摘要">
+<div class="matchup-group is-advantage">
+<span class="matchup-title">优势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-advantage">Kohaku Order 68.66%</span><span class="matchup-chip is-advantage">Midrange 64.66%</span><span class="matchup-chip is-advantage">Rider Core 62.66%</span></div>
+</div>
+<div class="matchup-group is-disadvantage">
+<span class="matchup-title">劣势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-disadvantage">Opening Rush 42.66%</span><span class="matchup-chip is-disadvantage">Wara Swarm 49.66%</span></div>
+</div>
+</section>
+</article><article class="deck-report-card archetype-row" data-sort-item data-sort-title="yoshitsune balance archetype" data-sort-wilson="0.51607527" data-sort-sample="372.00000000">
+<section class="rank-block report-card-block" aria-label="排名">
+<span class="rank-kicker">Rank</span>
+<strong data-rank-value>04</strong>
+<span class="rank-record">205 win / 167 lose</span>
+<span class="rank-trend trend-down" title="排名变化 -3">▼ 3</span>
+</section>
+<section class="deck-identity-block report-card-block" aria-label="卡组身份">
+<div class="identity-heading">
+<h3>Yoshitsune Balance Archetype</h3>
+<span class="identity-archetype">Yoshitsune Balance Archetype</span>
+</div>
+<div class="identity-meta">
+<span class="identity-pill"><strong>最多玩家</strong>Player Shizuka（45次）</span>
+<span class="identity-pill"><strong>统计玩家</strong>24人</span>
+<span class="identity-pill"><strong>构筑</strong>1/2</span>
+</div>
+<div class="variant-viewer" data-variant-root>
+<div class="variant-toolbar">
+<span class="variant-label" data-variant-label>构筑 1/2</span>
+<button type="button" class="variant-button" data-variant-button>Change · 2 构筑</button>
+</div>
+<div class="variant-stage">
+<div class="variant is-active" data-variant data-variant-index="0">
+<div class="variant-cards"><figure class="unit" title="Yoshitsune(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffe4e6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23be123c%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23be123c%22%3EY%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EYoshitsune%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Yoshitsune(2.0 Bow)" loading="lazy">
+<figcaption>Yoshitsune(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Benkei(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3EB%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EBenkei%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Benkei(2.0 Rider)" loading="lazy">
+<figcaption>Benkei(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Shizuka(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d7f7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230f766e%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%230f766e%22%3ES%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EShizuka%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Shizuka(2.0 Sword)" loading="lazy">
+<figcaption>Shizuka(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Nasu(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dbeafe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231d4ed8%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENasu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nasu(1.5 Gun)" loading="lazy">
+<figcaption>Nasu(1.5 Gun)</figcaption>
+</figure><figure class="unit" title="Sato(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23e2e8f0%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23475569%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23475569%22%3ES%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ESato%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Sato(1.5 Spear)" loading="lazy">
+<figcaption>Sato(1.5 Spear)</figcaption>
+</figure></div>
+<p class="variant-name">Yoshitsune Balanced Core</p>
+<div class="variant-statline">
+<span>372 样本</span>
+<span>最多玩家：Player Shizuka（45次） · 统计玩家：24人</span>
+<span>55.11% 胜率</span>
+<span>51.61% Wilson</span>
+<span>205 win / 167 lose</span>
+</div>
+</div>
+<div class="variant" data-variant data-variant-index="1">
+<div class="variant-cards"><figure class="unit" title="Yoshitsune(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffe4e6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23be123c%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23be123c%22%3EY%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EYoshitsune%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Yoshitsune(2.0 Bow)" loading="lazy">
+<figcaption>Yoshitsune(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Benkei(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3EB%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EBenkei%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Benkei(2.0 Rider)" loading="lazy">
+<figcaption>Benkei(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Nasu(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dbeafe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231d4ed8%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENasu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nasu(1.5 Gun)" loading="lazy">
+<figcaption>Nasu(1.5 Gun)</figcaption>
+</figure><figure class="unit" title="Sato(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23e2e8f0%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23475569%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23475569%22%3ES%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ESato%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Sato(1.5 Spear)" loading="lazy">
+<figcaption>Sato(1.5 Spear)</figcaption>
+</figure><figure class="unit" title="Nanbu(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fef3c7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a16207%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23a16207%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENanbu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nanbu(1.5 Spear)" loading="lazy">
+<figcaption>Nanbu(1.5 Spear)</figcaption>
+</figure></div>
+<p class="variant-name">Yoshitsune Balanced Core Variant 2</p>
+<div class="variant-statline">
+<span>124 样本</span>
+<span>最多玩家：Player Shizuka（45次） · 统计玩家：24人</span>
+<span>55.11% 胜率</span>
+<span>51.61% Wilson</span>
+<span>205 win / 167 lose</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="strength-metrics-block report-card-block" aria-label="强度指标">
+<div class="block-title">强度指标</div>
+<div class="metric-card-grid">
+<div class="metric-card is-primary">
+<span>胜率</span>
+<strong>55.11%</strong>
+</div>
+<div class="metric-card">
+<span>Wilson</span>
+<strong>51.61%</strong>
+</div>
+<div class="metric-card">
+<span>玩家归一化</span>
+<strong>-</strong>
+</div>
+<div class="metric-card">
+<span>样本数</span>
+<strong>372</strong>
+</div>
+<div class="metric-card">
+<span>玩家数</span>
+<strong>24人</strong>
+</div>
+<div class="metric-card is-trend" title="46 样本 / 51.01% / -4.1pt">
+<span>近7日趋势</span>
+<strong>-4.1pt</strong>
+</div>
+<div class="metric-card is-credibility credibility-low" title="样本 372 / 玩家 24 / Top3玩家贡献 16.94%">
+<span>可信度</span>
+<strong>低</strong>
+</div>
+</div>
+</section>
+<section class="equipment-style-block report-card-block" aria-label="战器与流派">
+<div class="block-title">主流战器 / 流派</div>
+<div class="equipment-grid">
+<div class="equipment-section">
+<span class="equipment-title">战器统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流战器</strong>Yoshitsune Scroll</span>
+<span class="equipment-cell"><strong>战器采用率</strong>39.00%</span>
+<span class="equipment-cell"><strong>战器胜率</strong>59.00%</span>
+</div>
+</div>
+<div class="equipment-section is-empty"><span>暂无英魂配置</span></div>
+<div class="equipment-section">
+<span class="equipment-title">流派统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流流派</strong>Rider Core</span>
+<span class="equipment-cell"><strong>流派采用率</strong>52.00%</span>
+<span class="equipment-cell"><strong>流派胜率</strong>56.00%</span>
+</div>
+</div>
+</div>
+</section>
+<section class="matchup-summary-block" aria-label="对局摘要">
+<div class="matchup-group is-advantage">
+<span class="matchup-title">优势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-advantage">Kohaku Order 63.11%</span><span class="matchup-chip is-advantage">Midrange 59.11%</span><span class="matchup-chip is-advantage">Rider Core 57.11%</span></div>
+</div>
+<div class="matchup-group is-disadvantage">
+<span class="matchup-title">劣势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-disadvantage">Opening Rush 37.11%</span><span class="matchup-chip is-disadvantage">Wara Swarm 44.11%</span></div>
+</div>
+</section>
+</article><article class="deck-report-card archetype-row" data-sort-item data-sort-title="oda gunline archetype" data-sort-wilson="0.58969136" data-sort-sample="810.00000000">
+<section class="rank-block report-card-block" aria-label="排名">
+<span class="rank-kicker">Rank</span>
+<strong data-rank-value>05</strong>
+<span class="rank-record">506 win / 304 lose</span>
+<span class="rank-trend trend-up" title="排名变化 +1">▲ 1</span>
+</section>
+<section class="deck-identity-block report-card-block" aria-label="卡组身份">
+<div class="identity-heading">
+<h3>Oda Gunline Archetype</h3>
+<span class="identity-archetype">Oda Gunline Archetype</span>
+</div>
+<div class="identity-meta">
+<span class="identity-pill"><strong>最多玩家</strong>Player Owari（96次）</span>
+<span class="identity-pill"><strong>统计玩家</strong>44人</span>
+<span class="identity-pill"><strong>构筑</strong>1/2</span>
+</div>
+<div class="variant-viewer" data-variant-root>
+<div class="variant-toolbar">
+<span class="variant-label" data-variant-label>构筑 1/2</span>
+<button type="button" class="variant-button" data-variant-button>Change · 2 构筑</button>
+</div>
+<div class="variant-stage">
+<div class="variant is-active" data-variant data-variant-index="0">
+<div class="variant-cards"><figure class="unit" title="Nobunaga(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fef3c7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a16207%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23a16207%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENobunaga%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nobunaga(2.0 Bow)" loading="lazy">
+<figcaption>Nobunaga(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Mitsuhide(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ede9fe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237c3aed%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%237c3aed%22%3EM%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EMitsuhide%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Mitsuhide(2.0 Rider)" loading="lazy">
+<figcaption>Mitsuhide(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Hideyoshi(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dcfce7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2315803d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%2315803d%22%3EH%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EHideyoshi%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Hideyoshi(2.0 Sword)" loading="lazy">
+<figcaption>Hideyoshi(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Katsuie(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffe4e6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23be123c%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23be123c%22%3EK%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EKatsuie%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Katsuie(1.5 Gun)" loading="lazy">
+<figcaption>Katsuie(1.5 Gun)</figcaption>
+</figure><figure class="unit" title="Kicho(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3EK%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EKicho%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Kicho(1.5 Spear)" loading="lazy">
+<figcaption>Kicho(1.5 Spear)</figcaption>
+</figure></div>
+<p class="variant-name">Oda Gunline Order</p>
+<div class="variant-statline">
+<span>810 样本</span>
+<span>最多玩家：Player Owari（96次） · 统计玩家：44人</span>
+<span>62.47% 胜率</span>
+<span>58.97% Wilson</span>
+<span>506 win / 304 lose</span>
+</div>
+</div>
+<div class="variant" data-variant data-variant-index="1">
+<div class="variant-cards"><figure class="unit" title="Nobunaga(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fef3c7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a16207%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23a16207%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENobunaga%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Nobunaga(2.0 Bow)" loading="lazy">
+<figcaption>Nobunaga(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Mitsuhide(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ede9fe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237c3aed%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%237c3aed%22%3EM%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EMitsuhide%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Mitsuhide(2.0 Rider)" loading="lazy">
+<figcaption>Mitsuhide(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Hideyoshi(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dcfce7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2315803d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%2315803d%22%3EH%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EHideyoshi%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Hideyoshi(2.0 Sword)" loading="lazy">
+<figcaption>Hideyoshi(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Kicho(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff1d6%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b1e2d%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%238b1e2d%22%3EK%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EKicho%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Kicho(1.5 Spear)" loading="lazy">
+<figcaption>Kicho(1.5 Spear)</figcaption>
+</figure><figure class="unit" title="Aya(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ede9fe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237c3aed%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%237c3aed%22%3EA%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EAya%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Aya(1.5 Spear)" loading="lazy">
+<figcaption>Aya(1.5 Spear)</figcaption>
+</figure></div>
+<p class="variant-name">Oda Gunline Order Variant 2</p>
+<div class="variant-statline">
+<span>270 样本</span>
+<span>最多玩家：Player Owari（96次） · 统计玩家：44人</span>
+<span>62.47% 胜率</span>
+<span>58.97% Wilson</span>
+<span>506 win / 304 lose</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="strength-metrics-block report-card-block" aria-label="强度指标">
+<div class="block-title">强度指标</div>
+<div class="metric-card-grid">
+<div class="metric-card is-primary">
+<span>胜率</span>
+<strong>62.47%</strong>
+</div>
+<div class="metric-card">
+<span>Wilson</span>
+<strong>58.97%</strong>
+</div>
+<div class="metric-card">
+<span>玩家归一化</span>
+<strong>-</strong>
+</div>
+<div class="metric-card">
+<span>样本数</span>
+<strong>810</strong>
+</div>
+<div class="metric-card">
+<span>玩家数</span>
+<strong>44人</strong>
+</div>
+<div class="metric-card is-trend" title="101 样本 / 69.87% / +7.4pt">
+<span>近7日趋势</span>
+<strong>+7.4pt</strong>
+</div>
+<div class="metric-card is-credibility credibility-high" title="样本 810 / 玩家 44 / Top3玩家贡献 14.07%">
+<span>可信度</span>
+<strong>高</strong>
+</div>
+</div>
+</section>
+<section class="equipment-style-block report-card-block" aria-label="战器与流派">
+<div class="block-title">主流战器 / 流派</div>
+<div class="equipment-grid">
+<div class="equipment-section">
+<span class="equipment-title">战器统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流战器</strong>Tenka Fubu</span>
+<span class="equipment-cell"><strong>战器采用率</strong>57.00%</span>
+<span class="equipment-cell"><strong>战器胜率</strong>67.00%</span>
+</div>
+</div>
+<div class="equipment-section">
+<span class="equipment-title">英魂配置</span>
+<div class="soul-chip-row"><span class="soul-chip"><strong>Range +5%</strong>61.00%</span><span class="soul-chip"><strong>Power +1</strong>47.00%</span></div>
+</div>
+<div class="equipment-section">
+<span class="equipment-title">流派统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流流派</strong>Gunline</span>
+<span class="equipment-cell"><strong>流派采用率</strong>71.00%</span>
+<span class="equipment-cell"><strong>流派胜率</strong>64.00%</span>
+</div>
+</div>
+</div>
+</section>
+<section class="matchup-summary-block" aria-label="对局摘要">
+<div class="matchup-group is-advantage">
+<span class="matchup-title">优势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-advantage">Kohaku Order 70.47%</span><span class="matchup-chip is-advantage">Midrange 66.47%</span><span class="matchup-chip is-advantage">Rider Core 64.47%</span></div>
+</div>
+<div class="matchup-group is-disadvantage">
+<span class="matchup-title">劣势对局</span>
+<div class="matchup-chip-row"><span class="matchup-chip is-disadvantage">Opening Rush 44.47%</span><span class="matchup-chip is-disadvantage">Wara Swarm 51.47%</span></div>
+</div>
+</section>
+</article><article class="deck-report-card archetype-row" data-sort-item data-sort-title="kenshin rider archetype" data-sort-wilson="0.47888889" data-sort-sample="216.00000000">
+<section class="rank-block report-card-block" aria-label="排名">
+<span class="rank-kicker">Rank</span>
+<strong data-rank-value>06</strong>
+<span class="rank-record">111 win / 105 lose</span>
+<span class="rank-trend trend-neutral" title="排名无变化">→ 0</span>
+</section>
+<section class="deck-identity-block report-card-block" aria-label="卡组身份">
+<div class="identity-heading">
+<h3>Kenshin Rider Archetype</h3>
+<span class="identity-archetype">Kenshin Rider Archetype</span>
+</div>
+<div class="identity-meta">
+<span class="identity-pill"><strong>最多玩家</strong>Player Bishamon（39次）</span>
+<span class="identity-pill"><strong>统计玩家</strong>15人</span>
+<span class="identity-pill"><strong>构筑</strong>1/1</span>
+</div>
+<div class="variant-viewer" data-variant-root>
+<div class="variant-toolbar">
+<span class="variant-label" data-variant-label>构筑 1/1</span>
+<span class="variant-single">Single · 1 构筑</span>
+</div>
+<div class="variant-stage">
+<div class="variant is-active" data-variant data-variant-index="0">
+<div class="variant-cards"><figure class="unit" title="Kenshin(2.0 Bow)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d7f7ee%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230f766e%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%230f766e%22%3EK%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EKenshin%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Bow%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Kenshin(2.0 Bow)" loading="lazy">
+<figcaption>Kenshin(2.0 Bow)</figcaption>
+</figure><figure class="unit" title="Naoe(2.0 Rider)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23dbeafe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231d4ed8%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231d4ed8%22%3EN%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3ENaoe%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Rider%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Naoe(2.0 Rider)" loading="lazy">
+<figcaption>Naoe(2.0 Rider)</figcaption>
+</figure><figure class="unit" title="Usami(2.0 Sword)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23e2e8f0%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23475569%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23475569%22%3EU%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EUsami%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E2.0%20cost%20/%20Sword%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Usami(2.0 Sword)" loading="lazy">
+<figcaption>Usami(2.0 Sword)</figcaption>
+</figure><figure class="unit" title="Amakasu(1.5 Gun)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fef3c7%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a16207%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23a16207%22%3EA%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EAmakasu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Gun%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Amakasu(1.5 Gun)" loading="lazy">
+<figcaption>Amakasu(1.5 Gun)</figcaption>
+</figure><figure class="unit" title="Aya(1.5 Spear)">
+<img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22160%22%20height%3D%22224%22%20viewBox%3D%220%200%20160%20224%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ede9fe%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237c3aed%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22160%22%20height%3D%22224%22%20rx%3D%2212%22%20fill%3D%22url%28%23g%29%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22208%22%20rx%3D%2210%22%20fill%3D%22rgba%28255%2C255%2C255%2C.10%29%22%20stroke%3D%22rgba%28255%2C255%2C255%2C.78%29%22%20stroke-width%3D%223%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2280%22%20cy%3D%2272%22%20r%3D%2240%22%20fill%3D%22rgba%28255%2C255%2C255%2C.82%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%2286%22%20text-anchor%3D%22middle%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%237c3aed%22%3EA%3C/text%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%22132%22%20width%3D%22124%22%20height%3D%2258%22%20rx%3D%228%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22153%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23111827%22%3EAya%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22174%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%23334155%22%3E1.5%20cost%20/%20Spear%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2280%22%20y%3D%22207%22%20text-anchor%3D%22middle%22%20font-size%3D%2211%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22rgba%28255%2C255%2C255%2C.88%29%22%3EPREVIEW%20CARD%3C/text%3E%0A%20%20%20%20%3C/svg%3E" alt="Aya(1.5 Spear)" loading="lazy">
+<figcaption>Aya(1.5 Spear)</figcaption>
+</figure></div>
+<p class="variant-name">Kenshin Rider Single</p>
+<div class="variant-statline">
+<span>216 样本</span>
+<span>最多玩家：Player Bishamon（39次） · 统计玩家：15人</span>
+<span>51.39% 胜率</span>
+<span>47.89% Wilson</span>
+<span>111 win / 105 lose</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="strength-metrics-block report-card-block" aria-label="强度指标">
+<div class="block-title">强度指标</div>
+<div class="metric-card-grid">
+<div class="metric-card is-primary">
+<span>胜率</span>
+<strong>51.39%</strong>
+</div>
+<div class="metric-card">
+<span>Wilson</span>
+<strong>47.89%</strong>
+</div>
+<div class="metric-card">
+<span>玩家归一化</span>
+<strong>-</strong>
+</div>
+<div class="metric-card">
+<span>样本数</span>
+<strong>216</strong>
+</div>
+<div class="metric-card">
+<span>玩家数</span>
+<strong>15人</strong>
+</div>
+<div class="metric-card is-trend" title="27 样本 / 51.39% / -">
+<span>近7日趋势</span>
+<strong>51.39%</strong>
+</div>
+<div class="metric-card is-credibility credibility-low" title="样本 216 / 玩家 15 / Top3玩家贡献 26.39%">
+<span>可信度</span>
+<strong>低</strong>
+</div>
+</div>
+</section>
+<section class="equipment-style-block report-card-block" aria-label="战器与流派">
+<div class="block-title">主流战器 / 流派</div>
+<div class="equipment-grid">
+<div class="equipment-section is-empty"><span>暂无战器统计</span></div>
+<div class="equipment-section is-empty"><span>暂无英魂配置</span></div>
+<div class="equipment-section">
+<span class="equipment-title">流派统计</span>
+<div class="equipment-row-grid">
+<span class="equipment-cell"><strong>主流流派</strong>Charge</span>
+<span class="equipment-cell"><strong>流派采用率</strong>62.00%</span>
+<span class="equipment-cell"><strong>流派胜率</strong>54.00%</span>
+</div>
+</div>
+</div>
+</section>
+<section class="matchup-summary-block" aria-label="对局摘要"><span class="matchup-empty">暂无对局矩阵</span></section>
+</article>
+</section>
+      
+    </main>
+  </body>
+</html>
