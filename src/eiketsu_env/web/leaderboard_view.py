@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import hashlib
 import os
 from pathlib import Path
 from string import Template
@@ -40,6 +41,26 @@ LEADERBOARD_STATIC_FILES = {"leaderboard.css", "leaderboard.js"}
 
 LEADERBOARD_HTML_DEFAULT_LIMIT = 80
 LEADERBOARD_HTML_MAX_LIMIT = 500
+
+
+def _leaderboard_asset_version() -> str:
+    digest = hashlib.sha256()
+    digest.update(__version__.encode("utf-8"))
+    has_static_asset = False
+    for filename in sorted(LEADERBOARD_STATIC_FILES):
+        path = WEB_STATIC_ROOT / filename
+        if not path.is_file():
+            continue
+        try:
+            content = path.read_bytes()
+        except OSError:
+            continue
+        has_static_asset = True
+        digest.update(filename.encode("utf-8"))
+        digest.update(content)
+    if not has_static_asset:
+        return __version__
+    return f"{__version__}-{digest.hexdigest()[:12]}"
 
 
 def _leaderboard_display_limit(limit: int | None, full: str = "") -> int | None:
@@ -106,7 +127,7 @@ def _leaderboard_visual_page(
         "leaderboard.html",
         {
             "page_title": _html(title),
-            "asset_version": _html(__version__),
+            "asset_version": _html(_leaderboard_asset_version()),
             "scope_tools": _leaderboard_scope_tools(personal_requested, is_personal_view, contributor_name or str(payload.get("contributor_name") or "")),
             "filter_error": _leaderboard_filter_error(filter_error),
             "eyebrow": _html(eyebrow),
@@ -407,38 +428,129 @@ def _archetype_feature_grid(archetypes: list[dict[str, Any]]) -> str:
 def _archetype_ranking_board(archetypes: list[dict[str, Any]]) -> str:
     if not archetypes:
         return ""
+    return _report_card_board(archetypes, board_id="archetype-ranking", item_type="archetype")
+
+
+def _archetype_rows(archetypes: list[dict[str, Any]], start: int = 1) -> str:
+    return "".join(
+        _deck_report_card(index, archetype, item_type="archetype")
+        for index, archetype in enumerate(archetypes, start=start)
+    )
+
+
+def _report_card_board(items: list[dict[str, Any]], *, board_id: str, item_type: str) -> str:
+    rows = _archetype_rows(items) if item_type == "archetype" else _deck_rows(items)
     return "\n".join(
         [
-            '<section class="archetype-board" id="archetype-ranking" data-sort-root>',
-            '<div class="board-head"><span>Rank</span><span>Archetype</span><span>Signal</span></div>',
-            _archetype_rows(archetypes),
+            f'<section class="archetype-board report-card-board" id="{_html(board_id)}" data-sort-root>',
+            rows,
             "</section>",
         ]
     )
 
 
-def _archetype_rows(archetypes: list[dict[str, Any]], start: int = 1) -> str:
-    return "".join(_archetype_rank_row(index, archetype) for index, archetype in enumerate(archetypes, start=start))
-
-
-def _archetype_rank_row(index: int, archetype: dict[str, Any]) -> str:
-    title = str(archetype.get("title") or archetype.get("archetype_id") or "")
+def _deck_report_card(index: int, item: dict[str, Any], *, item_type: str) -> str:
+    title = _report_card_title(item, item_type)
     return "\n".join(
         [
-            f'<article class="archetype-row" {_sort_item_attrs(title, archetype.get("wilson_lower_bound"), archetype.get("sample_count"))}>',
-            '<div class="row-rank">',
-            f'<strong data-rank-value>{index:02d}</strong>',
-            f'<span>{_record_label(archetype)}</span>',
-            "</div>",
-            '<div class="row-deck">',
-            f"<h3>{_html(title)}</h3>",
-            _player_summary(archetype),
-            _archetype_variant_viewer(archetype),
-            "</div>",
-            '<div class="row-signals signal-panel">',
-            _signal_groups(archetype),
-            "</div>",
+            f'<article class="deck-report-card archetype-row" {_sort_item_attrs(title, item.get("wilson_lower_bound"), item.get("sample_count"))}>',
+            _rank_block(index, item),
+            _deck_identity_block(item, item_type=item_type),
+            _strength_metrics_block(item),
+            _equipment_style_block(item),
+            _matchup_summary_block(item),
             "</article>",
+        ]
+    )
+
+
+def _rank_block(index: int, item: dict[str, Any]) -> str:
+    trend_label, trend_class, trend_title = _rank_trend(item)
+    return "\n".join(
+        [
+            '<section class="rank-block report-card-block" aria-label="排名">',
+            '<span class="rank-kicker">Rank</span>',
+            f'<strong data-rank-value>{index:02d}</strong>',
+            f'<span class="rank-record">{_record_label(item)}</span>',
+            f'<span class="rank-trend {trend_class}" title="{_html(trend_title)}">{_html(trend_label)}</span>',
+            "</section>",
+        ]
+    )
+
+
+def _deck_identity_block(item: dict[str, Any], *, item_type: str) -> str:
+    title = _report_card_title(item, item_type)
+    variant_viewer = _archetype_variant_viewer(item) if item_type == "archetype" else _deck_variant_viewer(item)
+    return "\n".join(
+        [
+            '<section class="deck-identity-block report-card-block" aria-label="卡组身份">',
+            '<div class="identity-heading">',
+            f"<h3>{_html(title)}</h3>",
+            f'<span class="identity-archetype">{_html(_archetype_label(item, item_type))}</span>',
+            "</div>",
+            '<div class="identity-meta">',
+            _identity_pill("最多玩家", _top_player_label(item)),
+            _identity_pill("统计玩家", f"{_safe_int(item.get('player_count'))}人"),
+            _identity_pill("构筑", _variant_count_label(item, item_type)),
+            "</div>",
+            variant_viewer,
+            "</section>",
+        ]
+    )
+
+
+def _strength_metrics_block(item: dict[str, Any]) -> str:
+    behavior = _behavior_stats_from_item(item)
+    trend = behavior.get("trend") if isinstance(behavior.get("trend"), dict) else {}
+    credibility = behavior.get("credibility") if isinstance(behavior.get("credibility"), dict) else {}
+    trend_value = _trend_compact_label(trend) if trend else "-"
+    return "\n".join(
+        [
+            '<section class="strength-metrics-block report-card-block" aria-label="强度指标">',
+            '<div class="block-title">强度指标</div>',
+            '<div class="metric-card-grid">',
+            _metric_card("胜率", _fmt_rate(item.get("win_rate")) or "-", "is-primary"),
+            _metric_card("Wilson", _fmt_rate(item.get("wilson_lower_bound")) or "-", ""),
+            _metric_card("玩家归一化", _player_normalized_rate(item), ""),
+            _metric_card("样本数", str(_safe_int(item.get("sample_count"))), ""),
+            _metric_card("玩家数", f"{_safe_int(item.get('player_count'))}人", ""),
+            _metric_card("近7日趋势", trend_value if trend_value != "-" else "暂无", "is-trend", title=_trend_label(trend) if trend else ""),
+            _metric_card("可信度", _credibility_label(credibility), f"is-credibility {_credibility_css_class(credibility)}", title=_credibility_title(credibility) if credibility else ""),
+            "</div>",
+            "</section>",
+        ]
+    )
+
+
+def _equipment_style_block(item: dict[str, Any]) -> str:
+    behavior = _behavior_stats_from_item(item)
+    weapon = _first_behavior_row(behavior.get("weapons"))
+    style = _first_behavior_row(behavior.get("styles"))
+    souls = [row for row in behavior.get("souls") or [] if isinstance(row, dict)]
+    return "\n".join(
+        [
+            '<section class="equipment-style-block report-card-block" aria-label="战器与流派">',
+            '<div class="block-title">主流战器 / 流派</div>',
+            '<div class="equipment-grid">',
+            _equipment_rows(weapon, empty_text="暂无战器统计", kind="weapon"),
+            _soul_rows(souls),
+            _equipment_rows(style, empty_text="暂无流派统计", kind="style"),
+            "</div>",
+            "</section>",
+        ]
+    )
+
+
+def _matchup_summary_block(item: dict[str, Any]) -> str:
+    advantages, disadvantages = _matchup_groups(item)
+    if not advantages and not disadvantages:
+        return '<section class="matchup-summary-block" aria-label="对局摘要"><span class="matchup-empty">暂无对局矩阵</span></section>'
+    return "\n".join(
+        [
+            '<section class="matchup-summary-block" aria-label="对局摘要">',
+            _matchup_group("优势对局", advantages, "advantage"),
+            _matchup_group("劣势对局", disadvantages, "disadvantage"),
+            "</section>",
         ]
     )
 
@@ -471,7 +583,7 @@ def _archetype_variant_viewer(archetype: dict[str, Any]) -> str:
 
 def _archetype_variant(deck: dict[str, Any], index: int) -> str:
     active_class = " is-active" if index == 0 else ""
-    cards = list(deck.get("cards") or [])
+    cards = list(deck.get("cards") or [])[:5]
     return "\n".join(
         [
             f'<div class="variant{active_class}" data-variant data-variant-index="{index}">',
@@ -543,40 +655,15 @@ def _feature_grid(decks: list[dict[str, Any]]) -> str:
 def _ranking_board(decks: list[dict[str, Any]]) -> str:
     if not decks:
         return ""
-    return "\n".join(
-        [
-            '<section class="archetype-board" id="deck-ranking" data-sort-root>',
-            '<div class="board-head"><span>Rank</span><span>Deck</span><span>Signals</span></div>',
-            _deck_rows(decks),
-            "</section>",
-        ]
-    )
+    return _report_card_board(decks, board_id="deck-ranking", item_type="deck")
 
 
 def _deck_rows(decks: list[dict[str, Any]], start: int = 1) -> str:
-    return "".join(_rank_row(index, deck) for index, deck in enumerate(decks, start=start))
+    return "".join(_deck_report_card(index, deck, item_type="deck") for index, deck in enumerate(decks, start=start))
 
 
 def _rank_row(index: int, deck: dict[str, Any]) -> str:
-    title = str(deck.get("deck_name") or deck.get("deck_fingerprint") or "")
-    return "\n".join(
-        [
-            f'<article class="archetype-row" {_sort_item_attrs(title, deck.get("wilson_lower_bound"), deck.get("sample_count"))}>',
-            '<div class="row-rank">',
-            f'<strong data-rank-value>{index:02d}</strong>',
-            f'<span>{_record_label(deck)}</span>',
-            "</div>",
-            '<div class="row-deck">',
-            f"<h3>{_html(title)}</h3>",
-            _player_summary(deck),
-            _deck_variant_viewer(deck),
-            "</div>",
-            '<div class="row-signals signal-panel">',
-            _signal_groups(deck),
-            "</div>",
-            "</article>",
-        ]
-    )
+    return _deck_report_card(index, deck, item_type="deck")
 
 
 def _deck_variant_viewer(deck: dict[str, Any]) -> str:
@@ -593,6 +680,220 @@ def _deck_variant_viewer(deck: dict[str, Any]) -> str:
             "</div>",
         ]
     )
+
+
+def _report_card_title(item: dict[str, Any], item_type: str) -> str:
+    if item_type == "archetype":
+        return str(item.get("title") or item.get("archetype_name") or item.get("archetype_id") or "-")
+    return str(item.get("deck_name") or item.get("deck_fingerprint") or item.get("title") or "-")
+
+
+def _archetype_label(item: dict[str, Any], item_type: str) -> str:
+    if item_type == "archetype":
+        title = str(item.get("title") or "").strip()
+        return title if title else "未识别分类"
+    for key in ("archetype", "archetype_name", "faction", "school"):
+        value = str(item.get(key) or "").strip()
+        if value:
+            return value
+    return "未归类"
+
+
+def _identity_pill(label: str, value: Any) -> str:
+    text = str(value) if value not in {None, ""} else "-"
+    return f'<span class="identity-pill"><strong>{_html(label)}</strong>{_html(text)}</span>'
+
+
+def _top_player_label(item: dict[str, Any]) -> str:
+    top_player = str(item.get("top_player") or "").strip()
+    if not top_player:
+        return "暂无"
+    return f"{top_player}（{_safe_int(item.get('top_player_count'))}次）"
+
+
+def _variant_count_label(item: dict[str, Any], item_type: str) -> str:
+    if item_type != "archetype":
+        return "1/1"
+    variants = [deck for deck in item.get("member_decks") or [] if isinstance(deck, dict)]
+    if variants:
+        return f"1/{len(variants)}"
+    if isinstance(item.get("representative_deck"), dict):
+        return "1/1"
+    member_count = _safe_int(item.get("member_deck_count") or item.get("member_count"))
+    return f"1/{max(member_count, 1)}"
+
+
+def _rank_trend(item: dict[str, Any]) -> tuple[str, str, str]:
+    for key in ("rank_delta", "rank_change", "trend_rank_change"):
+        value = _float_or_none(item.get(key))
+        if value is None:
+            continue
+        if value > 0:
+            return f"▲ {abs(value):.0f}", "trend-up", f"排名变化 +{value:.0f}"
+        if value < 0:
+            return f"▼ {abs(value):.0f}", "trend-down", f"排名变化 {value:.0f}"
+        return "→ 0", "trend-neutral", "排名无变化"
+
+    behavior = _behavior_stats_from_item(item)
+    trend = behavior.get("trend") if isinstance(behavior.get("trend"), dict) else {}
+    delta = _float_or_none(trend.get("delta_7d")) if trend else None
+    if delta is not None:
+        if delta > 0:
+            return _fmt_delta_points(delta), "trend-up", _trend_label(trend)
+        if delta < 0:
+            return _fmt_delta_points(delta), "trend-down", _trend_label(trend)
+        return "±0.0pt", "trend-neutral", _trend_label(trend)
+    return "暂无变化", "trend-unknown", "暂无排名变化或近7日趋势"
+
+
+def _behavior_stats_from_item(item: dict[str, Any]) -> dict[str, Any]:
+    behavior = item.get("behavior_stats")
+    return behavior if isinstance(behavior, dict) else {}
+
+
+def _metric_card(label: str, value: Any, css_class: str = "", title: str = "") -> str:
+    class_attr = f"metric-card {css_class}".strip()
+    title_attr = f' title="{_html(title)}"' if title else ""
+    text = str(value) if value not in {None, ""} else "-"
+    return "\n".join(
+        [
+            f'<div class="{_html(class_attr)}"{title_attr}>',
+            f'<span>{_html(label)}</span>',
+            f'<strong>{_html(text)}</strong>',
+            "</div>",
+        ]
+    )
+
+
+def _player_normalized_rate(item: dict[str, Any]) -> str:
+    for key in ("player_normalized_win_rate", "player_normalized_rate", "player_normalized"):
+        rate = _fmt_rate(item.get(key))
+        if rate:
+            return rate
+    return "-"
+
+
+def _credibility_css_class(credibility: dict[str, Any]) -> str:
+    label = str(credibility.get("label") or "low")
+    return {
+        "high": "credibility-high",
+        "medium": "credibility-medium",
+        "low": "credibility-low",
+    }.get(label, "credibility-low")
+
+
+def _first_behavior_row(rows: Any) -> dict[str, Any]:
+    if not isinstance(rows, list):
+        return {}
+    for row in rows:
+        if isinstance(row, dict):
+            return row
+    return {}
+
+
+def _equipment_rows(row: dict[str, Any], *, empty_text: str, kind: str) -> str:
+    if not row:
+        return f'<div class="equipment-section is-empty"><span>{_html(empty_text)}</span></div>'
+    if kind == "weapon":
+        title = "战器统计"
+        name_label = "主流战器"
+        usage_label = "战器采用率"
+        win_label = "战器胜率"
+    else:
+        title = "流派统计"
+        name_label = "主流流派"
+        usage_label = "流派采用率"
+        win_label = "流派胜率"
+    win_rate = "样本不足" if row.get("low_sample") else (_fmt_rate(row.get("conditional_win_rate")) or "-")
+    return "\n".join(
+        [
+            '<div class="equipment-section">',
+            f'<span class="equipment-title">{_html(title)}</span>',
+            '<div class="equipment-row-grid">',
+            _equipment_cell(name_label, row.get("name") or "-"),
+            _equipment_cell(usage_label, _fmt_rate(row.get("usage_rate")) or "-"),
+            _equipment_cell(win_label, win_rate),
+            "</div>",
+            "</div>",
+        ]
+    )
+
+
+def _equipment_cell(label: str, value: Any) -> str:
+    text = str(value) if value not in {None, ""} else "-"
+    return f'<span class="equipment-cell"><strong>{_html(label)}</strong>{_html(text)}</span>'
+
+
+def _soul_rows(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return '<div class="equipment-section is-empty"><span>暂无英魂配置</span></div>'
+    chips = "".join(
+        f'<span class="soul-chip"><strong>{_html(row.get("name") or "英魂")}</strong>{_fmt_rate(row.get("usage_rate")) or "-"}</span>'
+        for row in rows[:3]
+    )
+    return "\n".join(
+        [
+            '<div class="equipment-section">',
+            '<span class="equipment-title">英魂配置</span>',
+            f'<div class="soul-chip-row">{chips}</div>',
+            "</div>",
+        ]
+    )
+
+
+def _matchup_groups(item: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    summary = _matchup_summary(item)
+    if not summary:
+        return [], []
+    advantages = _matchup_rows(summary, ("advantages", "advantage_matchups", "favorable", "good"))
+    disadvantages = _matchup_rows(summary, ("disadvantages", "disadvantage_matchups", "unfavorable", "bad"))
+    return advantages[:4], disadvantages[:4]
+
+
+def _matchup_summary(item: dict[str, Any]) -> dict[str, Any]:
+    # 只消费后端显式给出的 matchup 结构；当前页面不从卡组胜率反推对局矩阵。
+    for key in ("matchup_summary", "matchups", "matchup_matrix"):
+        value = item.get(key)
+        if isinstance(value, dict):
+            return value
+    return {}
+
+
+def _matchup_rows(summary: dict[str, Any], keys: tuple[str, ...]) -> list[dict[str, Any]]:
+    for key in keys:
+        value = summary.get(key)
+        if isinstance(value, list):
+            return [row if isinstance(row, dict) else {"name": row} for row in value]
+    return []
+
+
+def _matchup_group(title: str, rows: list[dict[str, Any]], tone: str) -> str:
+    chips = "".join(_matchup_chip(row, tone) for row in rows)
+    if not chips:
+        chips = '<span class="matchup-chip is-unknown">暂无</span>'
+    return "\n".join(
+        [
+            f'<div class="matchup-group is-{_html(tone)}">',
+            f'<span class="matchup-title">{_html(title)}</span>',
+            f'<div class="matchup-chip-row">{chips}</div>',
+            "</div>",
+        ]
+    )
+
+
+def _matchup_chip(row: dict[str, Any], tone: str) -> str:
+    name = str(_first_present(row, "name", "matchup_name", "opponent_name", "title", "opponent_id") or "未知对局")
+    rate = _fmt_rate(_first_present(row, "win_rate", "rate", "value"))
+    text = f"{name} {rate}" if rate else name
+    return f'<span class="matchup-chip is-{_html(tone)}">{_html(text)}</span>'
+
+
+def _first_present(row: dict[str, Any], *keys: str) -> Any:
+    for key in keys:
+        value = row.get(key)
+        if value is not None and value != "":
+            return value
+    return ""
 
 
 def _variant_control(variant_count: int) -> str:
@@ -762,7 +1063,9 @@ def _card_strip(cards: list[dict[str, Any]]) -> str:
 
 
 def _record_label(deck: dict[str, Any]) -> str:
-    return f'{_html(deck.get("win_count", 0))} win {_html(deck.get("loss_count", 0))} lose'
+    draw_count = _safe_int(deck.get("draw_count"))
+    draw_text = f' / {_html(draw_count)} draw' if draw_count else ""
+    return f'{_html(deck.get("win_count", 0))} win / {_html(deck.get("loss_count", 0))} lose{draw_text}'
 
 
 def _player_summary(item: dict[str, Any]) -> str:
@@ -797,6 +1100,15 @@ def _safe_int(value: Any) -> int:
         return 0
 
 
+def _float_or_none(value: Any) -> float | None:
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _unit_figure(card: dict[str, Any]) -> str:
     label = str(card.get("label") or card.get("card_hash") or "")
     image_url = str(card.get("image_url") or "")
@@ -806,7 +1118,7 @@ def _unit_figure(card: dict[str, Any]) -> str:
         media = f'<div class="image-placeholder">{_html(_short_card_label(label))}</div>'
     return "\n".join(
         [
-            '<figure class="unit">',
+            f'<figure class="unit" title="{_html(label)}">',
             media,
             f"<figcaption>{_html(label)}</figcaption>",
             "</figure>",
