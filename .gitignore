@@ -43,6 +43,9 @@ shared/reports/
 # Local visual QA screenshots generated while tuning the leaderboard.
 leaderboard-*.png
 local-*.png
+!docs/assets/leaderboard/
+!docs/assets/leaderboard/screenshots/
+!docs/assets/leaderboard/screenshots/*.png
 
 # Database and temporary archives
 *.db
