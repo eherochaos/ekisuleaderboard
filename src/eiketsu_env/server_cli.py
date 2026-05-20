@@ -43,7 +43,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     update = admin_sub.add_parser("publish-client", help="发布 Windows 客户端 exe 更新包")
     update.add_argument("--version", required=True, help="客户端版本号，例如 0.1.2")
-    update.add_argument("--file", required=True, help="EiketsuCollector_0.1.8.exe 这类带版本号的文件路径")
+    update.add_argument("--file", required=True, help="EiketsuCollector_0.1.9.exe 这类带版本号的文件路径")
     update.add_argument("--notes", default="", help="给用户看的更新说明")
     admin_sub.add_parser("show-client-update", help="查看当前发布的客户端更新包")
     return parser

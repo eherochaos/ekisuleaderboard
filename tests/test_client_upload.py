@@ -16,6 +16,8 @@ from eiketsu_env.services.client_upload import (
     bind_client,
     check_client_update,
     cleanup_raw_snapshots,
+    fetch_client_share_config,
+    fetch_client_share_config_state,
     minimum_client_date_from,
     save_client_config,
     sync_client,
@@ -176,6 +178,31 @@ def test_sync_client_clamps_user_date_to_server_window(tmp_path, monkeypatch):
     assert seen_dates == [("2026-05-11", "2026-05-12")]
 
 
+def test_fetch_client_share_config_can_request_target_version(tmp_path, monkeypatch):
+    monkeypatch.setenv("EIKETSU_CLIENT_CONFIG_DIR", str(tmp_path / "client-config"))
+    settings = _settings(tmp_path)
+    save_client_config(
+        settings,
+        client_upload.ClientConfig(
+            server_url="http://127.0.0.1:8000",
+            api_token="token-secret",
+            contributor="alice",
+            user_public_id="u_test",
+        ),
+    )
+    transport = _FakeTransport()
+
+    config = fetch_client_share_config(settings, transport=transport, target_version="Ver.old")
+    state = fetch_client_share_config_state(settings, transport=transport, target_version="Ver.old")
+
+    assert config.target_version == "Ver.old"
+    assert config.date_from == "2026-04-22"
+    assert config.date_to == "2026-05-19"
+    assert state.current_target_version == "Ver.client"
+    assert state.available_target_versions == ["Ver.client", "Ver.old"]
+    assert transport.calls[-2][1].endswith("/api/v1/config?target_version=Ver.old")
+
+
 def test_client_date_override_rejects_date_before_effective_start():
     config = client_upload.ShareConfig(target_version="Ver.client", date_from="2026-05-10", date_to="2026-05-12")
 
@@ -259,6 +286,22 @@ class _FakeTransport:
                 "target_version": "Ver.client",
                 "date_from": "2026-05-10",
                 "date_to": "2026-05-12",
+                "current_target_version": "Ver.client",
+                "available_target_versions": ["Ver.client", "Ver.old"],
+                "include_solo": False,
+                "high_ranker_rank": 100,
+                "report_formats": ["md"],
+                "reports": ["overview"],
+            }
+        if url.endswith("/api/v1/config?target_version=Ver.old"):
+            return {
+                "configured": True,
+                "schema_version": "share_v1",
+                "target_version": "Ver.old",
+                "date_from": "2026-04-22",
+                "date_to": "2026-05-19",
+                "current_target_version": "Ver.client",
+                "available_target_versions": ["Ver.client", "Ver.old"],
                 "include_solo": False,
                 "high_ranker_rank": 100,
                 "report_formats": ["md"],

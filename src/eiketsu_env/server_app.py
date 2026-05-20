@@ -73,8 +73,11 @@ def create_app(settings: Settings | None = None):
         return {"status": "ok"}
 
     @app.get("/api/v1/config")
-    def api_config() -> dict[str, Any]:
-        return get_server_config(settings)
+    def api_config(version: str = "", target_version: str = "") -> dict[str, Any]:
+        try:
+            return get_server_config(settings, target_version=_target_version_from_query(version, target_version))
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.get("/api/v1/client/update")
     def api_client_update(request: Request, current_version: str = "") -> dict[str, Any]:
@@ -774,7 +777,7 @@ def _admin_updates_body(manifest: dict[str, Any] | None, error: str = "") -> str
       <section class="admin-actions">
         <h2>发布新版客户端</h2>
         <p>把新打包的 exe 放到 VPS 后运行下面的管理命令。发布成功后，不需要逐个把文件发给朋友；他们打开旧客户端时会看到新版提示。</p>
-        <pre><code>docker compose -f deploy/docker-compose.yml run --rm -v /tmp/EiketsuCollector_0.1.8.exe:/tmp/EiketsuCollector_0.1.8.exe:ro api eiketsu-server admin publish-client --version 0.1.8 --file /tmp/EiketsuCollector_0.1.8.exe --notes "更新说明"</code></pre>
+        <pre><code>docker compose -f deploy/docker-compose.yml run --rm -v /tmp/EiketsuCollector_0.1.9.exe:/tmp/EiketsuCollector_0.1.9.exe:ro api eiketsu-server admin publish-client --version 0.1.9 --file /tmp/EiketsuCollector_0.1.9.exe --notes "支持 Ver.3.5.0A 默认采集和旧版本切换"</code></pre>
       </section>
     """
 

@@ -85,9 +85,9 @@ def _load_cards_by_hash(path: Path) -> dict[str, dict[str, Any]]:
 
     suffix = path.suffix.lower()
     if suffix in {".db", ".sqlite", ".sqlite3"}:
-        return _load_from_sqlite(path)
+        return _merge_card_catalog_overlay(path, _load_from_sqlite(path))
     if suffix == ".json":
-        return _load_from_json(path)
+        return _merge_card_catalog_overlay(path, _load_from_json(path))
     return {}
 
 
@@ -195,6 +195,11 @@ def _load_from_official_base_payload(payload: dict[str, Any]) -> dict[str, dict[
         if len(raw) < 16:
             continue
 
+        image_keys = {
+            "card_small": raw[0],
+            "card_ds": raw[1],
+            "card_face": raw[2],
+        }
         hash_id = raw[0]
         card_number = _parse_int(raw[12])
         card = {
@@ -205,10 +210,24 @@ def _load_from_official_base_payload(payload: dict[str, Any]) -> dict[str, dict[
             "card_type": _lookup_official_name(payload, "cardType", raw[11]),
             "cost": _lookup_official_name(payload, "cost", raw[13]),
             "unitType": _lookup_official_name(payload, "unitType", raw[15]),
+            "image_keys": image_keys,
         }
-        if hash_id:
-            by_hash[hash_id] = card
+        for candidate_hash in _catalog_card_hashes(card):
+            by_hash[candidate_hash] = {**card, "hash_id": candidate_hash}
     return by_hash
+
+
+def _merge_card_catalog_overlay(path: Path, cards_by_hash: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    overlay_path = path.with_name("card_catalog_overlay.json")
+    try:
+        if not overlay_path.exists():
+            return cards_by_hash
+    except OSError:
+        return cards_by_hash
+    overlay_cards = _load_from_json(overlay_path)
+    if not overlay_cards:
+        return cards_by_hash
+    return {**cards_by_hash, **overlay_cards}
 
 
 def _latest_official_base_snapshot(root: Path) -> Path | None:

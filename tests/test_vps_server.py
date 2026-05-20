@@ -346,6 +346,27 @@ def test_server_config_auto_extends_stale_date_to_to_current_day(tmp_path):
     assert effective.date_to == "2026-05-17"
 
 
+def test_server_config_defaults_to_latest_known_version_and_can_select_old_version(tmp_path, monkeypatch):
+    from eiketsu_env.services import server_share as server_share_module
+
+    monkeypatch.setattr(server_share_module, "_latest_collectable_game_date", lambda today=None: "2026-05-20")
+    settings = _settings(tmp_path / "server")
+    _init_db(settings)
+    set_server_config(settings, "Ver.3.1.0H", "2026-04-22", "2026-05-15")
+
+    default_config = get_server_config(settings)
+    old_config = get_server_config(settings, target_version="Ver.3.1.0H")
+
+    assert default_config["target_version"] == "Ver.3.5.0A"
+    assert default_config["date_from"] == "2026-05-20"
+    assert default_config["date_to"] == "2026-05-20"
+    assert default_config["current_target_version"] == "Ver.3.5.0A"
+    assert default_config["available_target_versions"][:2] == ["Ver.3.5.0A", "Ver.3.1.0H"]
+    assert old_config["target_version"] == "Ver.3.1.0H"
+    assert old_config["date_from"] == "2026-04-22"
+    assert old_config["date_to"] == "2026-05-19"
+
+
 def test_public_leaderboard_uses_effective_date_to_for_recent_upload(tmp_path, monkeypatch):
     from eiketsu_env.services import server_share as server_share_module
 
