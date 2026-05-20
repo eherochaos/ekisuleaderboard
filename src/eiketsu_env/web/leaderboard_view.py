@@ -349,6 +349,14 @@ def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, c
     if rank_scope not in RANK_SCOPE_LABELS:
         rank_scope = RANK_SCOPE_ALL
     base_params = _leaderboard_base_query(payload, contributor_name)
+    active_version = str(payload.get("target_version") or "").strip()
+    available_versions = [
+        version
+        for version in dict.fromkeys(str(item or "").strip() for item in payload.get("available_target_versions") or [])
+        if version
+    ]
+    if active_version and active_version not in available_versions:
+        available_versions.insert(0, active_version)
     cluster_links = [
         _view_control_link("开", _leaderboard_query_url(base_params, cluster="on", rank_scope=rank_scope), cluster_enabled),
         _view_control_link("关", _leaderboard_query_url(base_params, cluster="off", rank_scope=rank_scope), not cluster_enabled),
@@ -362,12 +370,27 @@ def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, c
             (RANK_SCOPE_KNIGHT_UP, RANK_SCOPE_LABELS[RANK_SCOPE_KNIGHT_UP]),
         )
     ]
+    version_group = []
+    if str(payload.get("scope") or "public") == "public" and len(available_versions) > 1:
+        version_group = [
+            '<div class="view-control-group"><span class="view-control-label">目标版本</span>',
+            *[
+                _view_control_link(
+                    version,
+                    _leaderboard_query_url(base_params, version=version, cluster="on" if cluster_enabled else "off", rank_scope=rank_scope),
+                    version == active_version,
+                )
+                for version in available_versions
+            ],
+            "</div>",
+        ]
     return "\n".join(
         [
             '<section class="view-controls" aria-label="榜单视图设置">',
             '<div class="view-control-group"><span class="view-control-label">聚类</span>',
             *cluster_links,
             "</div>",
+            *version_group,
             '<div class="view-control-group"><span class="view-control-label">段位</span>',
             *rank_links,
             "</div>",
@@ -383,6 +406,9 @@ def _leaderboard_base_query(payload: dict[str, Any], contributor_name: str = "")
         return {"scope": "contributor", "contributor": contributor} if contributor else {"scope": "contributor"}
     if scope == "mine":
         return {"scope": "mine"}
+    version = str(payload.get("target_version") or "").strip()
+    if version:
+        return {"version": version}
     return {}
 
 

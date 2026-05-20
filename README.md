@@ -118,10 +118,25 @@ python -m eiketsu_env share doctor
 
 服务端首次部署：
 
-```powershell
+先在 VPS 项目目录创建本机 `.env`，管理口令不要提交到 Git：
+
+```bash
+read -s -p "Admin token: " EIKETSU_ADMIN_TOKEN
+printf '\nEIKETSU_ADMIN_TOKEN=%s\n' "$EIKETSU_ADMIN_TOKEN" > .env
+```
+
+再启动服务：
+
+```bash
 docker compose -f deploy/docker-compose.yml up -d --build
 docker compose -f deploy/docker-compose.yml run --rm api eiketsu-server admin set-config --target-version Ver.3.1.0H --date-from 2026-04-22 --date-to 2026-05-11
 docker compose -f deploy/docker-compose.yml run --rm api eiketsu-server admin create-invite --label 朋友A
+```
+
+如果管理页已经打开但提示“还没有配置管理口令”，补好 `.env` 后执行：
+
+```bash
+docker compose -f deploy/docker-compose.yml up -d api
 ```
 
 朋友侧推荐使用图形客户端；VPS 地址已内置在应用里，不需要让朋友手动输入：

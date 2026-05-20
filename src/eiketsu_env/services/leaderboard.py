@@ -32,7 +32,7 @@ from eiketsu_env.db.session import make_session_factory
 from eiketsu_env.services.card_lookup import load_card_lookup
 from eiketsu_env.services.mode_filter import is_environment_mode
 from eiketsu_env.services.share import ShareConfig
-from eiketsu_env.utils import sha256_text
+from eiketsu_env.utils import sha256_text, utc_now
 
 
 DEFAULT_ARCHETYPE_SIMILAR_COST = 5.0
@@ -408,24 +408,31 @@ def public_leaderboard_page(
     sort_key: str = "wilson",
     rank_scope: str = RANK_SCOPE_ALL,
     include_archetypes: bool = True,
+    target_version: str = "",
 ) -> dict[str, Any]:
     factory = make_session_factory(settings)
     with factory() as session:
         config = _server_share_config(session)
         upload_watermark = _leaderboard_upload_watermark(session)
-        run = _current_public_leaderboard_run(session, config, upload_watermark, status="ready")
-        latest = run or _current_public_leaderboard_run(session, config, upload_watermark, status="")
+        run, latest, payload_config, payload_watermark = _public_leaderboard_run_for_request(
+            session,
+            config,
+            upload_watermark,
+            target_version=target_version,
+        )
+        available_versions = _available_public_leaderboard_versions(session, config.target_version)
         normalized_rank_scope = _normalize_rank_scope(rank_scope)
         active_row_type = _normalize_leaderboard_row_type(row_type, include_archetypes)
         safe_offset = max(0, int(offset or 0))
         safe_limit = _leaderboard_page_limit(limit)
         payload = _materialized_base_payload(
-            config,
-            upload_watermark=upload_watermark,
+            payload_config,
+            upload_watermark=payload_watermark,
             run=latest,
             rank_scope=normalized_rank_scope,
             row_type=active_row_type,
         )
+        payload["available_target_versions"] = available_versions
         if run is None:
             payload["leaderboard_status"] = str(getattr(latest, "status", "") or "missing")
             payload["pagination"] = {
@@ -497,7 +504,7 @@ def refresh_public_leaderboard_materialized(settings: Settings, rank_scope: str 
                 upload_watermark=upload_watermark,
                 upload_count=int(session.scalar(select(func.count(ServerUpload.id))) or 0),
                 package_count=int(session.scalar(select(func.count(SharedContributionPackage.package_id))) or 0),
-                started_at=datetime.utcnow(),
+                started_at=utc_now(),
                 error_text="",
             )
             session.add(run)
@@ -511,8 +518,8 @@ def refresh_public_leaderboard_materialized(settings: Settings, rank_scope: str 
                 run.match_count = int(counts.get("match_count") or 0)
                 run.side_sample_count = int(counts.get("side_sample_count") or 0)
                 run.row_count = len(rows)
-                run.generated_at = datetime.utcnow()
-                _prune_old_public_leaderboard_runs(session, keep_run_id=int(run.id))
+                run.generated_at = utc_now()
+                _prune_old_public_leaderboard_runs(session, keep_run=run)
                 summary = {
                     "run_id": int(run.id),
                     "row_count": int(run.row_count or 0),
@@ -523,7 +530,7 @@ def refresh_public_leaderboard_materialized(settings: Settings, rank_scope: str 
             except Exception as exc:
                 run.status = "failed"
                 run.error_text = str(exc)[:4000]
-                run.generated_at = datetime.utcnow()
+                run.generated_at = utc_now()
                 session.commit()
                 LOGGER.exception("public leaderboard materialized refresh failed")
                 raise
@@ -629,7 +636,7 @@ def _store_leaderboard_snapshot(
     row.date_to = config.date_to
     row.upload_watermark = upload_watermark
     row.payload_json = payload
-    row.generated_at = datetime.utcnow()
+    row.generated_at = utc_now()
 
 
 def _leaderboard_cache_get(key: tuple[Any, ...]) -> dict[str, Any] | None:
@@ -652,13 +659,27 @@ def _clear_leaderboard_cache() -> None:
     _LEADERBOARD_CACHE.clear()
 
 
-def _clear_leaderboard_snapshots(settings: Settings) -> None:
+def _clear_leaderboard_snapshots(settings: Settings, target_version: str = "", clear_runs: bool = True) -> None:
     _clear_leaderboard_cache()
     factory = make_session_factory(settings)
     with factory() as session:
-        session.execute(delete(ServerLeaderboardRow))
-        session.execute(delete(ServerLeaderboardRun))
-        session.execute(delete(ServerLeaderboardSnapshot))
+        version = str(target_version or "").strip()
+        if version:
+            if clear_runs:
+                run_ids = list(
+                    session.scalars(
+                        select(ServerLeaderboardRun.id).where(ServerLeaderboardRun.target_version == version)
+                    ).all()
+                )
+                if run_ids:
+                    session.execute(delete(ServerLeaderboardRow).where(ServerLeaderboardRow.run_id.in_(run_ids)))
+                    session.execute(delete(ServerLeaderboardRun).where(ServerLeaderboardRun.id.in_(run_ids)))
+            session.execute(delete(ServerLeaderboardSnapshot).where(ServerLeaderboardSnapshot.target_version == version))
+        else:
+            if clear_runs:
+                session.execute(delete(ServerLeaderboardRow))
+                session.execute(delete(ServerLeaderboardRun))
+            session.execute(delete(ServerLeaderboardSnapshot))
         session.commit()
 
 
@@ -829,6 +850,36 @@ def _leaderboard_page_limit(limit: int | None) -> int:
     return max(1, min(int(limit), LEADERBOARD_MAX_PAGE_LIMIT))
 
 
+def _public_leaderboard_run_for_request(
+    session,
+    config: ShareConfig,
+    upload_watermark: int,
+    *,
+    target_version: str,
+) -> tuple[ServerLeaderboardRun | None, ServerLeaderboardRun | None, ShareConfig, int]:
+    requested_version = str(target_version or "").strip()
+    if not requested_version or requested_version == config.target_version:
+        run = _current_public_leaderboard_run(session, config, upload_watermark, status="ready")
+        latest = run or _current_public_leaderboard_run(session, config, upload_watermark, status="")
+        return run, latest, config, upload_watermark
+
+    run = _latest_public_leaderboard_run_for_version(session, requested_version, status="ready")
+    latest = run or _latest_public_leaderboard_run_for_version(session, requested_version, status="")
+    if latest is None:
+        requested_config = ShareConfig(
+            schema_version=config.schema_version,
+            target_version=requested_version,
+            date_from=config.date_from,
+            date_to=config.date_to,
+            include_solo=config.include_solo,
+            high_ranker_rank=config.high_ranker_rank,
+            report_formats=list(config.report_formats),
+            reports=list(config.reports),
+        )
+        return None, None, requested_config, 0
+    return run, latest, _config_from_leaderboard_run(latest, config), int(latest.upload_watermark or 0)
+
+
 def _current_public_leaderboard_run(
     session,
     config: ShareConfig,
@@ -851,6 +902,55 @@ def _current_public_leaderboard_run(
     if status:
         statement = statement.where(ServerLeaderboardRun.status == status)
     return session.scalar(statement)
+
+
+def _latest_public_leaderboard_run_for_version(
+    session,
+    target_version: str,
+    *,
+    status: str,
+) -> ServerLeaderboardRun | None:
+    statement = (
+        select(ServerLeaderboardRun)
+        .where(ServerLeaderboardRun.scope == "public")
+        .where(ServerLeaderboardRun.payload_version == LEADERBOARD_PAYLOAD_VERSION)
+        .where(ServerLeaderboardRun.target_version == target_version)
+        .order_by(ServerLeaderboardRun.id.desc())
+        .limit(1)
+    )
+    if status:
+        statement = statement.where(ServerLeaderboardRun.status == status)
+    return session.scalar(statement)
+
+
+def _config_from_leaderboard_run(run: ServerLeaderboardRun, fallback: ShareConfig) -> ShareConfig:
+    return ShareConfig(
+        schema_version=fallback.schema_version,
+        target_version=str(run.target_version or ""),
+        date_from=str(run.date_from or ""),
+        date_to=str(run.date_to or ""),
+        include_solo=bool(run.include_solo),
+        high_ranker_rank=fallback.high_ranker_rank,
+        report_formats=list(fallback.report_formats),
+        reports=list(fallback.reports),
+    )
+
+
+def _available_public_leaderboard_versions(session, current_version: str) -> list[str]:
+    versions = {
+        str(item or "").strip()
+        for item in session.scalars(
+            select(ServerLeaderboardRun.target_version)
+            .where(ServerLeaderboardRun.scope == "public")
+            .where(ServerLeaderboardRun.payload_version == LEADERBOARD_PAYLOAD_VERSION)
+            .where(ServerLeaderboardRun.status == "ready")
+            .order_by(ServerLeaderboardRun.id.desc())
+        ).all()
+        if str(item or "").strip()
+    }
+    if current_version:
+        versions.add(str(current_version))
+    return sorted(versions, reverse=True)
 
 
 def _materialized_base_payload(
@@ -942,12 +1042,17 @@ def _materialized_scope_sample_count(session, run_id: int, rank_scope: str) -> i
     return int(session.scalar(statement) or 0)
 
 
-def _prune_old_public_leaderboard_runs(session, keep_run_id: int) -> None:
+def _prune_old_public_leaderboard_runs(session, keep_run: ServerLeaderboardRun) -> None:
+    keep_run_id = int(keep_run.id)
     old_ids = list(
         session.scalars(
             select(ServerLeaderboardRun.id)
             .where(ServerLeaderboardRun.scope == "public")
             .where(ServerLeaderboardRun.id != keep_run_id)
+            .where(ServerLeaderboardRun.target_version == keep_run.target_version)
+            .where(ServerLeaderboardRun.date_from == keep_run.date_from)
+            .where(ServerLeaderboardRun.date_to == keep_run.date_to)
+            .where(ServerLeaderboardRun.include_solo == keep_run.include_solo)
         ).all()
     )
     if not old_ids:
@@ -1095,7 +1200,7 @@ def _leaderboard_payload(
             if include_archetypes
             else []
         ),
-        "generated_at": datetime.utcnow().isoformat(timespec="seconds"),
+        "generated_at": utc_now().isoformat(timespec="seconds"),
     }
 
 

@@ -138,6 +138,7 @@ def _detail(
     enemy_profile: dict | None = None,
     player_selected: dict | None = None,
     enemy_selected: dict | None = None,
+    version: str = "Ver.vps",
 ) -> dict:
     player_deck = player_deck or ["card-a", "card-b"]
     enemy_deck = enemy_deck or ["card-c"]
@@ -150,7 +151,7 @@ def _detail(
         "played_at": played_at,
         "date": played_at,
         "mode": "全国対戦",
-        "version": "Ver.vps",
+        "version": version,
         "result": result,
         "replay_id": replay_id,
         "castle_breakdown": {"rows": [{"player": "20.00%", "enemy": "100.00%"}]},
@@ -210,6 +211,7 @@ def _insert_match(
     enemy_profile: dict | None = None,
     player_selected: dict | None = None,
     enemy_selected: dict | None = None,
+    version: str = "Ver.vps",
 ) -> None:
     engine = make_engine(settings)
     with Session(engine) as session:
@@ -227,6 +229,7 @@ def _insert_match(
                 enemy_profile=enemy_profile,
                 player_selected=player_selected,
                 enemy_selected=enemy_selected,
+                version=version,
             )
         )
         session.commit()
@@ -273,6 +276,19 @@ def test_list_invites_reports_status_and_bound_user(tmp_path):
     assert by_code["INVITE-B"]["used_by"] == "alice"
     with Session(engine) as session:
         assert len(session.scalars(select(ServerInvite)).all()) == 2
+
+
+def test_admin_invite_page_shows_setup_hint_without_admin_token(tmp_path):
+    settings = _settings(tmp_path)
+    _init_db(settings)
+
+    page = _admin_invites_response(settings, _FakeRequest())
+    html = page.body.decode("utf-8")
+
+    assert page.status_code == 503
+    assert "还没有配置管理口令" in html
+    assert "EIKETSU_ADMIN_TOKEN" in html
+    assert ".env" in html
 
 
 def test_admin_invite_page_requires_token_and_can_create_invite(tmp_path):
@@ -533,6 +549,48 @@ def test_public_leaderboard_page_reads_materialized_rows_with_pagination(tmp_pat
     assert [item["rank"] for item in second["top_decks"]] == [3, 4]
 
 
+def test_public_leaderboard_page_can_switch_to_preserved_old_version_run(tmp_path):
+    settings = _settings(tmp_path / "server")
+    engine = _init_db(settings)
+    set_server_config(settings, "Ver.old", "2026-05-10", "2026-05-12")
+    _insert_match(
+        settings,
+        "old-version-page",
+        ["card-a"],
+        ["card-b"],
+        version="Ver.old",
+    )
+    refresh_public_leaderboard_materialized(settings)
+
+    set_server_config(settings, "Ver.next", "2026-05-10", "2026-05-12")
+    _insert_match(
+        settings,
+        "next-version-page",
+        ["card-c"],
+        ["card-d"],
+        version="Ver.next",
+    )
+    refresh_public_leaderboard_materialized(settings)
+
+    with Session(engine) as session:
+        assert {run.target_version for run in session.scalars(select(ServerLeaderboardRun)).all()} == {"Ver.old", "Ver.next"}
+
+    current = public_leaderboard_page(settings, include_archetypes=False, limit=1)
+    old = public_leaderboard_page(settings, include_archetypes=False, limit=1, target_version="Ver.old")
+
+    assert current["target_version"] == "Ver.next"
+    assert old["target_version"] == "Ver.old"
+    assert old["leaderboard_status"] == "ready"
+    assert {"Ver.old", "Ver.next"}.issubset(set(old["available_target_versions"]))
+    assert {item["deck_fingerprint"] for item in old["top_decks"]}.isdisjoint(
+        {item["deck_fingerprint"] for item in current["top_decks"]}
+    )
+
+    html = _leaderboard_visual_page(old, cluster_enabled=False, display_limit=1)
+    assert "version=Ver.old" in html
+    assert "version=Ver.next" in html
+
+
 def test_upload_clears_leaderboard_snapshots(tmp_path):
     settings = _settings(tmp_path / "server")
     engine = _init_db(settings)
@@ -550,8 +608,8 @@ def test_upload_clears_leaderboard_snapshots(tmp_path):
 
     with Session(engine) as session:
         assert session.scalars(select(ServerLeaderboardSnapshot)).all() == []
-        assert session.scalars(select(ServerLeaderboardRun)).all() == []
-        assert session.scalars(select(ServerLeaderboardRow)).all() == []
+        assert session.scalar(select(ServerLeaderboardRun)) is not None
+        assert session.scalar(select(ServerLeaderboardRow)) is not None
 
 
 def test_prune_legacy_leaderboard_snapshots_keeps_source_data(tmp_path):

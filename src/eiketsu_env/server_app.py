@@ -146,6 +146,8 @@ def create_app(settings: Settings | None = None):
         limit: int | None = LEADERBOARD_DEFAULT_PAGE_LIMIT,
         sort: str = "wilson",
         full: str = "",
+        version: str = "",
+        target_version: str = "",
     ) -> dict[str, Any]:
         include_archetypes = _cluster_enabled(cluster)
         service_limit = _leaderboard_service_limit(limit, full)
@@ -168,6 +170,7 @@ def create_app(settings: Settings | None = None):
                 sort_key=sort,
                 rank_scope=rank_scope,
                 include_archetypes=include_archetypes,
+                target_version=_target_version_from_query(version, target_version),
             )
         except ServerAuthError as exc:
             raise HTTPException(status_code=401, detail=str(exc)) from exc
@@ -186,8 +189,11 @@ def create_app(settings: Settings | None = None):
         offset: int = 0,
         limit: int = LEADERBOARD_HTML_DEFAULT_LIMIT,
         sort: str = "wilson",
+        version: str = "",
+        target_version: str = "",
     ) -> dict[str, Any]:
         cluster_enabled = _cluster_enabled(cluster)
+        selected_target_version = _target_version_from_query(version, target_version)
         try:
             if scope == "public":
                 payload = public_leaderboard_page(
@@ -198,6 +204,7 @@ def create_app(settings: Settings | None = None):
                     sort_key=sort,
                     rank_scope=rank_scope,
                     include_archetypes=cluster_enabled,
+                    target_version=selected_target_version,
                 )
                 contributor_value = ""
             else:
@@ -210,6 +217,7 @@ def create_app(settings: Settings | None = None):
                     rank_scope=rank_scope,
                     cluster_enabled=cluster_enabled,
                     service_limit=LEADERBOARD_SNAPSHOT_LIMIT,
+                    target_version=selected_target_version,
                 )
         except ServerAuthError as exc:
             raise HTTPException(status_code=401, detail=str(exc)) from exc
@@ -380,10 +388,13 @@ def create_app(settings: Settings | None = None):
         rank_scope: str = RANK_SCOPE_ALL,
         limit: int | None = None,
         full: str = "",
+        version: str = "",
+        target_version: str = "",
     ) -> HTMLResponse:
         cluster_enabled = _cluster_enabled(cluster)
         public_scope = scope not in {"mine", "contributor"}
         display_limit = _leaderboard_display_limit(limit, "" if public_scope else full)
+        selected_target_version = _target_version_from_query(version, target_version)
         try:
             if public_scope:
                 payload = public_leaderboard_page(
@@ -391,6 +402,7 @@ def create_app(settings: Settings | None = None):
                     limit=display_limit,
                     rank_scope=rank_scope,
                     include_archetypes=cluster_enabled,
+                    target_version=selected_target_version,
                 )
                 if payload.get("leaderboard_status") != "ready":
                     background_tasks.add_task(refresh_public_leaderboard_snapshots, settings)
@@ -408,6 +420,7 @@ def create_app(settings: Settings | None = None):
                     rank_scope=rank_scope,
                     cluster_enabled=cluster_enabled,
                     service_limit=_leaderboard_page_service_limit(display_limit, full),
+                    target_version=selected_target_version,
                 )
                 if payload.get("scope") == "public" and payload.get("leaderboard_status") != "ready":
                     background_tasks.add_task(refresh_public_leaderboard_snapshots, settings)
@@ -418,6 +431,7 @@ def create_app(settings: Settings | None = None):
                 limit=fallback_limit,
                 rank_scope=rank_scope,
                 include_archetypes=cluster_enabled,
+                target_version=selected_target_version,
             )
             if payload.get("leaderboard_status") != "ready":
                 background_tasks.add_task(refresh_public_leaderboard_snapshots, settings)
@@ -466,6 +480,10 @@ def _cluster_enabled(value: str) -> bool:
     return str(value or "on").strip().lower() not in {"0", "false", "off", "deck", "none"}
 
 
+def _target_version_from_query(version: str = "", target_version: str = "") -> str:
+    return str(target_version or version or "").strip()
+
+
 def _leaderboard_page_service_limit(display_limit: int | None, full: str = "") -> int | None:
     if display_limit is None or str(full or "").strip().lower() in {"1", "true", "yes", "all"}:
         return None
@@ -490,6 +508,7 @@ def _leaderboard_payload_for_web_request(
     rank_scope: str,
     cluster_enabled: bool,
     service_limit: int | None,
+    target_version: str = "",
 ) -> tuple[dict[str, Any], bool, str, str, str]:
     personal_requested = scope in {"mine", "contributor"}
     token_value = _user_token_from_request(request, token)
@@ -516,6 +535,7 @@ def _leaderboard_payload_for_web_request(
                 limit=service_limit,
                 rank_scope=rank_scope,
                 include_archetypes=cluster_enabled,
+                target_version=target_version,
             )
             filter_error = "请输入绑定用户名后查看我的贡献视角。"
     elif scope == "mine":
@@ -531,6 +551,7 @@ def _leaderboard_payload_for_web_request(
                 limit=service_limit,
                 rank_scope=rank_scope,
                 include_archetypes=cluster_enabled,
+                target_version=target_version,
             )
             filter_error = "旧版 token 链接缺少 token；请改用绑定用户名查看贡献。"
     else:
@@ -539,6 +560,7 @@ def _leaderboard_payload_for_web_request(
             limit=service_limit,
             rank_scope=rank_scope,
             include_archetypes=cluster_enabled,
+            target_version=target_version,
         )
     return payload, personal_requested, token_value, contributor_value, filter_error
 
@@ -617,7 +639,11 @@ def _admin_setup_page() -> str:
         """
         <section class="notice error">
           <strong>还没有配置管理口令。</strong>
-          <span>请在 VPS 的环境变量里设置 EIKETSU_ADMIN_TOKEN，然后重启服务。</span>
+          <span>请在 VPS 项目目录的 .env 里设置 EIKETSU_ADMIN_TOKEN，然后重启 api 服务。</span>
+          <pre><code>cd ~/eiketsu-env-db
+read -s -p "Admin token: " EIKETSU_ADMIN_TOKEN
+printf '\\nEIKETSU_ADMIN_TOKEN=%s\\n' "$EIKETSU_ADMIN_TOKEN" > .env
+docker compose -f deploy/docker-compose.yml up -d api</code></pre>
         </section>
         """,
     )

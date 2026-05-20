@@ -10,7 +10,6 @@ import re
 import shutil
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -23,6 +22,7 @@ from eiketsu_env.db.models import AnalysisCardStat, AnalysisDeckStat, AnalysisRu
 from eiketsu_env.db.session import make_session_factory
 from eiketsu_env.services.card_lookup import load_card_lookup
 from eiketsu_env.services.mode_filter import is_environment_mode
+from eiketsu_env.utils import utc_now
 
 DEFAULT_DECK_MIN_SAMPLES = 3
 DEFAULT_CARD_MIN_SAMPLES = 10
@@ -246,7 +246,7 @@ def refresh_analysis(
                 session.add(_card_stat(run, sample_scope, version_scope, card_hash, bucket, _high_win_deck_count(card_hash, high_win_decks)))
 
         run.status = "completed"
-        run.finished_at = datetime.utcnow()
+        run.finished_at = utc_now()
         run.counts_json = {
             "matches": len(scoped),
             "side_samples": len(samples),

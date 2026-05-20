@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +30,7 @@ from eiketsu_env.utils import (
     played_at_from_detail_t,
     public_id_for_match,
     sha256_text,
+    utc_now,
 )
 
 
@@ -57,7 +57,7 @@ class EnvRepository:
         run.status = status
         run.counts_json = counts
         run.error_summary_json = errors
-        run.finished_at = datetime.utcnow()
+        run.finished_at = utc_now()
         self.session.flush()
 
     def upsert_follow_player(self, player: dict[str, str]) -> FollowPlayer:
@@ -69,7 +69,7 @@ class EnvRepository:
         row.name = player.get("name") or row.name
         row.state = player.get("state") or row.state
         row.daily_url = player.get("daily_url") or row.daily_url
-        row.last_seen_at = datetime.utcnow()
+        row.last_seen_at = utc_now()
         self.session.flush()
         return row
 
@@ -83,7 +83,7 @@ class EnvRepository:
         date_hint: str | None = None,
     ) -> RawSnapshot:
         content_hash = sha256_text(html)
-        safe_date = date_hint or datetime.utcnow().strftime("%Y-%m-%d")
+        safe_date = date_hint or utc_now().strftime("%Y-%m-%d")
         path = self.settings.raw_dir / safe_date / source_kind / f"{content_hash[:16]}.html"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(html, encoding="utf-8")

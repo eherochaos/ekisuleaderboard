@@ -8,6 +8,8 @@ from typing import Any
 from sqlalchemy import DateTime, Float, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from eiketsu_env.utils import utc_now
+
 from .base import Base
 
 
@@ -35,7 +37,7 @@ class CollectionRun(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="running", index=True)
     date_from: Mapped[str | None] = mapped_column(String(10), index=True)
     date_to: Mapped[str | None] = mapped_column(String(10), index=True)
-    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=utc_now)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False))
     scope_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     counts_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
@@ -191,7 +193,7 @@ class RawSnapshot(Base):
     local_path: Mapped[str] = mapped_column(String(500), nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     parser_version: Mapped[str] = mapped_column(String(32), nullable=False)
-    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=utc_now)
 
     match: Mapped[Match | None] = relationship(back_populates="raw_snapshots")
     collection_run: Mapped[CollectionRun | None] = relationship(back_populates="raw_snapshots")
@@ -222,7 +224,7 @@ class AnalysisRun(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="running", index=True)
     date_from: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
     date_to: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
-    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=utc_now)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False))
     mode_scope_json: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     thresholds_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
@@ -323,7 +325,7 @@ class SharedContributionPackage(Base):
     match_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     imported_match_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     error_summary_json: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list, nullable=False)
-    imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
+    imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=utc_now)
 
     matches: Mapped[list["SharedContributionMatch"]] = relationship(
         back_populates="package",
@@ -349,7 +351,7 @@ class SharedContributionMatch(Base):
     public_id: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
     replay_id: Mapped[str | None] = mapped_column(String(64), index=True)
     detail_t: Mapped[str | None] = mapped_column(String(32), index=True)
-    imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
+    imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=utc_now)
 
     package: Mapped[SharedContributionPackage] = relationship(back_populates="matches")
     match: Mapped[Match] = relationship(back_populates="shared_package_links")
@@ -388,7 +390,7 @@ class ServerLeaderboardSnapshot(TimestampMixin, Base):
     date_to: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
     upload_watermark: Mapped[int] = mapped_column(Integer, nullable=False, default=0, index=True)
     payload_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
-    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=utc_now)
 
 
 class ServerLeaderboardRun(TimestampMixin, Base):
@@ -424,7 +426,7 @@ class ServerLeaderboardRun(TimestampMixin, Base):
     side_sample_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     row_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     error_text: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.utcnow)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=utc_now)
     generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False))
 
     rows: Mapped[list["ServerLeaderboardRow"]] = relationship(

@@ -49,7 +49,7 @@ from eiketsu_env.services.share import (
     import_contributions,
     parse_contribution_package_text,
 )
-from eiketsu_env.utils import JST, sha256_text
+from eiketsu_env.utils import JST, sha256_text, utc_now
 
 
 CONFIG_ROW_ID = 1
@@ -126,7 +126,7 @@ def set_server_config(
             session.add(row)
         _apply_config_to_row(row, config)
         session.commit()
-    _clear_leaderboard_snapshots(settings)
+    _clear_leaderboard_snapshots(settings, target_version=config.target_version)
     return {"configured": True, **_config_to_payload(_effective_share_config(config))}
 
 
@@ -229,7 +229,7 @@ def bind_invite(settings: Settings, invite_code: str, contributor_name: str) -> 
             public_id=f"u_{secrets.token_hex(8)}",
             contributor_name=contributor_name.strip() or "anonymous",
             label=invite.label,
-            last_seen_at=datetime.utcnow(),
+            last_seen_at=utc_now(),
         )
         token = secrets.token_urlsafe(32)
         token_row = ServerApiToken(
@@ -238,7 +238,7 @@ def bind_invite(settings: Settings, invite_code: str, contributor_name: str) -> 
             token_prefix=token[:8],
         )
         invite.status = "used"
-        invite.used_at = datetime.utcnow()
+        invite.used_at = utc_now()
         invite.used_by_user_id = user.id
         session.add_all([user, token_row])
         session.flush()
@@ -263,7 +263,7 @@ def import_uploaded_package(settings: Settings, api_token: str, package_text: st
             )
         )
         if existing is not None:
-            user.last_seen_at = datetime.utcnow()
+            user.last_seen_at = utc_now()
             session.commit()
             return _upload_result(existing, already_uploaded=True)
 
@@ -289,11 +289,11 @@ def import_uploaded_package(settings: Settings, api_token: str, package_text: st
             imported_match_count=package.imported_match_count if package else import_result.matches_imported,
             error_summary_json=errors,
         )
-        user.last_seen_at = datetime.utcnow()
+        user.last_seen_at = utc_now()
         session.add(upload)
         session.commit()
         result = _upload_result(upload, already_uploaded=False)
-    _clear_leaderboard_snapshots(settings)
+    _clear_leaderboard_snapshots(settings, target_version=str(manifest.get("target_version") or ""), clear_runs=False)
     return result
 
 
@@ -328,8 +328,8 @@ def authenticate_token(session, api_token: str) -> ServerUser:
     )
     if token_row is None:
         raise ServerAuthError("API token 无效")
-    token_row.last_used_at = datetime.utcnow()
-    token_row.user.last_seen_at = datetime.utcnow()
+    token_row.last_used_at = utc_now()
+    token_row.user.last_seen_at = utc_now()
     return token_row.user
 
 

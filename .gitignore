@@ -13,6 +13,7 @@ data/
 .pytest-tmp-run/
 .test-tmp/
 .test-tmp2/
+.codex-tmp/
 pytest-cache-files-*/
 
 # Test / coverage caches

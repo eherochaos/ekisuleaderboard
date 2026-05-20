@@ -15,6 +15,10 @@ PARSER_VERSION = "env_v1"
 JST = timezone(timedelta(hours=9))
 
 
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 def clean_text(value: Any) -> str:
     """清理页面文本里的私有区图标、重复空白和尾部装饰。"""
 

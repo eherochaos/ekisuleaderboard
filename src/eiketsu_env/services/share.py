@@ -26,7 +26,7 @@ from eiketsu_env.services.analysis import export_analysis, refresh_analysis
 from eiketsu_env.services.collector import CollectResult, collect_follow
 from eiketsu_env.services.mode_filter import is_environment_mode
 from eiketsu_env.services.repository import EnvRepository
-from eiketsu_env.utils import sha256_text, write_json
+from eiketsu_env.utils import sha256_text, utc_now, write_json
 
 
 SHARE_SCHEMA_VERSION = "share_v1"
@@ -170,7 +170,7 @@ def export_contribution(
         "include_solo": config.include_solo,
         "body_hash": body_hash,
         "match_count": len(records),
-        "created_at": datetime.utcnow().isoformat(timespec="seconds"),
+        "created_at": utc_now().isoformat(timespec="seconds"),
         "source": "eiketsu-env-db",
     }
     text = _json_line(manifest) + body_text
@@ -262,7 +262,7 @@ def aggregate_shared(
             "analysis_counts": analysis.counts,
             "import": _import_result_dict(import_result),
             "reports": [str(path.relative_to(settings.root_dir)) for path in report_paths],
-            "generated_at": datetime.utcnow().isoformat(timespec="seconds"),
+            "generated_at": utc_now().isoformat(timespec="seconds"),
         },
     )
     report_paths.append(summary_path)
@@ -448,7 +448,7 @@ def _import_contribution_file(session: Session, settings: Settings, path: Path) 
     package.imported_match_count = imported
     package.status = "completed_with_errors" if errors else "completed"
     package.error_summary_json = errors
-    package.imported_at = datetime.utcnow()
+    package.imported_at = utc_now()
     return 1, 0, imported
 
 
@@ -570,7 +570,7 @@ def _ensure_package_match_link(session: Session, package_id: str, match: Match) 
     link.public_id = match.public_id
     link.replay_id = match.replay_id
     link.detail_t = match.detail_t
-    link.imported_at = datetime.utcnow()
+    link.imported_at = utc_now()
 
 
 def _record_failed_package(session: Session, path: Path, exc: Exception) -> None:
@@ -616,7 +616,7 @@ def _update_package_row(
     package.match_count = int(manifest.get("match_count") or 0)
     package.imported_match_count = 0 if status in {"running", "failed"} or package.imported_match_count is None else package.imported_match_count
     package.error_summary_json = errors
-    package.imported_at = datetime.utcnow()
+    package.imported_at = utc_now()
 
 
 def _expand_import_paths(settings: Settings, paths: list[Path] | None) -> list[Path]:
