@@ -6,7 +6,7 @@ import json
 import re
 import subprocess
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -26,7 +26,7 @@ from eiketsu_env.services.analysis import export_analysis, refresh_analysis
 from eiketsu_env.services.collector import CollectResult, collect_follow
 from eiketsu_env.services.mode_filter import is_environment_mode
 from eiketsu_env.services.repository import EnvRepository
-from eiketsu_env.utils import sha256_text, utc_now, write_json
+from eiketsu_env.utils import JST, sha256_text, utc_now, write_json
 
 
 SHARE_SCHEMA_VERSION = "share_v1"
@@ -124,12 +124,40 @@ class ShareSyncResult:
     pushed: bool
 
 
-def load_share_config(settings: Settings, path: Path | None = None) -> ShareConfig:
+def load_share_config(settings: Settings, path: Path | None = None, *, effective: bool = True) -> ShareConfig:
     config_path = path or share_config_path(settings)
     payload = json.loads(config_path.read_text(encoding="utf-8"))
     config = ShareConfig.from_payload(payload)
     config.validate()
-    return config
+    return effective_share_config(config) if effective else config
+
+
+def effective_share_config(config: ShareConfig, today: date | None = None) -> ShareConfig:
+    effective_date_to = _effective_date_to(config, today=today)
+    if effective_date_to == config.date_to:
+        return config
+    effective = ShareConfig(
+        schema_version=config.schema_version,
+        target_version=config.target_version,
+        date_from=config.date_from,
+        date_to=effective_date_to,
+        include_solo=config.include_solo,
+        high_ranker_rank=config.high_ranker_rank,
+        report_formats=list(config.report_formats),
+        reports=list(config.reports),
+    )
+    effective.validate()
+    return effective
+
+
+def _effective_date_to(config: ShareConfig, today: date | None = None) -> str:
+    latest_collectable = _latest_collectable_game_date(today=today)
+    return max(config.date_from, config.date_to, latest_collectable)
+
+
+def _latest_collectable_game_date(today: date | None = None) -> str:
+    current_day = today or datetime.now(JST).date()
+    return current_day.isoformat()
 
 
 def share_config_path(settings: Settings) -> Path:

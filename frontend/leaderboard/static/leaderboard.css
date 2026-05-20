@@ -196,6 +196,37 @@ h1 {
 .view-control-link:hover {
   border-color: var(--accent);
 }
+.view-control-version-form {
+  margin: 0;
+}
+.view-control-select {
+  background: var(--panel);
+  border: 1px solid #cfd6e1;
+  border-radius: 6px;
+  color: #2c3745;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  height: 32px;
+  min-width: 132px;
+  padding: 0 28px 0 10px;
+}
+.view-control-select:focus {
+  border-color: var(--accent);
+  outline: 2px solid rgba(180, 40, 46, 0.22);
+  outline-offset: 2px;
+}
+.view-control-submit {
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  color: var(--panel);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  height: 32px;
+  padding: 0 10px;
+}
 .leaderboard-mobile-summary {
   display: none;
 }
@@ -1137,6 +1168,11 @@ figcaption {
   }
   .view-control-link {
     padding: 7px 9px;
+  }
+  .view-control-select {
+    height: 30px;
+    max-width: 152px;
+    min-width: 124px;
   }
   .deck-owner {
     font-size: 12px;

@@ -1,8 +1,5 @@
 name: CI and VPS Deploy
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 on:
   push:
     branches: ["main"]
@@ -21,10 +18,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: "pip"
@@ -45,7 +42,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Create source archive
         run: |
@@ -60,7 +57,7 @@ jobs:
             src
 
       - name: Upload deploy archive
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: eiketsu-vps-update
           path: eiketsu-vps-update.tar
@@ -74,7 +71,7 @@ jobs:
 
     steps:
       - name: Download deploy archive
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: eiketsu-vps-update
 

@@ -53,6 +53,11 @@ from eiketsu_env.services.server_share import (
     _effective_share_config,
     set_server_config,
 )
+from eiketsu_env.services.leaderboard import (
+    LEADERBOARD_PAYLOAD_VERSION,
+    LEADERBOARD_ROW_DECK,
+    RANK_SCOPE_ALL,
+)
 from eiketsu_env.services.share import ShareConfig, export_contribution
 from eiketsu_env.web import leaderboard_view
 from eiketsu_env.utils import sha256_text
@@ -549,6 +554,59 @@ def test_public_leaderboard_page_reads_materialized_rows_with_pagination(tmp_pat
     assert [item["rank"] for item in second["top_decks"]] == [3, 4]
 
 
+def test_public_leaderboard_page_defaults_to_sample_sort(tmp_path):
+    settings = _settings(tmp_path / "server")
+    engine = _init_db(settings)
+    set_server_config(settings, "Ver.vps", "2026-05-10", "2099-12-31")
+    with Session(engine) as session:
+        run = ServerLeaderboardRun(
+            scope="public",
+            status="ready",
+            payload_version=LEADERBOARD_PAYLOAD_VERSION,
+            target_version="Ver.vps",
+            date_from="2026-05-10",
+            date_to="2099-12-31",
+            include_solo=0,
+            upload_watermark=0,
+            match_count=2,
+            side_sample_count=11,
+            row_count=2,
+        )
+        session.add(run)
+        session.flush()
+        session.add_all(
+            [
+                ServerLeaderboardRow(
+                    run_id=run.id,
+                    row_type=LEADERBOARD_ROW_DECK,
+                    rank_scope=RANK_SCOPE_ALL,
+                    cluster_enabled=0,
+                    rank=1,
+                    sample_count=1,
+                    wilson_lower_bound=0.9,
+                    row_json={"deck_name": "High Wilson", "rank": 1, "sample_count": 1, "wilson_lower_bound": 0.9},
+                ),
+                ServerLeaderboardRow(
+                    run_id=run.id,
+                    row_type=LEADERBOARD_ROW_DECK,
+                    rank_scope=RANK_SCOPE_ALL,
+                    cluster_enabled=0,
+                    rank=2,
+                    sample_count=10,
+                    wilson_lower_bound=0.1,
+                    row_json={"deck_name": "High Sample", "rank": 2, "sample_count": 10, "wilson_lower_bound": 0.1},
+                ),
+            ]
+        )
+        session.commit()
+
+    payload = public_leaderboard_page(settings, include_archetypes=False, limit=1)
+    wilson_payload = public_leaderboard_page(settings, include_archetypes=False, limit=1, sort_key="wilson")
+
+    assert payload["top_decks"][0]["deck_name"] == "High Sample"
+    assert wilson_payload["top_decks"][0]["deck_name"] == "High Wilson"
+
+
 def test_public_leaderboard_page_can_switch_to_preserved_old_version_run(tmp_path):
     settings = _settings(tmp_path / "server")
     engine = _init_db(settings)
@@ -587,8 +645,37 @@ def test_public_leaderboard_page_can_switch_to_preserved_old_version_run(tmp_pat
     )
 
     html = _leaderboard_visual_page(old, cluster_enabled=False, display_limit=1)
-    assert "version=Ver.old" in html
-    assert "version=Ver.next" in html
+    assert '<select id="leaderboard-version-select"' in html
+    assert 'name="cluster" value="off"' in html
+    assert 'name="rank_scope" value="all"' in html
+    assert '<option value="Ver.old" selected>Ver.old</option>' in html
+    assert '<option value="Ver.next">Ver.next</option>' in html
+
+
+def test_public_leaderboard_page_shows_current_version_empty_state_with_old_switch(tmp_path):
+    settings = _settings(tmp_path / "server")
+    _init_db(settings)
+    set_server_config(settings, "Ver.old", "2026-05-10", "2026-05-12")
+    _insert_match(
+        settings,
+        "old-version-only",
+        ["card-a"],
+        ["card-b"],
+        version="Ver.old",
+    )
+    refresh_public_leaderboard_materialized(settings)
+
+    set_server_config(settings, "Ver.next", "2026-05-20", "2026-05-20")
+    payload = public_leaderboard_page(settings, include_archetypes=False, limit=1)
+    html = _leaderboard_visual_page(payload, cluster_enabled=False, display_limit=1)
+
+    assert payload["target_version"] == "Ver.next"
+    assert payload["leaderboard_status"] == "missing"
+    assert {"Ver.old", "Ver.next"}.issubset(set(payload["available_target_versions"]))
+    assert "暂无公开榜单数据" in html
+    assert '<select id="leaderboard-version-select"' in html
+    assert '<option value="Ver.old">Ver.old</option>' in html
+    assert '<option value="Ver.next" selected>Ver.next</option>' in html
 
 
 def test_upload_clears_leaderboard_snapshots(tmp_path):
@@ -973,6 +1060,8 @@ def test_leaderboard_view_controls_can_disable_clustering():
     assert "matchup-summary-block" in html
     assert "data-sort-wilson" in html
     assert "data-sort-sample" in html
+    assert 'data-sort-key="wilson" aria-pressed="false"' in html
+    assert 'data-sort-key="sample" aria-pressed="true"' in html
     assert "data-rank-value" in html
     assert "variant-viewer" in html
     assert "构筑 1/1" in html
