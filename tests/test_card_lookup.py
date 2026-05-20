@@ -66,6 +66,52 @@ def test_load_card_lookup_from_eki_database_sqlite(tmp_path: Path):
     assert lookup.cost_value("hash-a") == 1.0
 
 
+def test_load_card_lookup_merges_catalog_overlay(tmp_path: Path):
+    catalog_path = tmp_path / "card_catalog.json"
+    overlay_path = tmp_path / "card_catalog_overlay.json"
+    catalog_path.write_text(
+        json.dumps(
+            {
+                "cards": [
+                    {
+                        "hash_id": "old-hash",
+                        "name": "Old Card",
+                        "cost": "1.0",
+                        "unitType": "Spear",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    overlay_path.write_text(
+        json.dumps(
+            {
+                "cards": [
+                    {
+                        "hash_id": "new-hash",
+                        "name": "New Card",
+                        "cost": "2.0",
+                        "unitType": "Bow",
+                        "image_keys": {
+                            "card_small": "new-hash",
+                            "card_ds": "new-ds",
+                            "card_face": "new-face",
+                        },
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    lookup = load_card_lookup(_settings(tmp_path, catalog_path))
+
+    assert lookup.label("old-hash") == "Old Card(1.0 Spear)"
+    assert lookup.label("new-hash") == "New Card(2.0 Bow)"
+    assert lookup.label("new-face") == "New Card(2.0 Bow)"
+
+
 def test_load_card_lookup_from_official_base_snapshot(tmp_path: Path):
     catalog_root = tmp_path / "eki_database_v2"
     base_dir = catalog_root / "data" / "raw" / "official" / "base"
@@ -90,3 +136,6 @@ def test_load_card_lookup_from_official_base_snapshot(tmp_path: Path):
     lookup = load_card_lookup(_settings(tmp_path, catalog_root))
 
     assert lookup.label("hash-a") == "池内蔵太(1.0 槍兵)"
+    assert lookup.label("ds") == "池内蔵太(1.0 槍兵)"
+    assert lookup.label("face") == "池内蔵太(1.0 槍兵)"
+    assert lookup.official_card_small_url("face").endswith("/hash-a.jpg")

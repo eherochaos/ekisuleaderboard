@@ -65,6 +65,13 @@ class ClientSyncResult:
 
 
 @dataclass(slots=True)
+class ClientShareConfigResult:
+    config: ShareConfig
+    current_target_version: str
+    available_target_versions: list[str]
+
+
+@dataclass(slots=True)
 class ClientCleanupResult:
     raw_dir: Path
     files_removed: int
@@ -152,10 +159,11 @@ def sync_client(
     progress: ProgressReporter | None = None,
     date_from: str = "",
     date_to: str = "",
+    target_version: str = "",
 ) -> ClientSyncResult:
     config = load_client_config(settings)
     transport = transport or UrllibJsonTransport()
-    share_config = _request_share_config(config, transport)
+    share_config = _request_share_config(config, transport, target_version=target_version)
     share_config = apply_client_date_override(share_config, date_from=date_from, date_to=date_to)
 
     _ensure_client_database(settings)
@@ -200,9 +208,32 @@ def sync_client(
     )
 
 
-def fetch_client_share_config(settings: Settings, transport: JsonTransport | None = None) -> ShareConfig:
+def fetch_client_share_config(settings: Settings, transport: JsonTransport | None = None, target_version: str = "") -> ShareConfig:
     config = load_client_config(settings)
-    return _request_share_config(config, transport or UrllibJsonTransport())
+    return _request_share_config(config, transport or UrllibJsonTransport(), target_version=target_version)
+
+
+def fetch_client_share_config_state(
+    settings: Settings,
+    transport: JsonTransport | None = None,
+    target_version: str = "",
+) -> ClientShareConfigResult:
+    config = load_client_config(settings)
+    payload = _request_share_config_payload(config, transport or UrllibJsonTransport(), target_version=target_version)
+    share_config = ShareConfig.from_payload(payload)
+    share_config.validate()
+    available_versions = [
+        version
+        for version in dict.fromkeys(str(item or "").strip() for item in payload.get("available_target_versions") or [])
+        if version
+    ]
+    if share_config.target_version and share_config.target_version not in available_versions:
+        available_versions.insert(0, share_config.target_version)
+    return ClientShareConfigResult(
+        config=share_config,
+        current_target_version=str(payload.get("current_target_version") or share_config.target_version),
+        available_target_versions=available_versions,
+    )
 
 
 def check_client_update(
@@ -357,13 +388,22 @@ def cleanup_raw_snapshots(settings: Settings) -> ClientCleanupResult:
     )
 
 
-def _request_share_config(config: ClientConfig, transport: JsonTransport) -> ShareConfig:
-    remote_config = transport.request_json("GET", f"{config.server_url}/api/v1/config")
-    if not remote_config.get("configured", True):
-        raise RuntimeError("服务端还没有配置采集版本和日期范围")
+def _request_share_config(config: ClientConfig, transport: JsonTransport, target_version: str = "") -> ShareConfig:
+    remote_config = _request_share_config_payload(config, transport, target_version=target_version)
     share_config = ShareConfig.from_payload(remote_config)
     share_config.validate()
     return share_config
+
+
+def _request_share_config_payload(config: ClientConfig, transport: JsonTransport, target_version: str = "") -> dict[str, Any]:
+    url = f"{config.server_url}/api/v1/config"
+    requested_version = str(target_version or "").strip()
+    if requested_version:
+        url += "?" + urllib.parse.urlencode({"target_version": requested_version})
+    remote_config = transport.request_json("GET", url)
+    if not remote_config.get("configured", True):
+        raise RuntimeError("服务端还没有配置采集版本和日期范围")
+    return remote_config
 
 
 def _client_tmp_dir(settings: Settings) -> Path:

@@ -22,6 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sync = subparsers.add_parser("sync", help="采集本机登录态数据并上传到 VPS")
     sync.add_argument("--auth-source", default="", help="auto/default-browser/chrome/edge/brave/firefox/firefox-profile")
+    sync.add_argument("--target-version", "--version", dest="target_version", default="", help="指定采集上传的目标版本；留空默认使用服务端最新版本")
     sync.add_argument("--no-progress", action="store_true", help="不显示采集进度")
 
     subparsers.add_parser("doctor", help="检查本机绑定和服务端配置")
@@ -68,6 +69,7 @@ def main(argv: list[str] | None = None) -> None:
         result = sync_client(
             settings,
             auth_source=args.auth_source,
+            target_version=args.target_version,
             progress=ProgressReporter(enabled=not args.no_progress),
         )
         print(

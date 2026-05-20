@@ -86,8 +86,9 @@ python -m eiketsu_env share sync --contributor 你的昵称
 1. 打开官方首页确认“現在稼働中バージョン”和开始日期。
 2. 更新 `shared/share_config.json` 的 `target_version`、`date_from`、`date_to`；新版本刚开时 `date_to` 可以先写开始日，工具会按日本时间自动延到当天。
 3. 更新 `src/eiketsu_env/config.py` 的 `VERSION_START_DATES`，保留旧版本开始日，方便历史过滤和页面切换。
-4. 在 VPS 执行 `eiketsu-server admin set-config --target-version 新版本 --date-from 开始日 --date-to 开始日`，随后执行 `eiketsu-server admin refresh-leaderboard`。
-5. 通知贡献者重新同步或上传。新版本暂无上传时页面会显示空状态；旧版本榜单不要删除，用户可在公开榜单页“目标版本”处自行切换。
+4. 同步最新官方卡表；如果 VPS 没挂外部 `eki_database_v2`，把新卡补进 `assets/card_catalog_overlay.json`，避免公开榜显示“未识别卡”。
+5. 在 VPS 执行 `eiketsu-server admin set-config --target-version 新版本 --date-from 开始日 --date-to 开始日`，随后执行 `eiketsu-server admin refresh-leaderboard`。
+6. 通知贡献者重新同步或上传。新版本暂无上传时页面会显示空状态；旧版本榜单不要删除，用户可在公开榜单页“目标版本”处自行切换。
 
 推荐朋友侧使用：
 
@@ -162,18 +163,20 @@ scripts\run_client_gui.bat
 5. 点击“开始同步”，看进度条和日志，提示完成前不要关闭窗口。
 6. 完成后点击“我的上传”或“排行榜”查看结果。
 
+目标版本默认使用服务端返回的最新版本；需要补传旧版本时，可以在第 3 步的“目标版本”下拉框切换，日期范围会随版本重新计算。
+
 打包给朋友的 Windows 单文件 exe：
 
 ```powershell
 scripts\build_client_exe.ps1
 ```
 
-第一次生成后发送 `dist\EiketsuCollector_0.1.8.exe` 这类带版本号的文件给朋友即可。这个版本开始会自动检查 VPS 上的新客户端；以后你只需要在 VPS 发布新版，朋友打开旧客户端时会看到下载提示。
+第一次生成后发送 `dist\EiketsuCollector_0.1.9.exe` 这类带版本号的文件给朋友即可。这个版本开始会自动检查 VPS 上的新客户端；以后你只需要在 VPS 发布新版，朋友打开旧客户端时会看到下载提示。
 
 发布新版客户端到 VPS：
 
 ```powershell
-scripts\publish_client_update.ps1 -Version 0.1.8 -Notes "更新说明"
+scripts\publish_client_update.ps1 -Version 0.1.9 -Notes "支持 Ver.3.5.0A 默认采集和旧版本切换"
 ```
 
 管理页可查看当前发布的客户端更新包：`/admin/updates`。CLI 仍保留给排查使用：
@@ -181,9 +184,10 @@ scripts\publish_client_update.ps1 -Version 0.1.8 -Notes "更新说明"
 ```powershell
 eiketsu-client bind --server http://你的VPS_IP:8000 --invite 邀请码 --contributor 昵称
 eiketsu-client sync
+eiketsu-client sync --target-version Ver.3.1.0H
 ```
 
-`sync` 会从服务端读取目标版本和日期范围，自动检查默认浏览器登录态，必要时打开会员区登录页，然后采集、导出标准化 JSONL、上传到 VPS。上传包不包含 cookies、浏览器 profile、本地路径、raw HTML 或 SQLite。
+`sync` 会从服务端读取目标版本和日期范围，默认使用最新目标版本；传 `--target-version` 可以补传旧版本。随后工具会自动检查默认浏览器登录态，必要时打开会员区登录页，然后采集、导出标准化 JSONL、上传到 VPS。上传包不包含 cookies、浏览器 profile、本地路径、raw HTML 或 SQLite。
 
 查看页面：
 

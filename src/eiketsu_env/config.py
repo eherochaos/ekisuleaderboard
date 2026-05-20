@@ -15,6 +15,22 @@ VERSION_START_DATES = {
 }
 
 
+def known_target_versions() -> list[str]:
+    return [
+        version
+        for version, _start in sorted(
+            VERSION_START_DATES.items(),
+            key=lambda item: (item[1], item[0]),
+            reverse=True,
+        )
+    ]
+
+
+def latest_target_version() -> str:
+    versions = known_target_versions()
+    return versions[0] if versions else ""
+
+
 def version_start_date(version: str) -> str:
     return VERSION_START_DATES.get(str(version or "").strip(), "")
 

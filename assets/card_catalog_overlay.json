@@ -1,0 +1,1686 @@
+{
+  "source": "official-base-02ff068aa8b349e09985f76003e0fd06_base_b6f5eaac83cd.json",
+  "generated_for": "Ver.3.5.0A",
+  "cards": [
+    {
+      "hash_id": "5064cda313b016546e538af8685030c5",
+      "card_code": "ST005",
+      "name": "北添佶摩",
+      "faction": "蒼",
+      "card_type": "スターター",
+      "cost": "3.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "5064cda313b016546e538af8685030c5",
+        "card_ds": "c968ab4b80415f1e11c58abfd8aff743",
+        "card_face": "aba16e11c671dee5814b688b133bcf5d"
+      }
+    },
+    {
+      "hash_id": "1173e56f76898c26e1683780f4b8c159",
+      "card_code": "ST006",
+      "name": "祖茂",
+      "faction": "蒼",
+      "card_type": "スターター",
+      "cost": "3.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "1173e56f76898c26e1683780f4b8c159",
+        "card_ds": "b9e475eddb76bac407d925c1422eff33",
+        "card_face": "e8e8cd4ea806c1fc5a5b5fc91cc59589"
+      }
+    },
+    {
+      "hash_id": "2a590d768ddbc8d653b81452da41fae9",
+      "card_code": "蒼170",
+      "name": "アリストテレス",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "2a590d768ddbc8d653b81452da41fae9",
+        "card_ds": "673b43d77b8bedb2ae5451f7a11885d6",
+        "card_face": "4e8e9b8387a914f5865b0aa68578043f"
+      }
+    },
+    {
+      "hash_id": "528e2681f5bb1ec6150c6fb1e37936ca",
+      "card_code": "蒼171",
+      "name": "アレクサンドロス大王",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "3.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "528e2681f5bb1ec6150c6fb1e37936ca",
+        "card_ds": "d45147d2825402a501d7dd406d817a3a",
+        "card_face": "2fc74f467ee98e3002d8e941719d5afa"
+      }
+    },
+    {
+      "hash_id": "8010cd00fb63172b9dd07c1c5a000878",
+      "card_code": "蒼172",
+      "name": "エウメネス",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "8010cd00fb63172b9dd07c1c5a000878",
+        "card_ds": "2d3df4130a4c2bdb18e21e4c5711947b",
+        "card_face": "95afb3c995c7db7cb83bd3b8a9539a0d"
+      }
+    },
+    {
+      "hash_id": "40017884202d67cba3cb570e53de6fc6",
+      "card_code": "蒼173",
+      "name": "織田信長",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "40017884202d67cba3cb570e53de6fc6",
+        "card_ds": "4e065c7a92c762f4de61426742ef7641",
+        "card_face": "0ae3cd915af5c08a61bbca3aba12ee64"
+      }
+    },
+    {
+      "hash_id": "5f84ee5838036f7ebcd07b38f9c0cc77",
+      "card_code": "蒼174",
+      "name": "キュナ",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "5f84ee5838036f7ebcd07b38f9c0cc77",
+        "card_ds": "e26bd4c4b4084e27649176a6adab261a",
+        "card_face": "556e7d0986a72b6801e2f315a14ef974"
+      }
+    },
+    {
+      "hash_id": "5b07dcfa627cb632c45eb22d64a54691",
+      "card_code": "蒼175",
+      "name": "佐々成政",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "5b07dcfa627cb632c45eb22d64a54691",
+        "card_ds": "a3118fb46331904bfce30a0c7c2c4157",
+        "card_face": "00bd2197f6deafe4be59fc898fb77ccb"
+      }
+    },
+    {
+      "hash_id": "e0905c3821901aa4ff1151d6fb2c5a97",
+      "card_code": "蒼176",
+      "name": "シェヘラザード",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "e0905c3821901aa4ff1151d6fb2c5a97",
+        "card_ds": "4aa4548bbac3165a789e5477f898d6e8",
+        "card_face": "8f0101497f9a99af68450be0bd403c33"
+      }
+    },
+    {
+      "hash_id": "a0138699b63b8cc15311940f71624f81",
+      "card_code": "蒼177",
+      "name": "司空馬",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "a0138699b63b8cc15311940f71624f81",
+        "card_ds": "a01dd6b7187a27bc7f75a005acb0703b",
+        "card_face": "a11eaedf995143180dc05400eaa3fa0b"
+      }
+    },
+    {
+      "hash_id": "fe45abc34b81248736a7e82238ec1d4c",
+      "card_code": "蒼178",
+      "name": "子楚",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "fe45abc34b81248736a7e82238ec1d4c",
+        "card_ds": "196d313fa41b34caf6f8b6888386fb48",
+        "card_face": "73fe902d9b2ef6b100d0e494e88ee21c"
+      }
+    },
+    {
+      "hash_id": "b8983cad3354727fd1151ab9b3973e42",
+      "card_code": "蒼179",
+      "name": "朱桓",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "b8983cad3354727fd1151ab9b3973e42",
+        "card_ds": "216434127b793d1b52bf535a723d034a",
+        "card_face": "6eea62a9b2db029a8c95515ae2693a3e"
+      }
+    },
+    {
+      "hash_id": "26f7701bba53c41f67446a84dd2ae3b5",
+      "card_code": "蒼180",
+      "name": "曾我兄弟",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "26f7701bba53c41f67446a84dd2ae3b5",
+        "card_ds": "9dd00d5628c3f11b88cd386410ac2961",
+        "card_face": "87a856c22ea126502b5376f7d52cc367"
+      }
+    },
+    {
+      "hash_id": "c60fa9b99a64a149d44fd97f86d26db9",
+      "card_code": "蒼181",
+      "name": "高山右近",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "c60fa9b99a64a149d44fd97f86d26db9",
+        "card_ds": "e301d3b4e29fde7f759d7df823138267",
+        "card_face": "99db8134f755b834c77d3da902ee15c9"
+      }
+    },
+    {
+      "hash_id": "2150a398c97b3ab9675e1b240ecba7ce",
+      "card_code": "蒼182",
+      "name": "ヘファイスティオン",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "2150a398c97b3ab9675e1b240ecba7ce",
+        "card_ds": "b251bd21791ba681d25b02df58614594",
+        "card_face": "6295f359c9020832a58f5e4c3e3ed86d"
+      }
+    },
+    {
+      "hash_id": "dee7735ad90b807e83fd3020eb8977d6",
+      "card_code": "蒼183",
+      "name": "ロクサネ",
+      "faction": "蒼",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "dee7735ad90b807e83fd3020eb8977d6",
+        "card_ds": "5b2a8012885b6a754c81eca2a15fe0f0",
+        "card_face": "824241d4907037c5bba15455f54cc701"
+      }
+    },
+    {
+      "hash_id": "278c336469e1c8e22c6d131cf73e2a64",
+      "card_code": "EX193",
+      "name": "長宗我部元親",
+      "faction": "蒼",
+      "card_type": "EX",
+      "cost": "2.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "278c336469e1c8e22c6d131cf73e2a64",
+        "card_ds": "4442925bedc0bae95d4e01ccb4571ec4",
+        "card_face": "b9cf9a50eaf21d76afb5487a539ec87b"
+      }
+    },
+    {
+      "hash_id": "c42332a38e73008a6dbcc6fd9dd96581",
+      "card_code": "EX194",
+      "name": "李斯",
+      "faction": "蒼",
+      "card_type": "EX",
+      "cost": "1.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "c42332a38e73008a6dbcc6fd9dd96581",
+        "card_ds": "cc2eec2be74eddea58de79e7a9fa7983",
+        "card_face": "359af1bad5a7f4b2959a0fa7f68ea180"
+      }
+    },
+    {
+      "hash_id": "c9af3096cb278c0440448e80b4cf8f05",
+      "card_code": "ST007",
+      "name": "大熊朝秀",
+      "faction": "緋",
+      "card_type": "スターター",
+      "cost": "3.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "c9af3096cb278c0440448e80b4cf8f05",
+        "card_ds": "5d2bbdcc19b31e3dfbe5f5243aa1f529",
+        "card_face": "394aa03e7fbaa50e13c09c627be300aa"
+      }
+    },
+    {
+      "hash_id": "4104c5c3c3da8a6f59414f40a62bf274",
+      "card_code": "ST008",
+      "name": "毛利敬親",
+      "faction": "緋",
+      "card_type": "スターター",
+      "cost": "3.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "4104c5c3c3da8a6f59414f40a62bf274",
+        "card_ds": "d4db2bdae91ebe00eb2e606b5b749e0e",
+        "card_face": "b6a7d1ad700110c2c07d9c836721d7d9"
+      }
+    },
+    {
+      "hash_id": "10c2de69d7bfb6a291056ed176930e6f",
+      "card_code": "緋171",
+      "name": "ガイウス・ラエリウス",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "10c2de69d7bfb6a291056ed176930e6f",
+        "card_ds": "e3544406c179606d923153b4e71c39f5",
+        "card_face": "485bd9134ebfe4afc9e3bb3f56926a27"
+      }
+    },
+    {
+      "hash_id": "cb04084bdfd4a027f40b9295e87dac67",
+      "card_code": "緋172",
+      "name": "コルネリア・アフリカナ",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "cb04084bdfd4a027f40b9295e87dac67",
+        "card_ds": "699aa099f076db17c61e13971856f359",
+        "card_face": "a3162d08cd2940b1c90a35f259e80d33"
+      }
+    },
+    {
+      "hash_id": "a8c04ff1a46aaa214dd1c9a38bea1baf",
+      "card_code": "緋173",
+      "name": "清水宗治",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "a8c04ff1a46aaa214dd1c9a38bea1baf",
+        "card_ds": "558fb0280f39da4f975b93516999de1b",
+        "card_face": "f442147eeb780884d30db555533d39d6"
+      }
+    },
+    {
+      "hash_id": "7bd589ee312857843bf9806384bf0302",
+      "card_code": "緋174",
+      "name": "スキピオ",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "7bd589ee312857843bf9806384bf0302",
+        "card_ds": "d5be466f1a3d25fed95b60af501e45b2",
+        "card_face": "24558fc667de5d9cf328328271d2865f"
+      }
+    },
+    {
+      "hash_id": "68f34df5deab321a93ecf8778d534de4",
+      "card_code": "緋175",
+      "name": "広沢真臣",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "68f34df5deab321a93ecf8778d534de4",
+        "card_ds": "0e42354c4798a0369909bb9636242f4b",
+        "card_face": "2b12d4b2aa6decdc58eabaeab05c2f75"
+      }
+    },
+    {
+      "hash_id": "e4a072f6f629c7423140fc731bc30ba7",
+      "card_code": "緋176",
+      "name": "ファビウス",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "e4a072f6f629c7423140fc731bc30ba7",
+        "card_ds": "50a654137be71cdf7c6eee134cfee2be",
+        "card_face": "4659e79614bb735b15486adec809ed0f"
+      }
+    },
+    {
+      "hash_id": "48a4ba09ef52d31f70d644890f87e99a",
+      "card_code": "緋177",
+      "name": "マシニッサ",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "48a4ba09ef52d31f70d644890f87e99a",
+        "card_ds": "187252752c568ab23d751a84f81eb994",
+        "card_face": "63dfe880ff7ae427c429e7c00578e28f"
+      }
+    },
+    {
+      "hash_id": "351c3c9481ee9374b46affa6aa482e3a",
+      "card_code": "緋178",
+      "name": "マルケルス",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "351c3c9481ee9374b46affa6aa482e3a",
+        "card_ds": "d1ff2aa47fb9a09c0d7ef291fdb23161",
+        "card_face": "d279245fd42187471c11a2b6dda4451c"
+      }
+    },
+    {
+      "hash_id": "a43ae2fb6c3b40c7b9e4d5a14dcdf3ec",
+      "card_code": "緋179",
+      "name": "南の大方",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "a43ae2fb6c3b40c7b9e4d5a14dcdf3ec",
+        "card_ds": "9aa61fb0265671acaa002ccfc3a1aa40",
+        "card_face": "afb9db5bf18e2ff48624cb502500cd4b"
+      }
+    },
+    {
+      "hash_id": "6edafd031acdd4bc100a1e7386f2112d",
+      "card_code": "緋180",
+      "name": "毛利秀元",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "6edafd031acdd4bc100a1e7386f2112d",
+        "card_ds": "b32ffb71adf9b1cf513f64cccbfb7629",
+        "card_face": "731b9992d6efe0c75a7f3d91b0ea2b2b"
+      }
+    },
+    {
+      "hash_id": "c932fbe3be7f5e5debd09ff22be3ef44",
+      "card_code": "緋181",
+      "name": "毛利元就",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "3.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "c932fbe3be7f5e5debd09ff22be3ef44",
+        "card_ds": "f3ee72f048069d290f1e1dad0e6abf04",
+        "card_face": "3b32a8c52975d9a196f60a37c04072b1"
+      }
+    },
+    {
+      "hash_id": "66b9abf1398e2ff2b002e0002edd4799",
+      "card_code": "緋182",
+      "name": "山県有朋",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "66b9abf1398e2ff2b002e0002edd4799",
+        "card_ds": "1d1cc91444dffbdcd7c88fe6b6ae9070",
+        "card_face": "547d6a2ae12ddaa5369de554de928eae"
+      }
+    },
+    {
+      "hash_id": "1fc3d760d8f7ac409679e34b159b8b4b",
+      "card_code": "緋183",
+      "name": "廊御方",
+      "faction": "緋",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "1fc3d760d8f7ac409679e34b159b8b4b",
+        "card_ds": "37edf9f92e6ce1f96e5ea742d7124936",
+        "card_face": "f7b50e0bbe0e894ef69dc26f4c66a5ee"
+      }
+    },
+    {
+      "hash_id": "c84d43b3c078cfc4efe10461f634595d",
+      "card_code": "ST009",
+      "name": "鳥居元忠",
+      "faction": "碧",
+      "card_type": "スターター",
+      "cost": "3.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "c84d43b3c078cfc4efe10461f634595d",
+        "card_ds": "82577a98eaa6e784fc5e4fcaaf586a0a",
+        "card_face": "b440a19eb368083f8bc2df1933cd327f"
+      }
+    },
+    {
+      "hash_id": "b2ab6534e7e65383ced536a1e66bace4",
+      "card_code": "ST010",
+      "name": "田豫",
+      "faction": "碧",
+      "card_type": "スターター",
+      "cost": "3.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "b2ab6534e7e65383ced536a1e66bace4",
+        "card_ds": "6312570b87303a47f74d5bbfc351ca21",
+        "card_face": "2fcc31d9e36657bc723dd0692619e0ca"
+      }
+    },
+    {
+      "hash_id": "f6d1952e7d4c2bca29cf532eb66c0ab8",
+      "card_code": "碧169",
+      "name": "お夏の方",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "f6d1952e7d4c2bca29cf532eb66c0ab8",
+        "card_ds": "aa5186f95ceabb1c53c00f8f32f0ef30",
+        "card_face": "ad1fbd9b0a436ad9ab7f77d6ba376348"
+      }
+    },
+    {
+      "hash_id": "ebe752b05efc8703aad7540b88ec3efd",
+      "card_code": "碧170",
+      "name": "厳顔",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "ebe752b05efc8703aad7540b88ec3efd",
+        "card_ds": "4bc511f6015a77222cd5e68499ab253b",
+        "card_face": "ebc8eff329b2869e314fed3e98cffd0d"
+      }
+    },
+    {
+      "hash_id": "2ee009ec8dc5e7f12529057b44bf46a5",
+      "card_code": "碧171",
+      "name": "周倉",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "2ee009ec8dc5e7f12529057b44bf46a5",
+        "card_ds": "9e8d443705d6a74cc3eaa95d265a3fbd",
+        "card_face": "73f1c555ca414da055a2d84c629c0a90"
+      }
+    },
+    {
+      "hash_id": "c0160e65bd79f650cf45020f32890d30",
+      "card_code": "碧172",
+      "name": "諸葛果",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "c0160e65bd79f650cf45020f32890d30",
+        "card_ds": "579b88741404c215471405bd4711e159",
+        "card_face": "cb985b96c86bf768f1c55cc9468c0f9e"
+      }
+    },
+    {
+      "hash_id": "6edb9348baeb2dd4e91ed56bad595b93",
+      "card_code": "碧173",
+      "name": "薛仁貴",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "3.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "6edb9348baeb2dd4e91ed56bad595b93",
+        "card_ds": "f184dad2d62db1a6a9c58b2298f4493d",
+        "card_face": "afc0ee2ea12c6d08bbbd1383d47bb63f"
+      }
+    },
+    {
+      "hash_id": "9ab409a371b4b67072d1e898a7ed61e5",
+      "card_code": "碧174",
+      "name": "徳川家治",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "9ab409a371b4b67072d1e898a7ed61e5",
+        "card_ds": "34841348224090dd33d52d839645400f",
+        "card_face": "d86d9d7e1e472e160b8dc31326163f32"
+      }
+    },
+    {
+      "hash_id": "b599b771cf14e1213d8a46d2df53beb8",
+      "card_code": "碧175",
+      "name": "徳川綱吉",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "b599b771cf14e1213d8a46d2df53beb8",
+        "card_ds": "50d5146a70af994a6ac3defa079ab84a",
+        "card_face": "d72596d873ac9a670163c8861d948b30"
+      }
+    },
+    {
+      "hash_id": "5348ec6df65a13a44b952adc20af8cf7",
+      "card_code": "碧176",
+      "name": "南陽院",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "5348ec6df65a13a44b952adc20af8cf7",
+        "card_ds": "289cfdb9b35cbbf58fdc71ecbd57dd39",
+        "card_face": "602e3c0c84647e4437f697d9e50c874a"
+      }
+    },
+    {
+      "hash_id": "9c1baefa1d3c8bf2ca46da630723edef",
+      "card_code": "碧177",
+      "name": "パカル大王",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "9c1baefa1d3c8bf2ca46da630723edef",
+        "card_ds": "11ba8f9fc6944298500335198ccebe54",
+        "card_face": "3e3ac2192636cf6e55bb7ca7c78b63ad"
+      }
+    },
+    {
+      "hash_id": "2f291f820dd7f4e85082f7bb04d52856",
+      "card_code": "碧178",
+      "name": "北条幻庵",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "2f291f820dd7f4e85082f7bb04d52856",
+        "card_ds": "8781d92df217ff5d47e3aa4ad6f69b25",
+        "card_face": "8d5427acb83f79e3cd2d4b50b44ab689"
+      }
+    },
+    {
+      "hash_id": "e054796d7b5a9a2672b5135fc4b4009b",
+      "card_code": "碧179",
+      "name": "北条早雲",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "e054796d7b5a9a2672b5135fc4b4009b",
+        "card_ds": "9833534d528f0fa27fa68b54e20457ec",
+        "card_face": "ba9351280b92a40db0c7b4f3acea85c5"
+      }
+    },
+    {
+      "hash_id": "0b494ffd4e2b9bfaef91dc649e4cc488",
+      "card_code": "碧180",
+      "name": "李世民",
+      "faction": "碧",
+      "card_type": "通常",
+      "cost": "3.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "0b494ffd4e2b9bfaef91dc649e4cc488",
+        "card_ds": "16371c429e4f75b046da71d2dba761d3",
+        "card_face": "e52352727b8a9d60f05d3d194bd5e41d"
+      }
+    },
+    {
+      "hash_id": "195fa33ea621115d4e4a2ed4db903f08",
+      "card_code": "ST011",
+      "name": "本庄実乃",
+      "faction": "玄",
+      "card_type": "スターター",
+      "cost": "3.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "195fa33ea621115d4e4a2ed4db903f08",
+        "card_ds": "d5efc3e969ebe348ed1e1a80930dd4b0",
+        "card_face": "9c062be1fff86ae78601b46e937a9220"
+      }
+    },
+    {
+      "hash_id": "b7f4be176a346d423e42bdc52a0aa88b",
+      "card_code": "ST012",
+      "name": "宮部鼎蔵",
+      "faction": "玄",
+      "card_type": "スターター",
+      "cost": "3.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "b7f4be176a346d423e42bdc52a0aa88b",
+        "card_ds": "eeecc48645e752b8748aa75309689ec7",
+        "card_face": "2d4ef1a48281cbaf59703e8decaeee90"
+      }
+    },
+    {
+      "hash_id": "e517f96249d492960cf3461721a58e46",
+      "card_code": "玄173",
+      "name": "阿野全成",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "e517f96249d492960cf3461721a58e46",
+        "card_ds": "e0367cd700133427eb937c92ed58e862",
+        "card_face": "f69d74dc05306d4d413639ecf2bdd527"
+      }
+    },
+    {
+      "hash_id": "6c80a499edb20430f27734958915a0f9",
+      "card_code": "玄174",
+      "name": "アルビダ",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "6c80a499edb20430f27734958915a0f9",
+        "card_ds": "00dcc0807c837fb8d1e4f91186d74562",
+        "card_face": "6223677f36cc3415a9556e7d07dea19b"
+      }
+    },
+    {
+      "hash_id": "f51705213781c31755298fc040ee6034",
+      "card_code": "玄175",
+      "name": "犬塚信乃",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "f51705213781c31755298fc040ee6034",
+        "card_ds": "cd356614fb87b1dd20d32ed91301bc17",
+        "card_face": "8974a1ff459160292903191dba941b02"
+      }
+    },
+    {
+      "hash_id": "c69fbfc77a2f2d1ffd5ea58a1c4062a9",
+      "card_code": "玄176",
+      "name": "上杉憲顕",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "c69fbfc77a2f2d1ffd5ea58a1c4062a9",
+        "card_ds": "bb5e099134776db3bb2bc03374bf7975",
+        "card_face": "724b00cbeee9dcbc2aaa69c79b9ef577"
+      }
+    },
+    {
+      "hash_id": "805954301ecddfea3ae81d94b1084615",
+      "card_code": "玄177",
+      "name": "侯氏",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "805954301ecddfea3ae81d94b1084615",
+        "card_ds": "d90d53c22e4ebd6a0e086d314a74fefc",
+        "card_face": "6fb142ab4757e6b611066863d90920ca"
+      }
+    },
+    {
+      "hash_id": "2d1519946958f172ac7a72ed534d001e",
+      "card_code": "玄178",
+      "name": "小雀",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "2d1519946958f172ac7a72ed534d001e",
+        "card_ds": "6153d7b4a81de4183d57b56f84fc948f",
+        "card_face": "b8ab86131f9ff8bdd4dbd9c9df4125cc"
+      }
+    },
+    {
+      "hash_id": "42a30a65da38a805dcb978067172e463",
+      "card_code": "玄179",
+      "name": "郷御前",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "42a30a65da38a805dcb978067172e463",
+        "card_ds": "d7d29d86637952f45445b2e0c5634783",
+        "card_face": "ade1f2a758403336face8dc6f737c25e"
+      }
+    },
+    {
+      "hash_id": "62468065460dbed0f8c0b6c1a3a1c641",
+      "card_code": "玄180",
+      "name": "荀子",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "62468065460dbed0f8c0b6c1a3a1c641",
+        "card_ds": "be2401177ee89a2d732e7e726f0bcad2",
+        "card_face": "8c312fd54cba1718cbaad7f2e5605a0f"
+      }
+    },
+    {
+      "hash_id": "9036360d273beaaae563e741be7ef7bc",
+      "card_code": "玄181",
+      "name": "ジョン・ホークウッド",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "9036360d273beaaae563e741be7ef7bc",
+        "card_ds": "a3ba05ce4303406ecb43f791d22ebff2",
+        "card_face": "6a4d0ad6e96e1370ad2c6a110aad2b55"
+      }
+    },
+    {
+      "hash_id": "42d90969524a5a52ec836f1df963ae9d",
+      "card_code": "玄182",
+      "name": "鈴木重朝",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "42d90969524a5a52ec836f1df963ae9d",
+        "card_ds": "0b570ed7c7b680ecfdeedb219cc6498c",
+        "card_face": "d79e310f230db45a987f3343a0a007a8"
+      }
+    },
+    {
+      "hash_id": "70c7bec40b88f26e84da6b18111df470",
+      "card_code": "玄183",
+      "name": "伏姫",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "70c7bec40b88f26e84da6b18111df470",
+        "card_ds": "50ffe6d6dbc345332cec791ee2664bb1",
+        "card_face": "10647f2a710a19a6ca712cf333ff1825"
+      }
+    },
+    {
+      "hash_id": "a7deff5912cb444666b461e75a6f2bdc",
+      "card_code": "玄184",
+      "name": "武霊王",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "3.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "a7deff5912cb444666b461e75a6f2bdc",
+        "card_ds": "4777b69f2ca4d5ab4f68eba526c385fe",
+        "card_face": "4ba0a3b6f7ac816150a397fb992bd8e7"
+      }
+    },
+    {
+      "hash_id": "36166222baeb33aa5a4064348e279a04",
+      "card_code": "玄185",
+      "name": "盧氏",
+      "faction": "玄",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "36166222baeb33aa5a4064348e279a04",
+        "card_ds": "7f1e8a32b0f3fc539e688a2a4d5dc3ac",
+        "card_face": "5e31414690144a88cc783c79305c3e0f"
+      }
+    },
+    {
+      "hash_id": "d4dc9993be0ab07f394ed1681808cfdb",
+      "card_code": "紫134",
+      "name": "曲亭馬琴",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "d4dc9993be0ab07f394ed1681808cfdb",
+        "card_ds": "be0ef55d1a8eecc1e3f6b1e372b7b886",
+        "card_face": "5da2dc520808b4d0c06a8d7e265ea000"
+      }
+    },
+    {
+      "hash_id": "67189993e0bd4e6ab9bd60ae71d7f7cf",
+      "card_code": "紫135",
+      "name": "周勃",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "67189993e0bd4e6ab9bd60ae71d7f7cf",
+        "card_ds": "7da3b3c311a40e3ddbdc6429c5a533e6",
+        "card_face": "ee03ef6af3aaf9d600af2f178fc8934c"
+      }
+    },
+    {
+      "hash_id": "17d5fe4ac7059509f8feb4c8a54bd99e",
+      "card_code": "紫136",
+      "name": "ソフォニスバ",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "17d5fe4ac7059509f8feb4c8a54bd99e",
+        "card_ds": "654f659bcb748c782c0567ba5270b824",
+        "card_face": "7ce9ebcf00fc5e18a9f8d1e81df696e4"
+      }
+    },
+    {
+      "hash_id": "617fcae062d9e8fa0b5c6390553a8bc0",
+      "card_code": "紫137",
+      "name": "妲己",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "617fcae062d9e8fa0b5c6390553a8bc0",
+        "card_ds": "a81539b3e9294a0f6191bec8a894adb0",
+        "card_face": "f3615be14e2cb21967a9d73983ec000c"
+      }
+    },
+    {
+      "hash_id": "209c9fe2e1eae1b635afdb9559843962",
+      "card_code": "紫138",
+      "name": "妲己のお百",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "209c9fe2e1eae1b635afdb9559843962",
+        "card_ds": "6f6a7ff4062892ddb421b4d2c81b0112",
+        "card_face": "a67c8a53f68537a612ff1c47ee5689dd"
+      }
+    },
+    {
+      "hash_id": "d3a2a5a2139aa7203c6104274ad3c471",
+      "card_code": "紫139",
+      "name": "紂王",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "d3a2a5a2139aa7203c6104274ad3c471",
+        "card_ds": "2b539de071eb1ea2946505c687254a84",
+        "card_face": "964312cf03a1ff1a656dd0e0ae8bc7d8"
+      }
+    },
+    {
+      "hash_id": "2c9c354a4ed086eab7c9c7b937698fc6",
+      "card_code": "紫140",
+      "name": "禰衡",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "2c9c354a4ed086eab7c9c7b937698fc6",
+        "card_ds": "1031fa23d94adfd6e456dd58609ef916",
+        "card_face": "016886a0d153aa4239fb462f160bfcaa"
+      }
+    },
+    {
+      "hash_id": "c3f27c3746b5446bcf68c814eb4a9dbb",
+      "card_code": "紫141",
+      "name": "ハスドルバル・バルカ",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "c3f27c3746b5446bcf68c814eb4a9dbb",
+        "card_ds": "4ebd59f44d52da06bf304cb44bd63539",
+        "card_face": "037825e23a4c2d92fc6c0dc8947ab889"
+      }
+    },
+    {
+      "hash_id": "95920a7ee1861f8f15ad6a4439ad4ece",
+      "card_code": "紫142",
+      "name": "ハンニバル",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "95920a7ee1861f8f15ad6a4439ad4ece",
+        "card_ds": "53b0eb89ec88d55ae8fe5fa5e153d362",
+        "card_face": "2b3fdb303d0083c5eb08f60a2dc1f2da"
+      }
+    },
+    {
+      "hash_id": "fab5a1f9f89918635abc4f23bf5a8a39",
+      "card_code": "紫143",
+      "name": "傅説",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "fab5a1f9f89918635abc4f23bf5a8a39",
+        "card_ds": "938d52b0cc955b1e802afd2d10cfaca6",
+        "card_face": "ee02d845b69053e93daca0b3e6c96969"
+      }
+    },
+    {
+      "hash_id": "791bcd400d2fb3525c3591558750e915",
+      "card_code": "紫144",
+      "name": "婦好",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "791bcd400d2fb3525c3591558750e915",
+        "card_ds": "b1f88b323b5f33bb863a8ffae2468713",
+        "card_face": "0fff9235fe5770b71887864769ce1604"
+      }
+    },
+    {
+      "hash_id": "a45236797ae35a0d85998f056c5cbcf9",
+      "card_code": "紫145",
+      "name": "武丁",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "a45236797ae35a0d85998f056c5cbcf9",
+        "card_ds": "303ba7e87e34fb6846667025002eecce",
+        "card_face": "5e8f0531987abfe0eb9f3397431ed05e"
+      }
+    },
+    {
+      "hash_id": "7bd65fc7d80d37ebb8a4f2dc7092d270",
+      "card_code": "紫146",
+      "name": "マゴーネ",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "7bd65fc7d80d37ebb8a4f2dc7092d270",
+        "card_ds": "1ef0b41ba8295d33218db7575c4ffbc6",
+        "card_face": "88c6b3d81f1102526bdaf45e5eacbb32"
+      }
+    },
+    {
+      "hash_id": "2b8bae0f4e037f7e6e67773a56fd057a",
+      "card_code": "紫147",
+      "name": "マゴ・バルカ",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "2b8bae0f4e037f7e6e67773a56fd057a",
+        "card_ds": "3a09c38d6cbc9883553c795795a2d14b",
+        "card_face": "e9258b820be4cb006fadde4937f4ac9d"
+      }
+    },
+    {
+      "hash_id": "e9dc42a0989779fed8b37613416cceaa",
+      "card_code": "紫148",
+      "name": "四葩",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "e9dc42a0989779fed8b37613416cceaa",
+        "card_ds": "dc2512ae2d68b141dbf4801887ae7ab6",
+        "card_face": "5264e6265e404c69a4b64b74dae29af7"
+      }
+    },
+    {
+      "hash_id": "1b64c1986bed41844b54b0a37f64616a",
+      "card_code": "紫149",
+      "name": "両面宿儺",
+      "faction": "紫",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "1b64c1986bed41844b54b0a37f64616a",
+        "card_ds": "c32f428113bea39432529d74d922417c",
+        "card_face": "fcb7fcafc1312ccf7274322967f3c00a"
+      }
+    },
+    {
+      "hash_id": "7bd6a78ead8d29470d101479d97d0f41",
+      "card_code": "EX195",
+      "name": "葛飾北斎",
+      "faction": "紫",
+      "card_type": "EX",
+      "cost": "1.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "7bd6a78ead8d29470d101479d97d0f41",
+        "card_ds": "69aeb107a5ee1007c7c90c1c44e588fc",
+        "card_face": "31bfd8e24d06549b9c00c6a7023f86ab"
+      }
+    },
+    {
+      "hash_id": "690d6f514d86c6024e1d5a4ad625b460",
+      "card_code": "EX196",
+      "name": "張任",
+      "faction": "紫",
+      "card_type": "EX",
+      "cost": "2.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "690d6f514d86c6024e1d5a4ad625b460",
+        "card_ds": "cecf5783e5444deb2f21b8934edb0343",
+        "card_face": "0fe8f337c6e225dea36edc658f0b34f2"
+      }
+    },
+    {
+      "hash_id": "8672f243febe9423fdfd9faf7c58ae1d",
+      "card_code": "EX197",
+      "name": "足利尊氏",
+      "faction": "紫",
+      "card_type": "EX",
+      "cost": "3.5",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "8672f243febe9423fdfd9faf7c58ae1d",
+        "card_ds": "3be19f71a525c400b4bb6d62f29ed1d6",
+        "card_face": "b8f9d7b2a0dd557a937d0516b90763c8"
+      }
+    },
+    {
+      "hash_id": "f03979aa755df6259f6bf6a2d1b94226",
+      "card_code": "琥107",
+      "name": "郁姫",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "f03979aa755df6259f6bf6a2d1b94226",
+        "card_ds": "1bb1d275dabc1dbbfa07e0429d95cd34",
+        "card_face": "9901ab15e7e5b01819429f80df51461a"
+      }
+    },
+    {
+      "hash_id": "861d8c0af9b3d44efdbc45b934c0ef7f",
+      "card_code": "琥108",
+      "name": "一丈青",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "861d8c0af9b3d44efdbc45b934c0ef7f",
+        "card_ds": "6c61ce8c76ef75d423771be1ce46826c",
+        "card_face": "e6833913b515d91acbbe5e56b1bbc3e0"
+      }
+    },
+    {
+      "hash_id": "883a7da002cf29015f3771bda7f27729",
+      "card_code": "琥109",
+      "name": "可児才蔵",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "883a7da002cf29015f3771bda7f27729",
+        "card_ds": "a43fd866d6237aa2f928384498c576b8",
+        "card_face": "e263b9d30ff00afd3478273f638c9ae9"
+      }
+    },
+    {
+      "hash_id": "ef448a6c878f1d81ead1d0a4a321fa24",
+      "card_code": "琥110",
+      "name": "関勝",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "ef448a6c878f1d81ead1d0a4a321fa24",
+        "card_ds": "4fa5f2b37a2fd60ea6fd9caf74ae660b",
+        "card_face": "ff8089c177b02b98f061c9f36c7c7436"
+      }
+    },
+    {
+      "hash_id": "466bc4ebad1fc2623563978d00e14a09",
+      "card_code": "琥111",
+      "name": "小早川秀秋",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "466bc4ebad1fc2623563978d00e14a09",
+        "card_ds": "3076bf65849687c5fd1c355a99f26441",
+        "card_face": "107cb73a7eea23ad2c090e9e87df7627"
+      }
+    },
+    {
+      "hash_id": "ac0ae9453652134c3e35b5dc5cdb6594",
+      "card_code": "琥112",
+      "name": "胡芳",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "ac0ae9453652134c3e35b5dc5cdb6594",
+        "card_ds": "49435b729b9f3f962655cdb59debd302",
+        "card_face": "1fe2a7979aa893909d9b216d398d5b97"
+      }
+    },
+    {
+      "hash_id": "d60a6f39779d9c6a43df82fd4120735e",
+      "card_code": "琥113",
+      "name": "呉用",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "d60a6f39779d9c6a43df82fd4120735e",
+        "card_ds": "b4d21d2a3f9a5994207d45553930ae1a",
+        "card_face": "803223a574ecaf0532cd9dc847c85890"
+      }
+    },
+    {
+      "hash_id": "9f2e94cbdc1dc811a74c614632d833e0",
+      "card_code": "琥114",
+      "name": "実窓夫人",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "9f2e94cbdc1dc811a74c614632d833e0",
+        "card_ds": "b5c0921d749c0aeea4a58b1a09071bbe",
+        "card_face": "80cfb9d93a6ac0154afd3e1185337c53"
+      }
+    },
+    {
+      "hash_id": "cf9c2067e2f48dc4e5d6344323f8ed42",
+      "card_code": "琥115",
+      "name": "宋江",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "3.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "cf9c2067e2f48dc4e5d6344323f8ed42",
+        "card_ds": "01e851c8343a4e55e6a2a4b237895892",
+        "card_face": "de3f83bb6354e833240d9ea89ab316af"
+      }
+    },
+    {
+      "hash_id": "43799b54a7473e2ff51498447ec7e973",
+      "card_code": "琥116",
+      "name": "智瑶",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "43799b54a7473e2ff51498447ec7e973",
+        "card_ds": "8decdaaf0161c9f45b813df584973e25",
+        "card_face": "76bc41542a798e75ea43130e1a045592"
+      }
+    },
+    {
+      "hash_id": "05080391ec92560266c5553a66d25910",
+      "card_code": "琥117",
+      "name": "藤原秀衡",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "3.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "05080391ec92560266c5553a66d25910",
+        "card_ds": "d421a04a85c1c645dc64342b1db7e8b4",
+        "card_face": "bb41ed5057b9f40b25a607f38ecd577b"
+      }
+    },
+    {
+      "hash_id": "7e031544eb8c799722cab31946972aab",
+      "card_code": "琥118",
+      "name": "藤原泰衡",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "7e031544eb8c799722cab31946972aab",
+        "card_ds": "a0b10aeb156da5f8675ada6cd0d59f5f",
+        "card_face": "8f7861c020d6cac86fc34c08703a9dd5"
+      }
+    },
+    {
+      "hash_id": "dac2bf5d4bac46527fe556445b6c4332",
+      "card_code": "琥119",
+      "name": "前田利家",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "3.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "dac2bf5d4bac46527fe556445b6c4332",
+        "card_ds": "ae5980fd212aaeea89ebf45ef89dd2e8",
+        "card_face": "bf9dced54003f781b677e2efbd604c8d"
+      }
+    },
+    {
+      "hash_id": "0ca2ca04046bd8a12c81cb545167e87c",
+      "card_code": "琥120",
+      "name": "マクシミリアン１世",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "0ca2ca04046bd8a12c81cb545167e87c",
+        "card_ds": "e06742ff3a9e887bb75851bb02cf4685",
+        "card_face": "8fe5ab0574443b73b9466c700ede96fa"
+      }
+    },
+    {
+      "hash_id": "2a7d046eaac4dd464afc096e2be7e660",
+      "card_code": "琥121",
+      "name": "マリー・ド・ブルゴーニュ",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "2a7d046eaac4dd464afc096e2be7e660",
+        "card_ds": "afbcefb9f5b43eb241322b23cadf8fdc",
+        "card_face": "f3eb0433ebd1458e2f3ace61c9ddf89e"
+      }
+    },
+    {
+      "hash_id": "1a1b57f3831e45b48901f246419af055",
+      "card_code": "琥122",
+      "name": "林冲",
+      "faction": "琥",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "1a1b57f3831e45b48901f246419af055",
+        "card_ds": "796380ddf1ce85fcde0e80348d1c15c1",
+        "card_face": "93a38fae8601a45a0c2e4ac6b8c3ed75"
+      }
+    },
+    {
+      "hash_id": "50888ae69d2a5fb877a9860815c0655a",
+      "card_code": "EX198",
+      "name": "細川忠興",
+      "faction": "琥",
+      "card_type": "EX",
+      "cost": "2.5",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "50888ae69d2a5fb877a9860815c0655a",
+        "card_ds": "ec765c17c664b842bc2d9f61105c37c7",
+        "card_face": "f19aa86160d457f12e293142266bcccf"
+      }
+    },
+    {
+      "hash_id": "02a33bb57bb76b69d594b2ced0c52ff5",
+      "card_code": "EX199",
+      "name": "石田三成",
+      "faction": "琥",
+      "card_type": "EX",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "02a33bb57bb76b69d594b2ced0c52ff5",
+        "card_ds": "ec88d3ee6c1990d84ea2a989e7b58839",
+        "card_face": "e9d283fd55aa8e44e7e045fa5651b261"
+      }
+    },
+    {
+      "hash_id": "02eb9c95d4595787fe5faebb8c85ead1",
+      "card_code": "EX200",
+      "name": "蒲生氏郷",
+      "faction": "琥",
+      "card_type": "EX",
+      "cost": "2.5",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "02eb9c95d4595787fe5faebb8c85ead1",
+        "card_ds": "de6f9fe29e7b0f9dafa660d3f36b517b",
+        "card_face": "855b2f8774a1e0a911c60c00c7aad7fb"
+      }
+    },
+    {
+      "hash_id": "946a80ef85e45161b314f026a38ab226",
+      "card_code": "黄056",
+      "name": "枝吉神陽",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "946a80ef85e45161b314f026a38ab226",
+        "card_ds": "92b9f11ed399c6a69b27ae31c606e35e",
+        "card_face": "a60aaad120541fe6a890cb072406b041"
+      }
+    },
+    {
+      "hash_id": "c7d898f90f0c9e9634f6874f92e330bc",
+      "card_code": "黄057",
+      "name": "エレイン",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "c7d898f90f0c9e9634f6874f92e330bc",
+        "card_ds": "f2a9cdc475d0e9d87caa126ddd955a86",
+        "card_face": "e153649b49d6db533a4e0c1d541876a6"
+      }
+    },
+    {
+      "hash_id": "dcaf21cba157ec18745005b43d7676bb",
+      "card_code": "黄058",
+      "name": "於夫羅",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "dcaf21cba157ec18745005b43d7676bb",
+        "card_ds": "f519ffe6a02583d5fb7447e1ca3ac27f",
+        "card_face": "e27c58c40555e10443192bf76d73641a"
+      }
+    },
+    {
+      "hash_id": "5f1093fb61a79cae847d28512f0e4303",
+      "card_code": "黄059",
+      "name": "周公旦",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "5f1093fb61a79cae847d28512f0e4303",
+        "card_ds": "da7a99151a17598585a482e1467f746b",
+        "card_face": "1b7fb32e2b2c8690cc5354119d56b4a8"
+      }
+    },
+    {
+      "hash_id": "3641d9dcefeb382cf5694caabebc981c",
+      "card_code": "黄060",
+      "name": "周武王",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "3.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "3641d9dcefeb382cf5694caabebc981c",
+        "card_ds": "0ea89dfc70654b805b5ea32ad5be551d",
+        "card_face": "f3cb0e3a7f47d157ebe8cb3d1ecad87b"
+      }
+    },
+    {
+      "hash_id": "2e93bcb9a31079ea037c36422db6fe17",
+      "card_code": "黄061",
+      "name": "周文王",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "弓兵",
+      "image_keys": {
+        "card_small": "2e93bcb9a31079ea037c36422db6fe17",
+        "card_ds": "8d791f5980def798b3fa6bab0d5ea445",
+        "card_face": "5171f1c572ad3dcd7367563ec59e82ac"
+      }
+    },
+    {
+      "hash_id": "dbf38db14379d013137afbd9ddbf8f75",
+      "card_code": "黄062",
+      "name": "召公奭",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "dbf38db14379d013137afbd9ddbf8f75",
+        "card_ds": "662a8267453aa2a42727d94d31384c6e",
+        "card_face": "6a225caf3814ca227a7daf3146471540"
+      }
+    },
+    {
+      "hash_id": "c7b63c2ae0ff3b0ef3324c1a8db1c622",
+      "card_code": "黄063",
+      "name": "太公望",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "c7b63c2ae0ff3b0ef3324c1a8db1c622",
+        "card_ds": "8690b0301a90a1ed4531adce6993132c",
+        "card_face": "7008820bc73ea2c70b7d82e4598cb50e"
+      }
+    },
+    {
+      "hash_id": "e03344cac5bf7eb9ba1b4bfba11bc27f",
+      "card_code": "黄064",
+      "name": "太姒",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "e03344cac5bf7eb9ba1b4bfba11bc27f",
+        "card_ds": "3c2cc2f255f1cc8227101db1992c8202",
+        "card_face": "ec7945cea8b38e34306d7b54b9e77452"
+      }
+    },
+    {
+      "hash_id": "41ef34d121be4f80219e9b9d92c899d1",
+      "card_code": "黄065",
+      "name": "朶思大王",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "41ef34d121be4f80219e9b9d92c899d1",
+        "card_ds": "2fed364059ca029ac06a2078d8eca551",
+        "card_face": "bf208fc9aec725f04b5f8878c828e42b"
+      }
+    },
+    {
+      "hash_id": "183146c1da9990c02b25cc5aab2e7e79",
+      "card_code": "黄066",
+      "name": "鄭成功",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "183146c1da9990c02b25cc5aab2e7e79",
+        "card_ds": "2b984c09715b27e0b04f1d5669ac206d",
+        "card_face": "706750e365d7961f20059ee14b0c0b86"
+      }
+    },
+    {
+      "hash_id": "d2bf0b085aadea54dfa6fcb81d256560",
+      "card_code": "黄067",
+      "name": "伯邑考",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "d2bf0b085aadea54dfa6fcb81d256560",
+        "card_ds": "7a456cf6b12114741d2e2574c7f72e28",
+        "card_face": "3a76c40f1b49eca168270d5829adc216"
+      }
+    },
+    {
+      "hash_id": "e9606bed1ca3328fe6d45a12d485340f",
+      "card_code": "黄068",
+      "name": "フランシスコ・ザビエル",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "2.5",
+      "unitType": "剣豪",
+      "image_keys": {
+        "card_small": "e9606bed1ca3328fe6d45a12d485340f",
+        "card_ds": "65ea1691df9f3cff006994765ebc8e4a",
+        "card_face": "4a71978ee3ccdfb3019334fc44de4104"
+      }
+    },
+    {
+      "hash_id": "8814b1c531d08c3c36f32777ad707644",
+      "card_code": "黄069",
+      "name": "宗像色姫",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "8814b1c531d08c3c36f32777ad707644",
+        "card_ds": "6c52eafe02be27a5906d180a61d2eb54",
+        "card_face": "758425f58a7256e41fb1bb782aa755c0"
+      }
+    },
+    {
+      "hash_id": "5b170f9a592cf498c5218ca919b69d38",
+      "card_code": "黄070",
+      "name": "メローラ",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "5b170f9a592cf498c5218ca919b69d38",
+        "card_ds": "7c95130bc5ef45929b06a3d7d421dae3",
+        "card_face": "3327fcbe3287959fb3dd32a7e63cbbd7"
+      }
+    },
+    {
+      "hash_id": "cd91e9324d4ac1f402ff274eef1bc955",
+      "card_code": "黄071",
+      "name": "ヤン・ジシュカ",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.5",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "cd91e9324d4ac1f402ff274eef1bc955",
+        "card_ds": "1338e2e5a3d38616aa5238b4a1a5aa72",
+        "card_face": "326afb99e1ef74ff202bda1e902f264a"
+      }
+    },
+    {
+      "hash_id": "10f127a49f92f5071d6e2af86382c538",
+      "card_code": "黄072",
+      "name": "邑姜",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "1.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "10f127a49f92f5071d6e2af86382c538",
+        "card_ds": "677d29174da4ac85f3e5b7c9269f68ce",
+        "card_face": "d0c9c3ada66d03a5e84e5a1ecc813c23"
+      }
+    },
+    {
+      "hash_id": "2d125ce52bdf6a86e5e3d64cbea1daf5",
+      "card_code": "黄073",
+      "name": "ルイス・フロイス",
+      "faction": "黄",
+      "card_type": "通常",
+      "cost": "2.0",
+      "unitType": "鉄砲隊",
+      "image_keys": {
+        "card_small": "2d125ce52bdf6a86e5e3d64cbea1daf5",
+        "card_ds": "cbfb7cf718f9d5a025b88d995ba24cd5",
+        "card_face": "1689b4105406c3ed30ac8a398c13da73"
+      }
+    },
+    {
+      "hash_id": "53cae9a90f88515da261af718a812e3b",
+      "card_code": "EX201",
+      "name": "立花宗茂",
+      "faction": "黄",
+      "card_type": "EX",
+      "cost": "2.0",
+      "unitType": "槍兵",
+      "image_keys": {
+        "card_small": "53cae9a90f88515da261af718a812e3b",
+        "card_ds": "5f39d989fdf49257802002b1f1bd6cbe",
+        "card_face": "2d21bf3f30dde5ad11afd1f76b7b0249"
+      }
+    },
+    {
+      "hash_id": "9b989baef62c32080163ee2d7cab9b8a",
+      "card_code": "EX202",
+      "name": "高橋紹運",
+      "faction": "黄",
+      "card_type": "EX",
+      "cost": "3.0",
+      "unitType": "騎兵",
+      "image_keys": {
+        "card_small": "9b989baef62c32080163ee2d7cab9b8a",
+        "card_ds": "936c3d5e11090788c40b7bd8aba9e12f",
+        "card_face": "978512664d4b2c4ce13b34c90d2f49ac"
+      }
+    }
+  ]
+}

@@ -22,7 +22,7 @@ from eiketsu_env.services.client_upload import (
     client_config_path,
     cleanup_raw_snapshots,
     doctor_client,
-    fetch_client_share_config,
+    fetch_client_share_config_state,
     load_client_config,
     minimum_client_date_from,
     sync_client,
@@ -329,6 +329,7 @@ class CollectorApp(tk.Tk):
         self.bound = False
         self.browser_ok = False
         self.share_config: ShareConfig | None = None
+        self.available_target_versions: list[str] = []
         self.last_upload_summary = ""
         self.login_poll_active = False
         self.login_poll_inflight = False
@@ -453,7 +454,16 @@ class CollectorApp(tk.Tk):
         form.grid(row=self._next_content_row(), column=0, sticky="ew", pady=(8, 12))
         form.columnconfigure(1, weight=1)
         ttk.Label(form, text="目标版本").grid(row=0, column=0, sticky="w", pady=6)
-        ttk.Label(form, textvariable=self.state_vars.target_version).grid(row=0, column=1, sticky="w", pady=6)
+        selected_version = self.state_vars.target_version.get()
+        version_values = self.available_target_versions or ([selected_version] if selected_version != "尚未读取" else [])
+        version_box = ttk.Combobox(
+            form,
+            textvariable=self.state_vars.target_version,
+            values=version_values,
+            state="readonly" if version_values else "disabled",
+        )
+        version_box.grid(row=0, column=1, sticky="ew", pady=6)
+        version_box.bind("<<ComboboxSelected>>", lambda _event: self.refresh_sync_config())
         ttk.Label(form, text="最早日期").grid(row=1, column=0, sticky="w", pady=6)
         ttk.Label(form, textvariable=self.state_vars.date_floor).grid(row=1, column=1, sticky="w", pady=6)
         ttk.Label(form, text="最晚日期").grid(row=2, column=0, sticky="w", pady=6)
@@ -570,7 +580,11 @@ class CollectorApp(tk.Tk):
         self._run_background("自动检测登录", task, self._after_doctor_success)
 
     def refresh_sync_config(self) -> None:
-        self._run_background("读取采集日期范围", lambda: fetch_client_share_config(self.settings), self._after_config_success)
+        self._run_background(
+            "读取采集日期范围",
+            lambda: fetch_client_share_config_state(self.settings, target_version=self._selected_target_version_for_config()),
+            self._after_config_success,
+        )
 
     def cleanup_raw_cache(self) -> None:
         if not messagebox.askyesno(
@@ -610,6 +624,7 @@ class CollectorApp(tk.Tk):
                 interactive_auth=False,
                 date_from=date_from,
                 date_to=date_to,
+                target_version=self.share_config.target_version if self.share_config else "",
                 progress=progress,
             )
 
@@ -759,7 +774,12 @@ class CollectorApp(tk.Tk):
         self.state_vars.status.set("等待网页登录完成")
         self._schedule_login_poll()
 
-    def _after_config_success(self, config: ShareConfig) -> None:
+    def _after_config_success(self, result) -> None:
+        config = result.config if hasattr(result, "config") else result
+        available_versions = list(getattr(result, "available_target_versions", []) or [])
+        if config.target_version and config.target_version not in available_versions:
+            available_versions.insert(0, config.target_version)
+        self.available_target_versions = available_versions
         self.share_config = config
         floor = minimum_client_date_from(config)
         default_date_from, default_date_to = default_sync_date_range(config)
@@ -772,6 +792,10 @@ class CollectorApp(tk.Tk):
             self.state_vars.sync_date_to.set(default_date_to)
         self._log(f"采集配置：{config.target_version}，可采集日期 {floor} 至 {config.date_to}")
         self._render_step()
+
+    def _selected_target_version_for_config(self) -> str:
+        value = self.state_vars.target_version.get().strip()
+        return "" if not value or value == "尚未读取" else value
 
     def _after_cleanup_success(self, result) -> None:
         size_mb = result.bytes_removed / 1024 / 1024

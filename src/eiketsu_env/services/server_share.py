@@ -12,7 +12,7 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
-from eiketsu_env.config import Settings
+from eiketsu_env.config import Settings, known_target_versions, latest_target_version, version_start_date
 from eiketsu_env.db.models import (
     ServerApiToken,
     ServerInvite,
@@ -88,14 +88,27 @@ class ServerAuthError(PermissionError):
     """客户端 token 无效或已撤销。"""
 
 
-def get_server_config(settings: Settings) -> dict[str, Any]:
+def get_server_config(settings: Settings, target_version: str = "") -> dict[str, Any]:
     factory = make_session_factory(settings)
     with factory() as session:
         row = session.get(ServerShareConfig, CONFIG_ROW_ID)
         if row is None:
             return {"configured": False, "schema_version": SHARE_SCHEMA_VERSION}
-        config = _effective_share_config(_row_to_share_config(row))
-        return {"configured": True, **_config_to_payload(config)}
+        stored_config = _row_to_share_config(row)
+        current_config = _effective_share_config(_default_client_share_config(stored_config))
+        available_versions = _available_client_target_versions(session, current_config.target_version, stored_config.target_version)
+        requested_version = str(target_version or "").strip()
+        config = (
+            _client_share_config_for_version(session, stored_config, current_config, requested_version)
+            if requested_version
+            else current_config
+        )
+        return {
+            "configured": True,
+            **_config_to_payload(config),
+            "current_target_version": current_config.target_version,
+            "available_target_versions": available_versions,
+        }
 
 
 def set_server_config(
@@ -157,6 +170,99 @@ def _effective_date_to(config: ShareConfig, today: date | None = None) -> str:
 def _latest_collectable_game_date(today: date | None = None) -> str:
     current_day = today or datetime.now(JST).date()
     return current_day.isoformat()
+
+
+def _default_client_share_config(config: ShareConfig) -> ShareConfig:
+    latest_version = latest_target_version()
+    latest_start = version_start_date(latest_version)
+    current_start = version_start_date(config.target_version)
+    if not latest_version or not latest_start or not current_start:
+        return config
+    if latest_version == config.target_version or latest_start <= current_start:
+        return config
+    return ShareConfig(
+        schema_version=config.schema_version,
+        target_version=latest_version,
+        date_from=latest_start,
+        date_to=latest_start,
+        include_solo=config.include_solo,
+        high_ranker_rank=config.high_ranker_rank,
+        report_formats=list(config.report_formats),
+        reports=list(config.reports),
+    )
+
+
+def _available_client_target_versions(session, current_version: str, stored_version: str) -> list[str]:
+    versions = {version for version in known_target_versions() if version}
+    versions.update(version for version in (current_version, stored_version) if version)
+    uploaded_versions = session.scalars(select(ServerUpload.target_version).where(ServerUpload.target_version != "")).all()
+    versions.update(str(version or "").strip() for version in uploaded_versions if str(version or "").strip())
+    return sorted(versions, key=_client_version_sort_key, reverse=True)
+
+
+def _client_version_sort_key(version: str) -> tuple[int, str, str]:
+    start = version_start_date(version)
+    return (1 if start else 0, start, version)
+
+
+def _client_share_config_for_version(
+    session,
+    stored_config: ShareConfig,
+    current_config: ShareConfig,
+    target_version: str,
+) -> ShareConfig:
+    requested = str(target_version or "").strip()
+    if requested == current_config.target_version:
+        return current_config
+    start = version_start_date(requested)
+    if start:
+        date_to = _known_version_date_to(requested, current_config.date_to)
+        return _clone_share_config(current_config, requested, start, date_to)
+    upload_range = _uploaded_version_date_range(session, requested)
+    if upload_range is not None:
+        return _clone_share_config(current_config, requested, upload_range[0], upload_range[1])
+    if requested == stored_config.target_version:
+        return _effective_share_config(stored_config)
+    raise ValueError(f"未知目标版本：{requested}")
+
+
+def _known_version_date_to(target_version: str, fallback_date_to: str) -> str:
+    start = version_start_date(target_version)
+    later_starts = [
+        candidate_start
+        for candidate in known_target_versions()
+        for candidate_start in [version_start_date(candidate)]
+        if candidate != target_version and candidate_start and start and candidate_start > start
+    ]
+    if later_starts:
+        next_start = min(later_starts)
+        return (date.fromisoformat(next_start) - timedelta(days=1)).isoformat()
+    return max(start, fallback_date_to, _latest_collectable_game_date())
+
+
+def _uploaded_version_date_range(session, target_version: str) -> tuple[str, str] | None:
+    row = session.execute(
+        select(func.min(ServerUpload.date_from), func.max(ServerUpload.date_to)).where(ServerUpload.target_version == target_version)
+    ).one()
+    date_from, date_to = str(row[0] or ""), str(row[1] or "")
+    if not date_from or not date_to:
+        return None
+    return date_from, date_to
+
+
+def _clone_share_config(config: ShareConfig, target_version: str, date_from: str, date_to: str) -> ShareConfig:
+    selected = ShareConfig(
+        schema_version=config.schema_version,
+        target_version=target_version,
+        date_from=date_from,
+        date_to=date_to,
+        include_solo=config.include_solo,
+        high_ranker_rank=config.high_ranker_rank,
+        report_formats=list(config.report_formats),
+        reports=list(config.reports),
+    )
+    selected.validate()
+    return selected
 
 
 def create_invite(settings: Settings, label: str, code: str = "") -> InviteResult:
