@@ -144,7 +144,7 @@ def create_app(settings: Settings | None = None):
         row_type: str = "",
         offset: int = 0,
         limit: int | None = LEADERBOARD_DEFAULT_PAGE_LIMIT,
-        sort: str = "wilson",
+        sort: str = "sample",
         full: str = "",
         version: str = "",
         target_version: str = "",
@@ -188,7 +188,7 @@ def create_app(settings: Settings | None = None):
         row_type: str = "",
         offset: int = 0,
         limit: int = LEADERBOARD_HTML_DEFAULT_LIMIT,
-        sort: str = "wilson",
+        sort: str = "sample",
         version: str = "",
         target_version: str = "",
     ) -> dict[str, Any]:

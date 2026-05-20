@@ -68,7 +68,8 @@ def test_video_item_to_detail_marks_lightweight_source():
     assert detail["players"][1]["deck_ids"] == ["hash-b"]
 
 
-def test_version_start_date_includes_310h_official_window():
+def test_version_start_date_includes_current_and_previous_windows():
+    assert version_start_date("Ver.3.5.0A") == "2026-05-20"
     assert version_start_date("Ver.3.1.0H") == "2026-04-22"
 
 

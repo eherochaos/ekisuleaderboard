@@ -83,15 +83,15 @@
         if (!button) {
           return;
         }
-        applySort(button.getAttribute("data-sort-key") || "wilson");
+        applySort(button.getAttribute("data-sort-key") || "sample");
       });
-      toolbar.dataset.applySort = "wilson";
+      toolbar.dataset.applySort = "sample";
     });
   };
 
   const activeSortKey = () => {
     const active = document.querySelector("[data-sort-button][aria-pressed='true']");
-    return active ? active.getAttribute("data-sort-key") || "wilson" : "wilson";
+    return active ? active.getAttribute("data-sort-key") || "sample" : "sample";
   };
 
   const resortCurrentBoard = () => {

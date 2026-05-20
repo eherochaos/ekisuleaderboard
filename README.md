@@ -14,16 +14,16 @@ python -m pip install -e .[dev]
 python -m eiketsu_env init-db
 python -m eiketsu_env doctor firefox
 python -m eiketsu_env doctor browser
-python -m eiketsu_env collect follow --date 2026-05-11
+python -m eiketsu_env collect follow --date 2026-05-20
 python -m eiketsu_env collect follow --date 2026-05-10 --player-id 586
-python -m eiketsu_env collect follow --from 2026-05-05 --to 2026-05-11 --skip-inactive --skip-existing
+python -m eiketsu_env collect follow --from 2026-05-20 --to 2026-05-20 --skip-inactive --skip-existing
 python -m eiketsu_env collect follow --from 2026-04-22 --to 2026-05-04 --skip-inactive --skip-existing --concurrency-profile aggressive --auth-source auto
-python -m eiketsu_env collect video-search --date 2026-05-11 --max-cards 20
-python -m eiketsu_env collect video-search --from 2026-04-22 --to 2026-05-04 --version Ver.3.1.0H --max-cards 0 --skip-searched-cards --frontier-rounds auto --concurrency-profile aggressive --auth-source auto
+python -m eiketsu_env collect video-search --date 2026-05-20 --max-cards 20
+python -m eiketsu_env collect video-search --from 2026-05-20 --to 2026-05-20 --version Ver.3.5.0A --max-cards 0 --skip-searched-cards --frontier-rounds auto --concurrency-profile aggressive --auth-source auto
 python -m eiketsu_env export matches --format csv
 python -m eiketsu_env export matches --format md
 python -m eiketsu_env analyze refresh --from 2026-05-10 --to 2026-05-10 --high-ranker-rank 100
-python -m eiketsu_env analyze refresh --from 2026-04-22 --to 2026-05-11 --version Ver.3.1.0H --high-ranker-rank 100
+python -m eiketsu_env analyze refresh --from 2026-05-20 --to 2026-05-20 --version Ver.3.5.0A --high-ranker-rank 100
 python -m eiketsu_env analyze export --report overview --format md
 python -m eiketsu_env analyze export --report deck --format md
 python -m eiketsu_env analyze export --report deck-visual --format html
@@ -79,7 +79,15 @@ python -m eiketsu_env share sync --contributor 你的昵称
 
 ## 多人共享与汇总
 
-`shared/share_config.json` 是多人同步的目标版本配置，包含目标版本、采集日期范围、是否包含特殊模式、报告格式和高 Ranker 口径。新版本开始后，先由维护者更新这个文件，再让朋友同步仓库。
+`shared/share_config.json` 是多人同步的目标版本配置，包含目标版本、采集日期范围、是否包含特殊模式、报告格式和高 Ranker 口径。新版本开始后，先由维护者更新这个文件，再让朋友同步仓库；如果新版本刚开始还没有上传样本，公开榜单会显示当前版本但暂时为空，旧版本可在榜单页“目标版本”处切换查看。
+
+版本变化跟进流程：
+
+1. 打开官方首页确认“現在稼働中バージョン”和开始日期。
+2. 更新 `shared/share_config.json` 的 `target_version`、`date_from`、`date_to`；新版本刚开时 `date_to` 可以先写开始日，工具会按日本时间自动延到当天。
+3. 更新 `src/eiketsu_env/config.py` 的 `VERSION_START_DATES`，保留旧版本开始日，方便历史过滤和页面切换。
+4. 在 VPS 执行 `eiketsu-server admin set-config --target-version 新版本 --date-from 开始日 --date-to 开始日`，随后执行 `eiketsu-server admin refresh-leaderboard`。
+5. 通知贡献者重新同步或上传。新版本暂无上传时页面会显示空状态；旧版本榜单不要删除，用户可在公开榜单页“目标版本”处自行切换。
 
 推荐朋友侧使用：
 
@@ -129,7 +137,7 @@ printf '\nEIKETSU_ADMIN_TOKEN=%s\n' "$EIKETSU_ADMIN_TOKEN" > .env
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d --build
-docker compose -f deploy/docker-compose.yml run --rm api eiketsu-server admin set-config --target-version Ver.3.1.0H --date-from 2026-04-22 --date-to 2026-05-11
+docker compose -f deploy/docker-compose.yml run --rm api eiketsu-server admin set-config --target-version Ver.3.5.0A --date-from 2026-05-20 --date-to 2026-05-20
 docker compose -f deploy/docker-compose.yml run --rm api eiketsu-server admin create-invite --label 朋友A
 ```
 

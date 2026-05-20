@@ -405,7 +405,7 @@ def public_leaderboard_page(
     row_type: str = "",
     offset: int = 0,
     limit: int | None = LEADERBOARD_DEFAULT_PAGE_LIMIT,
-    sort_key: str = "wilson",
+    sort_key: str = "sample",
     rank_scope: str = RANK_SCOPE_ALL,
     include_archetypes: bool = True,
     target_version: str = "",
@@ -433,6 +433,8 @@ def public_leaderboard_page(
             row_type=active_row_type,
         )
         payload["available_target_versions"] = available_versions
+        payload["current_target_version"] = config.target_version
+        payload["selected_target_version"] = payload_config.target_version
         if run is None:
             payload["leaderboard_status"] = str(getattr(latest, "status", "") or "missing")
             payload["pagination"] = {

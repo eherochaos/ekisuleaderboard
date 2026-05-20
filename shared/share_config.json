@@ -1,8 +1,8 @@
 {
   "schema_version": "share_v1",
-  "target_version": "Ver.3.1.0H",
-  "date_from": "2026-04-22",
-  "date_to": "2026-05-11",
+  "target_version": "Ver.3.5.0A",
+  "date_from": "2026-05-20",
+  "date_to": "2026-05-20",
   "include_solo": false,
   "high_ranker_rank": 100,
   "report_formats": ["md", "csv"],

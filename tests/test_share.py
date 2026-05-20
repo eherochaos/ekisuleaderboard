@@ -14,7 +14,7 @@ from eiketsu_env.db.models import Match, SharedContributionMatch, SharedContribu
 from eiketsu_env.db.session import make_engine
 from eiketsu_env.services.collector import CollectResult
 from eiketsu_env.services.repository import EnvRepository
-from eiketsu_env.services.share import ShareConfig, export_contribution, import_contributions, sync_shared
+from eiketsu_env.services.share import ShareConfig, export_contribution, import_contributions, load_share_config, sync_shared
 
 
 def _settings(tmp_path: Path) -> Settings:
@@ -131,6 +131,36 @@ def test_import_contributions_is_idempotent_and_dedupes_replay(tmp_path):
         assert len(session.scalars(select(Match)).all()) == 1
         assert len(session.scalars(select(SharedContributionPackage)).all()) == 2
         assert len(session.scalars(select(SharedContributionMatch)).all()) == 2
+
+
+def test_load_share_config_extends_stale_date_to_for_tools(tmp_path, monkeypatch):
+    settings = _settings(tmp_path)
+    (tmp_path / "shared").mkdir()
+    (tmp_path / "shared" / "share_config.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "share_v1",
+                "target_version": "Ver.share",
+                "date_from": "2026-05-10",
+                "date_to": "2026-05-12",
+                "include_solo": False,
+                "high_ranker_rank": 100,
+                "report_formats": ["md"],
+                "reports": ["overview"],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    from eiketsu_env.services import share as share_service
+
+    monkeypatch.setattr(share_service, "_latest_collectable_game_date", lambda today=None: "2026-05-20")
+
+    raw = load_share_config(settings, effective=False)
+    effective = load_share_config(settings)
+
+    assert raw.date_to == "2026-05-12"
+    assert effective.date_to == "2026-05-20"
 
 
 def test_sync_uses_only_shared_git_paths_and_retries_push(tmp_path, monkeypatch):

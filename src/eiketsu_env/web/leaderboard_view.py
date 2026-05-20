@@ -337,7 +337,16 @@ def _leaderboard_display_notice(
     total_count: int,
 ) -> str:
     status = str(payload.get("leaderboard_status") or "")
-    if status in {"missing", "building", "running"}:
+    if status == "missing":
+        target_version = str(payload.get("target_version") or "").strip()
+        available_versions = [
+            version
+            for version in dict.fromkeys(str(item or "").strip() for item in payload.get("available_target_versions") or [])
+            if version and version != target_version
+        ]
+        suffix = "旧版本可在上方“目标版本”切换查看。" if available_versions else "等待上传样本后刷新榜单。"
+        return f'<section class="empty">当前目标版本 {_html(target_version)} 暂无公开榜单数据。{_html(suffix)}</section>'
+    if status in {"building", "running"}:
         return '<section class="empty">榜单生成中，请稍后刷新。当前不会在页面请求里同步重算。</section>'
     if status == "failed":
         return '<section class="empty">榜单生成失败，请在服务端重新执行刷新命令。</section>'
@@ -371,18 +380,25 @@ def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, c
         )
     ]
     version_group = []
-    if str(payload.get("scope") or "public") == "public" and len(available_versions) > 1:
+    if str(payload.get("scope") or "public") == "public" and available_versions:
+        version_params = {
+            **base_params,
+            "cluster": "on" if cluster_enabled else "off",
+            "rank_scope": rank_scope,
+        }
+        version_params.pop("version", None)
         version_group = [
-            '<div class="view-control-group"><span class="view-control-label">目标版本</span>',
+            '<form class="view-control-group view-control-version-form" method="get" action="/leaderboard">',
+            '<label class="view-control-label" for="leaderboard-version-select">目标版本</label>',
+            *_hidden_query_inputs(version_params),
+            '<select id="leaderboard-version-select" class="view-control-select" name="version" onchange="this.form.submit()">',
             *[
-                _view_control_link(
-                    version,
-                    _leaderboard_query_url(base_params, version=version, cluster="on" if cluster_enabled else "off", rank_scope=rank_scope),
-                    version == active_version,
-                )
+                f'<option value="{_html(version)}"{" selected" if version == active_version else ""}>{_html(version)}</option>'
                 for version in available_versions
             ],
-            "</div>",
+            "</select>",
+            '<noscript><button class="view-control-submit" type="submit">切换</button></noscript>',
+            "</form>",
         ]
     return "\n".join(
         [
@@ -415,6 +431,14 @@ def _leaderboard_base_query(payload: dict[str, Any], contributor_name: str = "")
 def _leaderboard_query_url(base_params: dict[str, str], **updates: str) -> str:
     params = {key: value for key, value in {**base_params, **updates}.items() if value}
     return "/leaderboard" + (f"?{urlencode(params)}" if params else "")
+
+
+def _hidden_query_inputs(params: dict[str, str]) -> list[str]:
+    return [
+        f'<input type="hidden" name="{_html(key)}" value="{_html(value)}">'
+        for key, value in params.items()
+        if value
+    ]
 
 
 def _view_control_link(label: str, href: str, active: bool) -> str:
