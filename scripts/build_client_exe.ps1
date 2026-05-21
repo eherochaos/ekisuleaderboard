@@ -1,8 +1,9 @@
 param(
     [string]$Name = "EiketsuCollector",
     [string]$Version = "",
-    [ValidateSet("gui", "cli")]
-    [string]$Mode = "gui"
+    [ValidateSet("gui", "cli", "manager")]
+    [string]$Mode = "gui",
+    [switch]$NoVersionSuffix
 )
 
 $ErrorActionPreference = "Stop"
@@ -26,7 +27,7 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
 }
 
 $OutputName = $Name
-if ($OutputName -notmatch "_$([regex]::Escape($Version))$") {
+if (-not $NoVersionSuffix -and $OutputName -notmatch "_$([regex]::Escape($Version))$") {
     $OutputName = "${Name}_${Version}"
 }
 
@@ -36,6 +37,8 @@ $WindowArgs = @("--windowed")
 if ($Mode -eq "cli") {
     $EntryPoint = "src\eiketsu_env\client_cli.py"
     $WindowArgs = @()
+} elseif ($Mode -eq "manager") {
+    $EntryPoint = "src\eiketsu_env\manager_gui.py"
 }
 
 if (-not (Test-Path $PyInstaller)) {
@@ -53,7 +56,7 @@ $TclLibraryDir = Join-Path $TclDir "tcl8.6"
 $TkLibraryDir = Join-Path $TclDir "tk8.6"
 $TkinterDir = Join-Path $PythonBase "Lib\tkinter"
 $ExtraArgs = @()
-if ($Mode -eq "gui") {
+if ($Mode -in @("gui", "manager")) {
     $ExtraArgs += @("--hidden-import", "tkinter", "--hidden-import", "_tkinter")
     # Bundle Tcl/Tk data from the active Python install so the exe can run on machines without Python.
     if (Test-Path $TclLibraryDir) {

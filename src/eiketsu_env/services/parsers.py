@@ -244,16 +244,28 @@ def _parse_selected(side: Tag | None) -> dict[str, Any]:
     containers = side.select(".c-selected__container")
     weapon = containers[0] if containers else None
     school = containers[1] if len(containers) > 1 else None
+    souls = _parse_souls(weapon)
     return {
         "weapon": {
             "name": _text(weapon.select_one(".etfont")) if weapon else "",
             "summary": _text(weapon),
+            "souls": souls,
         },
         "school": {
             "name": _text(school.select_one(".etfont")) if school else "",
             "summary": _text(school),
         },
+        "souls": souls,
     }
+
+
+def _parse_souls(container: Tag | None) -> list[dict[str, str]]:
+    if not container:
+        return []
+    nodes = container.select(".c-selected__explain--buff .c-sec__text")
+    if not nodes:
+        nodes = container.select(".c-selected__explain--buff .c-sec")
+    return [{"name": name} for node in nodes if (name := _text(node))]
 
 
 def _parse_generals(section: Tag | None) -> list[dict[str, Any]]:

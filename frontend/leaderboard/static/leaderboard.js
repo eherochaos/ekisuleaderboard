@@ -1,6 +1,95 @@
 (() => {
   const padRank = (index) => String(index + 1).padStart(2, "0");
 
+  const updateCardScrollers = (root = document) => {
+    root.querySelectorAll("[data-card-scroll]").forEach((scroller) => {
+      scroller.dispatchEvent(new CustomEvent("card-scroll:update"));
+    });
+  };
+
+  const initCardScrollers = (root = document) => {
+    root.querySelectorAll("[data-card-scroll]").forEach((scroller) => {
+      if (scroller.dataset.cardScrollReady === "1") {
+        return;
+      }
+      const strip = scroller.querySelector("[data-card-scroll-strip]");
+      const leftButton = scroller.querySelector("[data-card-scroll-left]");
+      const rightButton = scroller.querySelector("[data-card-scroll-right]");
+      if (!(strip instanceof HTMLElement)) {
+        return;
+      }
+      scroller.dataset.cardScrollReady = "1";
+
+      const update = () => {
+        const maxScroll = Math.max(0, strip.scrollWidth - strip.clientWidth);
+        const hasOverflow = maxScroll > 1;
+        scroller.classList.toggle("has-overflow", hasOverflow);
+        scroller.classList.toggle("at-start", !hasOverflow || strip.scrollLeft <= 1);
+        scroller.classList.toggle("at-end", !hasOverflow || strip.scrollLeft >= maxScroll - 1);
+        if (leftButton instanceof HTMLButtonElement) {
+          leftButton.disabled = !hasOverflow || strip.scrollLeft <= 1;
+        }
+        if (rightButton instanceof HTMLButtonElement) {
+          rightButton.disabled = !hasOverflow || strip.scrollLeft >= maxScroll - 1;
+        }
+      };
+
+      const scrollByPage = (direction) => {
+        const distance = Math.max(220, Math.floor(strip.clientWidth * 0.86));
+        strip.scrollBy({ left: distance * direction, behavior: "smooth" });
+      };
+
+      if (leftButton instanceof HTMLButtonElement) {
+        leftButton.addEventListener("click", () => scrollByPage(-1));
+      }
+      if (rightButton instanceof HTMLButtonElement) {
+        rightButton.addEventListener("click", () => scrollByPage(1));
+      }
+
+      let dragState = null;
+      strip.addEventListener("pointerdown", (event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) {
+          return;
+        }
+        dragState = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          scrollLeft: strip.scrollLeft,
+        };
+        scroller.classList.add("is-dragging");
+        strip.setPointerCapture(event.pointerId);
+      });
+      strip.addEventListener("pointermove", (event) => {
+        if (!dragState || dragState.pointerId !== event.pointerId) {
+          return;
+        }
+        const delta = event.clientX - dragState.startX;
+        strip.scrollLeft = dragState.scrollLeft - delta;
+        if (Math.abs(delta) > 2) {
+          event.preventDefault();
+        }
+      });
+      const finishDrag = (event) => {
+        if (!dragState || dragState.pointerId !== event.pointerId) {
+          return;
+        }
+        dragState = null;
+        scroller.classList.remove("is-dragging");
+        if (strip.hasPointerCapture(event.pointerId)) {
+          strip.releasePointerCapture(event.pointerId);
+        }
+      };
+      strip.addEventListener("pointerup", finishDrag);
+      strip.addEventListener("pointercancel", finishDrag);
+      strip.addEventListener("scroll", update, { passive: true });
+      scroller.addEventListener("card-scroll:update", update);
+      if ("ResizeObserver" in window) {
+        new ResizeObserver(update).observe(strip);
+      }
+      requestAnimationFrame(update);
+    });
+  };
+
   const initVariantViewers = (root = document) => {
     root.querySelectorAll("[data-variant-root]").forEach((viewer) => {
       if (viewer.dataset.variantReady === "1") {
@@ -24,6 +113,8 @@
         if (label) {
           label.textContent = `构筑 ${current + 1}/${variants.length}`;
         }
+        initCardScrollers(viewer);
+        updateCardScrollers(viewer);
       };
       if (button) {
         button.addEventListener("click", () => {
@@ -144,6 +235,7 @@
         fragment.innerHTML = payload.html || "";
         root.appendChild(fragment.content);
         initVariantViewers(root);
+        initCardScrollers(root);
         control.setAttribute("data-next-offset", String(payload.next_offset || offset + pageSize));
         if (payload.has_more) {
           setStatus(`已显示 ${payload.next_offset} / ${payload.total}`);
@@ -160,7 +252,16 @@
     });
   };
 
-  initVariantViewers();
-  initSortToolbars();
-  initLoadMore();
+  const boot = () => {
+    initVariantViewers();
+    initCardScrollers();
+    initSortToolbars();
+    initLoadMore();
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
 })();
