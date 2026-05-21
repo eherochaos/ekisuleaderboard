@@ -240,10 +240,12 @@ def _insert_match(
         session.commit()
 
 
-def _selected_loadout(weapon: str, style: str) -> dict:
+def _selected_loadout(weapon: str, style: str, souls: list[str] | None = None) -> dict:
+    soul_payload = [{"name": name} for name in souls or []]
     return {
-        "weapon": {"name": weapon, "summary": weapon},
+        "weapon": {"name": weapon, "summary": weapon, "souls": soul_payload},
         "school": {"name": style, "summary": style},
+        "souls": soul_payload,
     }
 
 
@@ -1035,7 +1037,10 @@ def test_leaderboard_view_controls_can_disable_clustering():
         "top_player": "Player One",
         "top_player_count": 2,
         "player_count": 2,
-        "cards": [],
+        "cards": [
+            {"card_hash": f"card-{index}", "label": f"Card {index}(1.0 Spear)", "image_url": ""}
+            for index in range(1, 9)
+        ],
     }
     html = _leaderboard_visual_page(
         {
@@ -1085,6 +1090,11 @@ def test_leaderboard_view_controls_can_disable_clustering():
     assert 'data-sort-key="sample" aria-pressed="true"' in html
     assert "data-rank-value" in html
     assert "variant-viewer" in html
+    assert "data-card-scroll" in html
+    assert "data-card-scroll-left" in html
+    assert "data-card-scroll-right" in html
+    assert 'class="variant-name"' not in html
+    assert '<span class="unit-name">Card 8</span><span class="unit-meta">1.0 Spear</span>' in html
     assert "构筑 1/1" in html
     assert "Single · 1 构筑" in html
     assert "2 win / 1 lose" in html
@@ -1194,7 +1204,14 @@ def test_public_leaderboard_adds_deck_behavior_stats_and_trend(tmp_path):
     results = ["win"] * 5 + ["loss"] * 5 + ["win"] * 9 + ["loss"] + ["win"] * 3 + ["loss"] * 2
     for index, result in enumerate(results):
         played_date = start + timedelta(days=index % 7 if index < 10 else 7 + (index - 10) % 7)
-        selected = _selected_loadout("Weapon A", "士气流") if index < 20 else _selected_loadout("Weapon B", "城塞流")
+        selected = (
+            _selected_loadout("Weapon A", "士气流", ["SoulA", "SoulB"])
+            if index < 20
+            else {
+                "weapon": {"name": "Weapon B", "summary": "選択戦器 Weapon B 英魂 SoulA"},
+                "school": {"name": "城塞流", "summary": "城塞流"},
+            }
+        )
         _insert_match(
             settings,
             f"behavior-{index}",
@@ -1210,7 +1227,12 @@ def test_public_leaderboard_adds_deck_behavior_stats_and_trend(tmp_path):
     deck = payload["top_decks"][0]
     behavior = deck["behavior_stats"]
 
-    assert behavior["souls"] == []
+    assert behavior["souls"][0]["name"] == "SoulA"
+    assert behavior["souls"][0]["sample_count"] == 25
+    assert behavior["souls"][0]["usage_rate"] == pytest.approx(1.0)
+    assert behavior["souls"][1]["name"] == "SoulB"
+    assert behavior["souls"][1]["sample_count"] == 20
+    assert behavior["souls"][1]["usage_rate"] == pytest.approx(20 / 25)
     assert behavior["weapons"][0]["name"] == "Weapon A"
     assert behavior["weapons"][0]["sample_count"] == 20
     assert behavior["weapons"][0]["win_count"] == 14
@@ -1245,7 +1267,7 @@ def test_public_leaderboard_aggregates_archetype_behavior_and_html_hides_empty_s
         ["card-a", "card-b", "card-c"],
         ["card-e"],
         "2026-05-11 09:00",
-        player_selected=_selected_loadout("Weapon A", "士气流"),
+        player_selected=_selected_loadout("Weapon A", "士气流", ["SoulA"]),
     )
     _insert_match(
         settings,
@@ -1253,7 +1275,7 @@ def test_public_leaderboard_aggregates_archetype_behavior_and_html_hides_empty_s
         ["card-b", "card-c", "card-d"],
         ["card-f"],
         "2026-05-11 10:00",
-        player_selected=_selected_loadout("Weapon B", "士气流"),
+        player_selected=_selected_loadout("Weapon B", "士气流", ["SoulA", "SoulB"]),
     )
 
     payload = public_leaderboard(settings)
@@ -1269,6 +1291,10 @@ def test_public_leaderboard_aggregates_archetype_behavior_and_html_hides_empty_s
     assert weapon_names == {"Weapon A", "Weapon B"}
     assert behavior["styles"][0]["name"] == "士气流"
     assert behavior["styles"][0]["sample_count"] == 2
+    assert behavior["souls"][0]["name"] == "SoulA"
+    assert behavior["souls"][0]["sample_count"] == 2
+    assert behavior["souls"][1]["name"] == "SoulB"
+    assert behavior["souls"][1]["sample_count"] == 1
 
     html = _leaderboard_visual_page(payload)
     assert "deck-report-card" in html
@@ -1276,6 +1302,7 @@ def test_public_leaderboard_aggregates_archetype_behavior_and_html_hides_empty_s
     assert "战器采用率" in html
     assert "战器胜率" in html
     assert "Weapon A" in html
+    assert '<span class="unit-name">Card B</span><span class="unit-meta">2.0 騎兵</span>' in html
     assert "主流流派" in html
     assert "流派采用率" in html
     assert "士气流" in html
@@ -1283,7 +1310,8 @@ def test_public_leaderboard_aggregates_archetype_behavior_and_html_hides_empty_s
     assert "可信度" in html
     assert "Top3玩家贡献" in html
     assert "样本不足" in html
-    assert "暂无英魂配置" in html
+    assert "英魂配置" in html
+    assert "SoulA" in html
 
 
 def test_upload_rejects_cookie_fields(tmp_path):

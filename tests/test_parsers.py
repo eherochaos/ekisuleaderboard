@@ -40,6 +40,16 @@ DETAIL_HTML = """
 <a href="/members/enbujyo/play?p=b925ff0584d242fa895d47e03306a4b8">play</a>
 <section class="p-detail--player">
   <div class="p-detail__score-box"><dt>証</dt><dd>十二</dd></div>
+  <div class="c-selected__container">
+    <span class="etfont">Weapon Test</span>
+    <p class="c-selected__explain c-selected__explain--buff">
+      <span class="c-sec"><b class="c-sec__text">Soul A</b></span>
+      <span class="c-sec"><b class="c-sec__text">Soul B</b></span>
+    </p>
+  </div>
+  <div class="c-selected__container">
+    <span class="etfont">Style Test</span>
+  </div>
 </section>
 <section class="p-detail--enemy"></section>
 <section class="p-general-score">
@@ -183,6 +193,9 @@ def test_parse_detail_html_extracts_match_fields_and_decks():
     assert detail["players"][0]["battle_stats"]["kill_count"]["total"] == 5
     assert detail["players"][0]["battle_stats"]["death_count"]["total"] == 5
     assert detail["players"][1]["battle_stats"]["kill_count"]["total"] == 6
+    assert detail["players"][0]["selected"]["weapon"]["name"] == "Weapon Test"
+    assert detail["players"][0]["selected"]["school"]["name"] == "Style Test"
+    assert detail["players"][0]["selected"]["souls"] == [{"name": "Soul A"}, {"name": "Soul B"}]
     assert detail["timeline_data"]["castle"]["enemy"] == [10000, 0]
 
 

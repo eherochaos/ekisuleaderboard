@@ -84,11 +84,37 @@ python -m eiketsu_env share sync --contributor 你的昵称
 版本变化跟进流程：
 
 1. 打开官方首页确认“現在稼働中バージョン”和开始日期。
-2. 更新 `shared/share_config.json` 的 `target_version`、`date_from`、`date_to`；新版本刚开时 `date_to` 可以先写开始日，工具会按日本时间自动延到当天。
-3. 更新 `src/eiketsu_env/config.py` 的 `VERSION_START_DATES`，保留旧版本开始日，方便历史过滤和页面切换。
-4. 同步最新官方卡表；如果 VPS 没挂外部 `eki_database_v2`，把新卡补进 `assets/card_catalog_overlay.json`，避免公开榜显示“未识别卡”。
-5. 在 VPS 执行 `eiketsu-server admin set-config --target-version 新版本 --date-from 开始日 --date-to 开始日`，随后执行 `eiketsu-server admin refresh-leaderboard`。
+2. 先确认相邻目录 `eki_database_v2` 已经有最新官方 base 快照，然后运行准备脚本：
+
+```powershell
+python scripts\prepare_version_update.py --version Ver.3.5.0A --start-date 2026-05-20
+```
+
+脚本会更新 `shared/share_config.json`、`src/eiketsu_env/config.py` 的 `VERSION_START_DATES`，并用最新官方 base 重建 `assets/card_catalog_overlay.json`，避免 VPS fallback 卡表漏新卡。
+
+3. 检查脚本输出的 overlay 卡数和 Git diff；新版本刚开时 `date_to` 可以先等于开始日，工具会按日本时间自动延到当天。
+4. 跑测试并提交：
+
+```powershell
+pytest
+git add shared/share_config.json src/eiketsu_env/config.py assets/card_catalog_overlay.json README.md
+git commit -m "chore: 准备 Ver.x 新版本配置"
+```
+
+5. 部署到 VPS 后，执行脚本输出的 `set-config` 和 `refresh-leaderboard` 两条命令。
 6. 通知贡献者重新同步或上传。新版本暂无上传时页面会显示空状态；旧版本榜单不要删除，用户可在公开榜单页“目标版本”处自行切换。
+
+维护者也可以直接打开本地管理器：
+
+```powershell
+dist\EiketsuCollectorManager.exe
+```
+
+它会把检查配置、写入新版本配置和卡表 overlay、运行关键测试、复制 Git/VPS 命令、启动本地预览串成按钮流程。重新打包管理器时运行：
+
+```powershell
+scripts\build_client_exe.ps1 -Name EiketsuCollectorManager -Mode manager -NoVersionSuffix
+```
 
 推荐朋友侧使用：
 

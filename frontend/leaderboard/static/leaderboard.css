@@ -681,12 +681,12 @@ figcaption {
   border-radius: 8px;
   box-shadow: 0 10px 26px rgba(23, 29, 37, 0.07);
   display: grid;
-  gap: 14px;
-  grid-template-columns: 78px minmax(340px, 1.25fr) minmax(280px, 0.92fr) minmax(270px, 0.9fr);
+  gap: 12px;
+  grid-template-columns: 70px minmax(600px, 1.75fr) minmax(230px, 0.7fr) minmax(220px, 0.7fr);
   grid-template-areas:
     "rank identity metrics equipment"
     "matchup matchup matchup matchup";
-  padding: 14px 16px 12px;
+  padding: 13px 14px 11px;
   position: relative;
 }
 .deck-report-card:hover {
@@ -752,7 +752,10 @@ figcaption {
   color: #667386;
 }
 .deck-identity-block {
+  display: grid;
   grid-area: identity;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  min-width: 0;
 }
 .identity-heading {
   align-items: start;
@@ -807,7 +810,11 @@ figcaption {
   margin-right: 4px;
 }
 .deck-report-card .variant-viewer {
+  align-self: stretch;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   margin: 0;
+  min-width: 0;
 }
 .deck-report-card .variant-toolbar {
   justify-content: flex-start;
@@ -825,16 +832,81 @@ figcaption {
   height: 28px;
   padding: 0 10px;
 }
+.deck-report-card .variant-scroll {
+  height: auto;
+  min-width: 0;
+  position: relative;
+}
 .deck-report-card .variant-cards {
-  flex-wrap: nowrap;
-  gap: 7px;
-  overflow-x: auto;
-  padding-bottom: 2px;
+  align-content: flex-start;
+  cursor: default;
+  display: grid;
+  flex-wrap: initial;
+  gap: 5px;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  height: auto;
+  overflow: visible;
+  padding-bottom: 0;
+  user-select: auto;
+}
+.deck-report-card .variant-cards::-webkit-scrollbar {
+  display: none;
+}
+.deck-report-card .variant-scroll.is-dragging .variant-cards {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+.deck-report-card .variant-scroll-button {
+  align-items: center;
+  background: rgba(17, 24, 39, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
+  color: #fff;
+  cursor: pointer;
+  display: none;
+  font-size: 26px;
+  font-weight: 900;
+  height: 52px;
+  justify-content: center;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 43%;
+  transform: translateY(-50%);
+  transition: opacity 140ms ease, transform 140ms ease, background 140ms ease;
+  width: 32px;
+  z-index: 3;
+}
+.deck-report-card .variant-scroll-button:hover {
+  background: rgba(17, 24, 39, 0.92);
+}
+.deck-report-card .variant-scroll.has-overflow:hover .variant-scroll-button,
+.deck-report-card .variant-scroll.has-overflow:focus-within .variant-scroll-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+.deck-report-card .variant-scroll-button.is-left {
+  left: 4px;
+}
+.deck-report-card .variant-scroll-button.is-right {
+  right: 4px;
+}
+.deck-report-card .variant-scroll.at-start .variant-scroll-button.is-left,
+.deck-report-card .variant-scroll.at-end .variant-scroll-button.is-right {
+  opacity: 0;
+  pointer-events: none;
 }
 .deck-report-card .unit {
-  flex: 0 0 58px;
-  min-width: 58px;
-  width: 58px;
+  background: #f7f9fc;
+  border: 1px solid #dfe6ef;
+  border-radius: 6px;
+  box-sizing: border-box;
+  flex: initial;
+  min-width: 0;
+  padding: 2px;
+  width: auto;
 }
 .deck-report-card .unit img,
 .deck-report-card .image-placeholder {
@@ -843,21 +915,38 @@ figcaption {
 }
 .deck-report-card figcaption {
   color: #293445;
-  display: block;
-  font-size: 10px;
+  display: grid;
+  font-size: 9px;
   font-weight: 800;
-  line-height: 1.25;
-  margin-top: 4px;
-  max-height: 34px;
+  gap: 1px;
+  line-height: 1.12;
+  margin-top: 3px;
+  max-height: 25px;
   overflow: hidden;
   text-align: center;
 }
-.deck-report-card .variant-name {
-  color: #4a5565;
-  font-size: 11px;
-  margin: 6px 0 0;
-  max-height: 32px;
+.deck-report-card .unit-name,
+.deck-report-card .unit-meta {
+  min-width: 0;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+.deck-report-card .unit-name {
+  color: #111827;
+  white-space: nowrap;
+}
+.deck-report-card .unit-meta {
+  color: #344054;
+  font-size: 8px;
+  font-weight: 900;
+}
+.deck-report-card .variant-stage {
+  display: grid;
+  min-width: 0;
+}
+.deck-report-card .variant.is-active {
+  align-content: start;
+  display: grid;
 }
 .deck-report-card .variant-statline {
   display: none;
@@ -1234,9 +1323,9 @@ figcaption {
     overflow-x: visible;
   }
   .deck-report-card .unit {
-    flex-basis: 50px;
-    min-width: 50px;
-    width: 50px;
+    flex-basis: 58px;
+    min-width: 58px;
+    width: 58px;
   }
   .strength-metrics-block,
   .equipment-style-block {
@@ -1305,6 +1394,144 @@ figcaption {
   }
   .behavior-panel {
     display: none;
+  }
+  .report-card-board {
+    gap: 6px;
+  }
+  .deck-report-card {
+    gap: 6px 8px;
+    grid-template-columns: 42px minmax(0, 1fr);
+    grid-template-areas:
+      "rank identity"
+      "metrics metrics";
+    padding: 7px 8px;
+  }
+  .rank-block {
+    align-content: center;
+    align-self: stretch;
+    border-bottom: 0;
+    border-right: 1px solid #dfe5ee;
+    display: grid;
+    gap: 2px;
+    justify-items: center;
+    padding: 0 7px 0 0;
+    text-align: center;
+  }
+  .rank-block strong {
+    font-size: 22px;
+  }
+  .rank-record {
+    font-size: 9px;
+    line-height: 1.1;
+  }
+  .rank-trend {
+    font-size: 9px;
+    padding: 3px 5px;
+  }
+  .deck-identity-block {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .identity-heading {
+    gap: 3px;
+    margin-bottom: 4px;
+  }
+  .identity-heading h3 {
+    font-size: 14px;
+    line-height: 1.12;
+    max-height: 32px;
+    overflow: hidden;
+  }
+  .identity-archetype,
+  .identity-meta,
+  .deck-report-card .variant-toolbar,
+  .deck-report-card .variant-scroll-button,
+  .equipment-style-block,
+  .matchup-summary-block {
+    display: none;
+  }
+  .deck-report-card .variant-viewer {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .deck-report-card .variant-cards {
+    cursor: default;
+    display: grid;
+    gap: 4px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    height: auto;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+  .deck-report-card .unit {
+    flex: initial;
+    min-width: 0;
+    position: relative;
+    width: auto;
+  }
+  .deck-report-card .unit img,
+  .deck-report-card .image-placeholder {
+    aspect-ratio: 1.1;
+    object-fit: cover;
+    object-position: top center;
+  }
+  .deck-report-card figcaption {
+    align-items: end;
+    background: linear-gradient(180deg, rgba(10, 16, 24, 0), rgba(10, 16, 24, 0.82));
+    border-radius: 0 0 4px 4px;
+    bottom: 0;
+    color: #fff;
+    display: flex;
+    font-size: 8px;
+    font-weight: 900;
+    height: 18px;
+    justify-content: center;
+    left: 0;
+    line-height: 1;
+    margin: 0;
+    overflow: hidden;
+    padding: 5px 2px 2px;
+    position: absolute;
+    right: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+  .deck-report-card .unit-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .deck-report-card .unit-meta {
+    display: none;
+  }
+  .strength-metrics-block {
+    display: block;
+    grid-area: metrics;
+  }
+  .strength-metrics-block .block-title {
+    display: none;
+  }
+  .metric-card-grid {
+    display: flex;
+    gap: 4px;
+    overflow: hidden;
+  }
+  .metric-card {
+    border-radius: 999px;
+    display: none;
+    min-height: 0;
+    padding: 4px 6px;
+  }
+  .metric-card:nth-child(1),
+  .metric-card:nth-child(2),
+  .metric-card:nth-child(4),
+  .metric-card:nth-child(5) {
+    align-items: center;
+    display: flex;
+    gap: 3px;
+  }
+  .metric-card span {
+    font-size: 9px;
+  }
+  .metric-card strong {
+    font-size: 10px;
   }
   .leaderboard-loadmore {
     align-items: stretch;

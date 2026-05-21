@@ -633,12 +633,15 @@ def _archetype_variant_viewer(archetype: dict[str, Any]) -> str:
 
 def _archetype_variant(deck: dict[str, Any], index: int) -> str:
     active_class = " is-active" if index == 0 else ""
-    cards = list(deck.get("cards") or [])[:5]
+    cards = list(deck.get("cards") or [])
     return "\n".join(
         [
             f'<div class="variant{active_class}" data-variant data-variant-index="{index}">',
-            f'<div class="variant-cards">{_card_strip(cards)}</div>',
-            f'<p class="variant-name">{_html(deck.get("deck_name") or deck.get("deck_fingerprint") or "-")}</p>',
+            '<div class="variant-scroll" data-card-scroll>',
+            '<button type="button" class="variant-scroll-button is-left" data-card-scroll-left aria-label="向左滚动卡组">‹</button>',
+            f'<div class="variant-cards" data-card-scroll-strip>{_card_strip(cards)}</div>',
+            '<button type="button" class="variant-scroll-button is-right" data-card-scroll-right aria-label="向右滚动卡组">›</button>',
+            "</div>",
             '<div class="variant-statline">',
             f'<span>{_html(deck.get("sample_count", 0))} 样本</span>',
             f'<span>{_player_summary_text(deck)}</span>',
@@ -1166,14 +1169,30 @@ def _unit_figure(card: dict[str, Any]) -> str:
         media = f'<img src="{_html(image_url)}" alt="{_html(label)}" loading="lazy">'
     else:
         media = f'<div class="image-placeholder">{_html(_short_card_label(label))}</div>'
+    caption = _card_caption(label)
     return "\n".join(
         [
             f'<figure class="unit" title="{_html(label)}">',
             media,
-            f"<figcaption>{_html(label)}</figcaption>",
+            f"<figcaption>{caption}</figcaption>",
             "</figure>",
         ]
     )
+
+
+def _card_caption(label: str) -> str:
+    name, detail = _split_card_label(label)
+    if not detail:
+        return f'<span class="unit-name">{_html(name)}</span>'
+    return f'<span class="unit-name">{_html(name)}</span><span class="unit-meta">{_html(detail)}</span>'
+
+
+def _split_card_label(label: str) -> tuple[str, str]:
+    text = str(label or "").strip()
+    if text.endswith(")") and "(" in text:
+        name, detail = text.rsplit("(", 1)
+        return name.strip() or text, detail[:-1].strip()
+    return text, ""
 
 
 def _sort_item_attrs(title: str, wilson: Any, sample_count: Any) -> str:

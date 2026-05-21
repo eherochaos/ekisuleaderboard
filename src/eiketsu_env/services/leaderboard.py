@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from collections import Counter
 from dataclasses import dataclass, field
@@ -93,6 +94,7 @@ class _LeaderboardBucket:
     player_counts: Counter[str] = field(default_factory=Counter)
     weapon_counts: dict[str, dict[str, int]] = field(default_factory=dict)
     style_counts: dict[str, dict[str, int]] = field(default_factory=dict)
+    soul_counts: dict[str, dict[str, int]] = field(default_factory=dict)
     date_counts: dict[str, dict[str, int]] = field(default_factory=dict)
     recent_samples: list[_LeaderboardSideSample] = field(default_factory=list)
 
@@ -110,6 +112,8 @@ class _LeaderboardBucket:
         )
         _add_behavior_counter(self.weapon_counts, sample.weapon_name, result)
         _add_behavior_counter(self.style_counts, sample.style_name, result)
+        for soul_name in dict.fromkeys(_selected_soul_names(side)):
+            _add_behavior_counter(self.soul_counts, soul_name, result)
         sample_date = _sample_date(sample.played_at)
         if sample_date is not None:
             _add_behavior_counter(self.date_counts, sample_date.isoformat(), result)
@@ -130,6 +134,7 @@ class _LeaderboardBucket:
         self.player_counts.update(other.player_counts)
         _merge_behavior_counts(self.weapon_counts, other.weapon_counts)
         _merge_behavior_counts(self.style_counts, other.style_counts)
+        _merge_behavior_counts(self.soul_counts, other.soul_counts)
         _merge_behavior_counts(self.date_counts, other.date_counts)
         self.recent_samples.extend(other.recent_samples)
         _trim_recent_samples(self.recent_samples)
@@ -1511,7 +1516,7 @@ def _behavior_stats(bucket: _LeaderboardBucket, trend_anchor: str) -> dict[str, 
         "styles": _behavior_category_rows(bucket.style_counts),
         "trend": _trend_stats(bucket, trend_anchor),
         "credibility": _credibility_stats(bucket),
-        "souls": [],
+        "souls": _soul_behavior_rows(bucket),
     }
 
 
@@ -1555,6 +1560,19 @@ def _behavior_category_payload(name: str, row: dict[str, int], total_sample: int
         "conditional_win_rate": conditional_win_rate,
         "low_sample": low_sample,
     }
+
+
+def _soul_behavior_rows(bucket: _LeaderboardBucket) -> list[dict[str, Any]]:
+    if bucket.sample_count <= 0 or not bucket.soul_counts:
+        return []
+    sorted_rows = sorted(
+        bucket.soul_counts.items(),
+        key=lambda item: (-item[1]["sample_count"], -item[1]["win_count"], item[0]),
+    )
+    return [
+        _behavior_category_payload(name, row, bucket.sample_count, bucket.win_count)
+        for name, row in sorted_rows[:BEHAVIOR_TOP_LIMIT]
+    ]
 
 
 def _add_behavior_counter(buckets: dict[str, dict[str, int]], name: str, result: str) -> None:
@@ -1672,6 +1690,63 @@ def _selected_name(side: MatchSide | None, key: str) -> str:
     if isinstance(raw, dict):
         return _normalize_behavior_name(raw.get("name") or raw.get("label") or raw.get("summary"))
     return _normalize_behavior_name(raw)
+
+
+def _selected_soul_names(side: MatchSide | None) -> list[str]:
+    selected = getattr(side, "selected_json", None)
+    if not isinstance(selected, dict):
+        return []
+    names: list[str] = []
+    raw_souls = selected.get("souls")
+    names.extend(_soul_names_from_raw(raw_souls))
+    weapon = selected.get("weapon")
+    if isinstance(weapon, dict):
+        names.extend(_soul_names_from_raw(weapon.get("souls")))
+        if not names:
+            names.extend(_soul_names_from_summary(weapon.get("summary")))
+    if not names:
+        names.extend(_soul_names_from_summary(selected.get("summary")))
+    return [name for name in names if name]
+
+
+def _soul_names_from_raw(raw: Any) -> list[str]:
+    if raw is None:
+        return []
+    if isinstance(raw, list):
+        names: list[str] = []
+        for item in raw:
+            names.extend(_soul_names_from_raw(item))
+        return names
+    if isinstance(raw, dict):
+        summary_names = _soul_names_from_summary(raw.get("summary"))
+        if summary_names:
+            return summary_names
+        name = _normalize_behavior_name(raw.get("name") or raw.get("label") or raw.get("summary"))
+        if name:
+            return [name]
+        for key in ("souls", "effects", "items", "names"):
+            names = _soul_names_from_raw(raw.get(key))
+            if names:
+                return names
+        return []
+    summary_names = _soul_names_from_summary(raw)
+    if summary_names:
+        return summary_names
+    name = _normalize_behavior_name(raw)
+    return [name] if name else []
+
+
+def _soul_names_from_summary(value: Any) -> list[str]:
+    text = " ".join(str(value or "").split())
+    if "英魂" not in text:
+        return []
+    return _soul_names_from_text(text.split("英魂", 1)[1])
+
+
+def _soul_names_from_text(value: str) -> list[str]:
+    pieces = re.split(r"\s*[、,/／]\s*|\s+", str(value or ""))
+    names = [_normalize_behavior_name(piece) for piece in pieces]
+    return [name for name in names if name]
 
 
 def _normalize_behavior_name(value: Any) -> str:
