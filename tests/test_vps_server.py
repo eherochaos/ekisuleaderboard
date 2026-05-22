@@ -614,6 +614,10 @@ def test_public_leaderboard_matchup_matrix_tracks_direction_and_low_samples(tmp_
     assert c_into_a["visible"] is False
     assert c_into_a["sample_count"] == 4
 
+    html = leaderboard_view._leaderboard_matchup_matrix_page(payload)
+    assert "is-low-sample" in html
+    assert "n=4" in html
+
 
 def test_leaderboard_matchup_route_renders_matrix_and_preserves_filters(tmp_path, monkeypatch):
     settings = _settings(tmp_path / "server")

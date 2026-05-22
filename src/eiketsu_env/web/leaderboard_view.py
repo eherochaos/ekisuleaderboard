@@ -587,7 +587,7 @@ def _matchup_matrix_table(payload: dict[str, Any]) -> str:
             '<section class="matchup-matrix-panel" aria-label="卡组对局矩阵">',
             '<div class="matchup-matrix-meta">',
             f'<span>胜率优先前 {_safe_int(matrix.get("limit")) or len(columns)} 卡组</span>',
-            f'<span>低于 {min_sample or 0} 场留空</span>',
+            f'<span>低于 {min_sample or 0} 场仅显示样本数</span>',
             "</div>",
             '<div class="matchup-matrix-scroll">',
             '<table class="matchup-matrix-table">',
@@ -660,13 +660,15 @@ def _matchup_matrix_mini_strip(cards: list[dict[str, Any]]) -> str:
 
 
 def _matchup_matrix_cell(cell: dict[str, Any]) -> str:
+    sample = _safe_int(cell.get("sample_count"))
     if not cell.get("visible"):
+        if sample > 0:
+            return f'<td class="matchup-matrix-cell is-low-sample" title="样本不足"><small>n={sample}</small></td>'
         return '<td class="matchup-matrix-cell is-empty" aria-label="样本不足"></td>'
     tone = str(cell.get("tone") or "even")
     if tone not in {"advantage", "even", "disadvantage"}:
         tone = "even"
     rate = _fmt_rate(cell.get("win_rate")) or "-"
-    sample = _safe_int(cell.get("sample_count"))
     title = f"{_safe_int(cell.get('win_count'))}胜 / {_safe_int(cell.get('loss_count'))}负 / {_safe_int(cell.get('draw_count'))}平"
     return (
         f'<td class="matchup-matrix-cell is-{_html(tone)}" title="{_html(title)}">'
