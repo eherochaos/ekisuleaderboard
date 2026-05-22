@@ -1292,6 +1292,12 @@ figcaption {
   background: #fff0ef;
   color: #b42318;
 }
+.matchup-matrix-cell.is-low-sample {
+  background: #f8fafc;
+  color: #7b8797;
+  outline: 1px dashed #cbd5e1;
+  outline-offset: -5px;
+}
 .matchup-matrix-cell.is-empty {
   background: #f3f6fa;
   color: transparent;
