@@ -153,6 +153,47 @@ def _leaderboard_visual_page(
     )
 
 
+def _leaderboard_matchup_matrix_page(payload: dict[str, Any]) -> str:
+    title = "公开卡组对局矩阵"
+    matrix = payload.get("matchup_matrix") if isinstance(payload.get("matchup_matrix"), dict) else {}
+    matrix_limit = _safe_int(matrix.get("limit")) if matrix else 0
+    min_sample = _safe_int(matrix.get("min_sample_count")) if matrix else 0
+    summary_items = "".join(
+        [
+            _summary_item("目标版本", payload.get("target_version", "")),
+            _summary_item("采集日期", f"{payload.get('date_from', '')} 至 {payload.get('date_to', '')}"),
+            _summary_item("对局数", payload.get("match_count", 0)),
+            _summary_item("双方样本", payload.get("side_sample_count", 0)),
+            _summary_item("矩阵规模", f"前 {matrix_limit or '-'} 卡组"),
+            _summary_item("最低样本", min_sample or "-"),
+        ]
+    )
+    notice = _leaderboard_display_notice(
+        payload,
+        cluster_enabled=False,
+        contributor_name="",
+        display_limit=None,
+        shown_count=0,
+        total_count=0,
+    )
+    matrix_html = _matchup_matrix_table(payload) if str(payload.get("leaderboard_status") or "") == "ready" else ""
+    return _render_web_template(
+        "leaderboard_matchups.html",
+        {
+            "page_title": _html(title),
+            "asset_version": _html(_leaderboard_asset_version()),
+            "title": _html(title),
+            "eyebrow": "PUBLIC MATCHUP MATRIX",
+            "summary_items": summary_items,
+            "mobile_summary": _leaderboard_mobile_summary(payload, "上传批次"),
+            "privacy_note": _html("公开矩阵只展示匿名聚合结果，不展示贡献者、token、浏览器信息或本地路径。"),
+            "view_controls": _leaderboard_matchup_view_controls(payload),
+            "display_notice": notice,
+            "matrix": matrix_html,
+        },
+    )
+
+
 def _render_web_template(name: str, context: dict[str, Any]) -> str:
     template_path = WEB_TEMPLATE_ROOT / name
     if not template_path.is_file():
@@ -358,6 +399,7 @@ def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, c
     if rank_scope not in RANK_SCOPE_LABELS:
         rank_scope = RANK_SCOPE_ALL
     base_params = _leaderboard_base_query(payload, contributor_name)
+    is_public = str(payload.get("scope") or "public") == "public"
     active_version = str(payload.get("target_version") or "").strip()
     available_versions = [
         version
@@ -379,6 +421,13 @@ def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, c
             (RANK_SCOPE_KNIGHT_UP, RANK_SCOPE_LABELS[RANK_SCOPE_KNIGHT_UP]),
         )
     ]
+    matchup_group = []
+    if is_public:
+        matchup_group = [
+            '<div class="view-control-group"><span class="view-control-label">分析</span>',
+            _view_control_link("对局矩阵", _leaderboard_path_query_url("/leaderboard/matchups", base_params, rank_scope=rank_scope), False),
+            "</div>",
+        ]
     version_group = []
     if str(payload.get("scope") or "public") == "public" and available_versions:
         version_params = {
@@ -410,6 +459,61 @@ def _leaderboard_view_controls(payload: dict[str, Any], cluster_enabled: bool, c
             '<div class="view-control-group"><span class="view-control-label">段位</span>',
             *rank_links,
             "</div>",
+            *matchup_group,
+            "</section>",
+        ]
+    )
+
+
+def _leaderboard_matchup_view_controls(payload: dict[str, Any]) -> str:
+    rank_scope = str(payload.get("rank_scope") or RANK_SCOPE_ALL)
+    if rank_scope not in RANK_SCOPE_LABELS:
+        rank_scope = RANK_SCOPE_ALL
+    base_params = _leaderboard_base_query(payload)
+    active_version = str(payload.get("target_version") or "").strip()
+    available_versions = [
+        version
+        for version in dict.fromkeys(str(item or "").strip() for item in payload.get("available_target_versions") or [])
+        if version
+    ]
+    if active_version and active_version not in available_versions:
+        available_versions.insert(0, active_version)
+    rank_links = [
+        _view_control_link(label, _leaderboard_path_query_url("/leaderboard/matchups", base_params, rank_scope=value), rank_scope == value)
+        for value, label in (
+            (RANK_SCOPE_ALL, RANK_SCOPE_LABELS[RANK_SCOPE_ALL]),
+            (RANK_SCOPE_TRAVELER_DOWN, RANK_SCOPE_LABELS[RANK_SCOPE_TRAVELER_DOWN]),
+            (RANK_SCOPE_KNIGHT_DOWN, RANK_SCOPE_LABELS[RANK_SCOPE_KNIGHT_DOWN]),
+            (RANK_SCOPE_KNIGHT_UP, RANK_SCOPE_LABELS[RANK_SCOPE_KNIGHT_UP]),
+        )
+    ]
+    version_group = []
+    if available_versions:
+        version_params = {**base_params, "rank_scope": rank_scope}
+        version_params.pop("version", None)
+        version_group = [
+            '<form class="view-control-group view-control-version-form" method="get" action="/leaderboard/matchups">',
+            '<label class="view-control-label" for="matchup-version-select">目标版本</label>',
+            *_hidden_query_inputs(version_params),
+            '<select id="matchup-version-select" class="view-control-select" name="version" onchange="this.form.submit()">',
+            *[
+                f'<option value="{_html(version)}"{" selected" if version == active_version else ""}>{_html(version)}</option>'
+                for version in available_versions
+            ],
+            "</select>",
+            '<noscript><button class="view-control-submit" type="submit">切换</button></noscript>',
+            "</form>",
+        ]
+    return "\n".join(
+        [
+            '<section class="view-controls" aria-label="对局矩阵筛选">',
+            '<div class="view-control-group"><span class="view-control-label">页面</span>',
+            _view_control_link("返回榜单", _leaderboard_path_query_url("/leaderboard", base_params, cluster="off", rank_scope=rank_scope), False),
+            "</div>",
+            *version_group,
+            '<div class="view-control-group"><span class="view-control-label">段位</span>',
+            *rank_links,
+            "</div>",
             "</section>",
         ]
     )
@@ -429,8 +533,12 @@ def _leaderboard_base_query(payload: dict[str, Any], contributor_name: str = "")
 
 
 def _leaderboard_query_url(base_params: dict[str, str], **updates: str) -> str:
+    return _leaderboard_path_query_url("/leaderboard", base_params, **updates)
+
+
+def _leaderboard_path_query_url(path: str, base_params: dict[str, str], **updates: str) -> str:
     params = {key: value for key, value in {**base_params, **updates}.items() if value}
-    return "/leaderboard" + (f"?{urlencode(params)}" if params else "")
+    return path + (f"?{urlencode(params)}" if params else "")
 
 
 def _hidden_query_inputs(params: dict[str, str]) -> list[str]:
@@ -444,6 +552,132 @@ def _hidden_query_inputs(params: dict[str, str]) -> list[str]:
 def _view_control_link(label: str, href: str, active: bool) -> str:
     css_class = "view-control-link is-active" if active else "view-control-link"
     return f'<a class="{css_class}" href="{_html(href)}">{_html(label)}</a>'
+
+
+def _matchup_matrix_table(payload: dict[str, Any]) -> str:
+    matrix = payload.get("matchup_matrix") if isinstance(payload.get("matchup_matrix"), dict) else {}
+    columns = [item for item in matrix.get("columns") or [] if isinstance(item, dict)]
+    rows = [item for item in matrix.get("rows") or [] if isinstance(item, dict)]
+    if not columns or not rows:
+        return '<section class="empty">当前公开榜还没有可生成矩阵的卡组数据。</section>'
+    header_cells = [
+        '<th class="matchup-matrix-corner" scope="col">卡组</th>',
+        *[
+            f'<th class="matchup-matrix-column" scope="col">{_matchup_matrix_deck_heading(column)}</th>'
+            for column in columns
+        ],
+    ]
+    body_rows = []
+    for row in rows:
+        deck = row.get("deck") if isinstance(row.get("deck"), dict) else {}
+        cells = [cell if isinstance(cell, dict) else {} for cell in row.get("cells") or []]
+        body_rows.append(
+            "\n".join(
+                [
+                    "<tr>",
+                    f'<th class="matchup-matrix-row-head" scope="row">{_matchup_matrix_deck_heading(deck)}</th>',
+                    *[_matchup_matrix_cell(cell) for cell in cells[: len(columns)]],
+                    "</tr>",
+                ]
+            )
+        )
+    min_sample = _safe_int(matrix.get("min_sample_count"))
+    return "\n".join(
+        [
+            '<section class="matchup-matrix-panel" aria-label="卡组对局矩阵">',
+            '<div class="matchup-matrix-meta">',
+            f'<span>胜率优先前 {_safe_int(matrix.get("limit")) or len(columns)} 卡组</span>',
+            f'<span>低于 {min_sample or 0} 场留空</span>',
+            "</div>",
+            '<div class="matchup-matrix-scroll">',
+            '<table class="matchup-matrix-table">',
+            f"<thead><tr>{''.join(header_cells)}</tr></thead>",
+            f"<tbody>{''.join(body_rows)}</tbody>",
+            "</table>",
+            "</div>",
+            "</section>",
+        ]
+    )
+
+
+def _matchup_matrix_deck_heading(deck: dict[str, Any]) -> str:
+    index = _safe_int(deck.get("matrix_index")) or _safe_int(deck.get("rank"))
+    index_label = f"#{index:02d}" if index else "#--"
+    name = str(deck.get("deck_name") or deck.get("deck_fingerprint") or "-")
+    cards = _matchup_matrix_cards(deck)
+    return "\n".join(
+        [
+            '<span class="matchup-matrix-deck">',
+            _matchup_matrix_avatar(cards, name),
+            '<span class="matchup-matrix-copy">',
+            f'<span class="matchup-matrix-rank">{_html(index_label)}</span>',
+            f'<span class="matchup-matrix-name" title="{_html(name)}">{_html(_short_deck_label(name))}</span>',
+            _matchup_matrix_mini_strip(cards),
+            "</span>",
+            "</span>",
+        ]
+    )
+
+
+def _matchup_matrix_cards(deck: dict[str, Any]) -> list[dict[str, Any]]:
+    cards = deck.get("cards")
+    if not isinstance(cards, list):
+        return []
+    return [card for card in cards if isinstance(card, dict)]
+
+
+def _matchup_matrix_avatar(cards: list[dict[str, Any]], deck_name: str) -> str:
+    representative = cards[0] if cards else {}
+    label = str(representative.get("label") or deck_name or "-")
+    image_url = str(representative.get("image_url") or "")
+    if image_url:
+        return (
+            '<span class="matchup-matrix-avatar">'
+            f'<img src="{_html(image_url)}" alt="{_html(label)}" loading="lazy">'
+            "</span>"
+        )
+    return f'<span class="matchup-matrix-avatar is-placeholder">{_html(_short_card_label(label))}</span>'
+
+
+def _matchup_matrix_mini_strip(cards: list[dict[str, Any]]) -> str:
+    if not cards:
+        return ""
+    chips = []
+    for card in cards[:4]:
+        label = str(card.get("label") or card.get("card_hash") or "")
+        image_url = str(card.get("image_url") or "")
+        if image_url:
+            chips.append(
+                '<span class="matchup-matrix-mini-card">'
+                f'<img src="{_html(image_url)}" alt="{_html(label)}" loading="lazy">'
+                "</span>"
+            )
+        else:
+            chips.append(
+                f'<span class="matchup-matrix-mini-card is-placeholder">{_html(_short_card_label(label))}</span>'
+            )
+    return f'<span class="matchup-matrix-mini-strip">{"".join(chips)}</span>'
+
+
+def _matchup_matrix_cell(cell: dict[str, Any]) -> str:
+    if not cell.get("visible"):
+        return '<td class="matchup-matrix-cell is-empty" aria-label="样本不足"></td>'
+    tone = str(cell.get("tone") or "even")
+    if tone not in {"advantage", "even", "disadvantage"}:
+        tone = "even"
+    rate = _fmt_rate(cell.get("win_rate")) or "-"
+    sample = _safe_int(cell.get("sample_count"))
+    title = f"{_safe_int(cell.get('win_count'))}胜 / {_safe_int(cell.get('loss_count'))}负 / {_safe_int(cell.get('draw_count'))}平"
+    return (
+        f'<td class="matchup-matrix-cell is-{_html(tone)}" title="{_html(title)}">'
+        f'<span>{_html(rate)}</span><small> · n={sample}</small></td>'
+    )
+
+
+def _short_deck_label(label: str) -> str:
+    text = " / ".join(part.strip() for part in str(label or "").split("/")[:2] if part.strip())
+    text = text or str(label or "")
+    return text if len(text) <= 20 else f"{text[:20]}..."
 
 
 def _archetype_feature_grid(archetypes: list[dict[str, Any]]) -> str:

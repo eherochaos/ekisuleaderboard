@@ -44,6 +44,10 @@ LEADERBOARD_MAX_PAGE_LIMIT = 500
 LEADERBOARD_ROW_DECK = "deck"
 LEADERBOARD_ROW_CARD = "card"
 LEADERBOARD_ROW_ARCHETYPE = "archetype"
+LEADERBOARD_ROW_DECK_MATCHUP_MATRIX = "deck_matchup_matrix"
+MATCHUP_MATRIX_LIMIT = 20
+MATCHUP_MATRIX_MIN_SAMPLE_COUNT = 5
+MATCHUP_MATRIX_SORT_BASIS = "win_rate"
 RANK_SCOPE_ALL = "all"
 RANK_SCOPE_TRAVELER_DOWN = "traveler_down"
 RANK_SCOPE_KNIGHT_DOWN = "knight_down"
@@ -70,7 +74,7 @@ RANK_SCOPE_ALIASES = {
 }
 _LEADERBOARD_CACHE: dict[tuple[Any, ...], tuple[float, dict[str, Any]]] = {}
 _LEADERBOARD_REFRESH_LOCK = Lock()
-LEADERBOARD_PAYLOAD_VERSION = 2
+LEADERBOARD_PAYLOAD_VERSION = 3
 BEHAVIOR_TOP_LIMIT = 3
 BEHAVIOR_MIN_CONDITIONAL_SAMPLE = 20
 LOGGER = logging.getLogger(__name__)
@@ -161,6 +165,27 @@ class _LeaderboardBucket:
 
 
 @dataclass(slots=True)
+class _MatchupBucket:
+    sample_count: int = 0
+    win_count: int = 0
+    loss_count: int = 0
+    draw_count: int = 0
+
+    def add(self, result: str) -> None:
+        self.sample_count += 1
+        if result == "win":
+            self.win_count += 1
+        elif result == "loss":
+            self.loss_count += 1
+        elif result == "draw":
+            self.draw_count += 1
+
+    @property
+    def win_rate(self) -> float | None:
+        return _win_rate(self.win_count, self.loss_count)
+
+
+@dataclass(slots=True)
 class _DeckArchetype:
     representative: str
     members: list[str]
@@ -173,6 +198,17 @@ class _LeaderboardSideView:
     player_name: str
     profile_json: dict[str, Any]
     selected_json: dict[str, Any]
+
+
+@dataclass(slots=True)
+class _MaterializedLeaderboardSide:
+    match_id: int
+    side_index: int
+    deck_fingerprint: str
+    result: str
+    played_at: str
+    rank_order: int | None
+    side: _LeaderboardSideView
 
 
 def _server_share_config(session) -> ShareConfig:
@@ -484,6 +520,69 @@ def public_leaderboard_page(
         return payload
 
 
+def public_leaderboard_matchup_matrix(
+    settings: Settings,
+    *,
+    rank_scope: str = RANK_SCOPE_ALL,
+    target_version: str = "",
+) -> dict[str, Any]:
+    factory = make_session_factory(settings)
+    with factory() as session:
+        config = _server_share_config(session)
+        upload_watermark = _leaderboard_upload_watermark(session)
+        run, latest, payload_config, payload_watermark = _public_leaderboard_run_for_request(
+            session,
+            config,
+            upload_watermark,
+            target_version=target_version,
+        )
+        available_versions = _available_public_leaderboard_versions(session, config.target_version)
+        normalized_rank_scope = _normalize_rank_scope(rank_scope)
+        payload = _materialized_base_payload(
+            payload_config,
+            upload_watermark=payload_watermark,
+            run=latest,
+            rank_scope=normalized_rank_scope,
+            row_type=LEADERBOARD_ROW_DECK_MATCHUP_MATRIX,
+        )
+        payload["available_target_versions"] = available_versions
+        payload["current_target_version"] = config.target_version
+        payload["selected_target_version"] = payload_config.target_version
+        payload["matchup_matrix"] = _empty_matchup_matrix_payload()
+        if run is None:
+            payload["leaderboard_status"] = str(getattr(latest, "status", "") or "missing")
+            return payload
+
+        matrix_row = session.scalar(
+            _materialized_row_query(int(run.id), LEADERBOARD_ROW_DECK_MATCHUP_MATRIX, normalized_rank_scope).limit(1)
+        )
+        if matrix_row is None:
+            payload["leaderboard_status"] = "missing"
+            return payload
+
+        payload["match_count"] = int(run.match_count or 0)
+        payload["side_sample_count"] = _materialized_scope_sample_count(session, int(run.id), normalized_rank_scope)
+        payload["leaderboard_status"] = "ready"
+        payload["matchup_matrix"] = dict(matrix_row.row_json or {})
+        payload["totals"] = {
+            LEADERBOARD_ROW_DECK_MATCHUP_MATRIX: 1,
+            "row_count": int(run.row_count or 0),
+        }
+        return payload
+
+
+def _empty_matchup_matrix_payload() -> dict[str, Any]:
+    return {
+        "row_type": LEADERBOARD_ROW_DECK_MATCHUP_MATRIX,
+        "limit": MATCHUP_MATRIX_LIMIT,
+        "min_sample_count": MATCHUP_MATRIX_MIN_SAMPLE_COUNT,
+        "sort_basis": MATCHUP_MATRIX_SORT_BASIS,
+        "sample_count": 0,
+        "columns": [],
+        "rows": [],
+    }
+
+
 def refresh_public_leaderboard_materialized(settings: Settings, rank_scope: str = "all", cluster: str = "all") -> dict[str, Any]:
     """Regenerate derived public leaderboard rows without keeping one huge JSON payload in memory."""
 
@@ -714,10 +813,19 @@ def _build_materialized_public_leaderboard_rows(
     rank_scopes = _materialized_rank_scopes(rank_scope)
     deck_buckets: dict[str, dict[str, _LeaderboardBucket]] = {scope: {} for scope in rank_scopes}
     card_buckets: dict[str, dict[str, _LeaderboardBucket]] = {scope: {} for scope in rank_scopes}
+    matchup_buckets: dict[str, dict[str, dict[str, _MatchupBucket]]] = {scope: {} for scope in rank_scopes}
     match_ids_by_scope: dict[str, set[int]] = {scope: set() for scope in rank_scopes}
     seen_names: dict[str, str] = {}
+    current_match_id: int | None = None
+    current_match_sides: list[_MaterializedLeaderboardSide] = []
 
     for row in _iter_materialized_leaderboard_side_rows(session, config):
+        match_id = int(row.match_id or 0)
+        if current_match_id is not None and match_id != current_match_id:
+            _add_materialized_matchup_samples(current_match_sides, rank_scopes, matchup_buckets)
+            current_match_sides = []
+        current_match_id = match_id
+
         if not is_environment_mode(str(row.mode or ""), include_solo=config.include_solo):
             continue
         deck_fingerprint = str(row.deck_fingerprint or "")
@@ -732,18 +840,27 @@ def _build_materialized_public_leaderboard_rows(
             selected_json=selected,
         )
         order = _rank_order_from_profile(profile)
-        scopes = [scope for scope in rank_scopes if _rank_order_matches_scope(order, scope)]
-        if not scopes:
-            continue
-        match_id = int(row.match_id or 0)
+        scopes = _rank_scopes_for_order(order, rank_scopes)
         result = _result_for_side_values(str(row.match_result or ""), int(row.side_index or 0), str(row.side_result or ""))
         played_at = str(row.played_at or "")
+        current_match_sides.append(
+            _MaterializedLeaderboardSide(
+                match_id=match_id,
+                side_index=int(row.side_index or 0),
+                deck_fingerprint=deck_fingerprint,
+                result=result,
+                played_at=played_at,
+                rank_order=order,
+                side=side,
+            )
+        )
         card_hashes = {card_hash for card_hash in deck_fingerprint.split(",") if card_hash}
         for scope in scopes:
             match_ids_by_scope[scope].add(match_id)
             deck_buckets[scope].setdefault(deck_fingerprint, _LeaderboardBucket()).add(result, side, played_at)
             for card_hash in card_hashes:
                 card_buckets[scope].setdefault(card_hash, _LeaderboardBucket()).add(result, side, played_at)
+    _add_materialized_matchup_samples(current_match_sides, rank_scopes, matchup_buckets)
 
     rows: list[ServerLeaderboardRow] = []
     for scope in rank_scopes:
@@ -769,6 +886,12 @@ def _build_materialized_public_leaderboard_rows(
                 scope,
                 cluster_enabled=1,
                 items=_top_archetypes(deck_buckets[scope], lookup, seen_names, None, config.date_to),
+            )
+        )
+        rows.append(
+            _materialized_matchup_matrix_row(
+                scope,
+                _matchup_matrix_payload(deck_buckets[scope], matchup_buckets[scope], lookup, seen_names),
             )
         )
 
@@ -827,6 +950,133 @@ def _materialized_rows_for_items(
             )
         )
     return rows
+
+
+def _materialized_matchup_matrix_row(rank_scope: str, matrix: dict[str, Any]) -> ServerLeaderboardRow:
+    return ServerLeaderboardRow(
+        run_id=0,
+        row_type=LEADERBOARD_ROW_DECK_MATCHUP_MATRIX,
+        rank_scope=rank_scope,
+        cluster_enabled=0,
+        rank=1,
+        sample_count=int(matrix.get("sample_count") or 0),
+        wilson_lower_bound=None,
+        row_json=matrix,
+    )
+
+
+def _rank_scopes_for_order(order: int | None, rank_scopes: list[str]) -> list[str]:
+    return [scope for scope in rank_scopes if _rank_order_matches_scope(order, scope)]
+
+
+def _add_materialized_matchup_samples(
+    sides: list[_MaterializedLeaderboardSide],
+    rank_scopes: list[str],
+    matchup_buckets: dict[str, dict[str, dict[str, _MatchupBucket]]],
+) -> None:
+    if len(sides) < 2:
+        return
+    for row_side in sides:
+        if not row_side.deck_fingerprint:
+            continue
+        scopes = _rank_scopes_for_order(row_side.rank_order, rank_scopes)
+        if not scopes:
+            continue
+        for column_side in sides:
+            if row_side.side_index == column_side.side_index:
+                continue
+            column_fingerprint = column_side.deck_fingerprint
+            if not column_fingerprint or column_fingerprint == row_side.deck_fingerprint:
+                continue
+            for scope in scopes:
+                row = matchup_buckets[scope].setdefault(row_side.deck_fingerprint, {})
+                row.setdefault(column_fingerprint, _MatchupBucket()).add(row_side.result)
+
+
+def _matchup_matrix_payload(
+    deck_buckets: dict[str, _LeaderboardBucket],
+    matchup_buckets: dict[str, dict[str, _MatchupBucket]],
+    lookup,
+    seen_names: dict[str, str],
+) -> dict[str, Any]:
+    axis = _matchup_axis_decks(deck_buckets, lookup, seen_names)
+    axis_fingerprints = [str(item.get("deck_fingerprint") or "") for item in axis]
+    rows = [
+        {
+            "deck": deck,
+            "cells": [
+                _matchup_matrix_cell(
+                    matchup_buckets.get(str(deck.get("deck_fingerprint") or ""), {}).get(column_fingerprint)
+                    if column_fingerprint != str(deck.get("deck_fingerprint") or "")
+                    else None
+                )
+                for column_fingerprint in axis_fingerprints
+            ],
+        }
+        for deck in axis
+    ]
+    return {
+        "row_type": LEADERBOARD_ROW_DECK_MATCHUP_MATRIX,
+        "limit": MATCHUP_MATRIX_LIMIT,
+        "min_sample_count": MATCHUP_MATRIX_MIN_SAMPLE_COUNT,
+        "sort_basis": MATCHUP_MATRIX_SORT_BASIS,
+        "sample_count": sum(bucket.sample_count for row in matchup_buckets.values() for bucket in row.values()),
+        "columns": axis,
+        "rows": rows,
+    }
+
+
+def _matchup_axis_decks(
+    deck_buckets: dict[str, _LeaderboardBucket],
+    lookup,
+    seen_names: dict[str, str],
+) -> list[dict[str, Any]]:
+    ranked = sorted(
+        deck_buckets.items(),
+        key=lambda item: (
+            -_matchup_sort_rate(item[1]),
+            -item[1].sample_count,
+            -(_wilson_lower_bound(item[1].win_count, item[1].loss_count) or 0),
+            item[0],
+        ),
+    )[:MATCHUP_MATRIX_LIMIT]
+    return [
+        {
+            **_deck_payload(fingerprint, bucket, lookup, seen_names, ""),
+            "matrix_index": index,
+        }
+        for index, (fingerprint, bucket) in enumerate(ranked, start=1)
+    ]
+
+
+def _matchup_sort_rate(bucket: _LeaderboardBucket) -> float:
+    return bucket.win_rate if bucket.win_rate is not None else -1.0
+
+
+def _matchup_matrix_cell(bucket: _MatchupBucket | None) -> dict[str, Any]:
+    if bucket is None:
+        return {"sample_count": 0, "visible": False, "tone": "empty"}
+    win_rate = bucket.win_rate
+    visible = bucket.sample_count >= MATCHUP_MATRIX_MIN_SAMPLE_COUNT and win_rate is not None
+    return {
+        "sample_count": bucket.sample_count,
+        "win_count": bucket.win_count,
+        "loss_count": bucket.loss_count,
+        "draw_count": bucket.draw_count,
+        "win_rate": win_rate,
+        "visible": visible,
+        "tone": _matchup_matrix_tone(win_rate) if visible else "empty",
+    }
+
+
+def _matchup_matrix_tone(win_rate: float | None) -> str:
+    if win_rate is None:
+        return "empty"
+    if win_rate >= 0.55:
+        return "advantage"
+    if win_rate <= 0.45:
+        return "disadvantage"
+    return "even"
 
 
 def _materialized_rank_scopes(rank_scope: str) -> list[str]:

@@ -36,6 +36,7 @@ from eiketsu_env.services.leaderboard import (
     personal_leaderboard,
     prune_legacy_leaderboard_snapshots,
     public_leaderboard,
+    public_leaderboard_matchup_matrix,
     public_leaderboard_page,
     refresh_public_leaderboard_materialized,
     refresh_public_leaderboard_snapshots,

@@ -46,6 +46,7 @@ from eiketsu_env.services.server_share import (
     personal_leaderboard,
     prune_legacy_leaderboard_snapshots,
     public_leaderboard,
+    public_leaderboard_matchup_matrix,
     public_leaderboard_page,
     refresh_public_leaderboard_materialized,
     refresh_public_leaderboard_snapshots,
@@ -56,6 +57,7 @@ from eiketsu_env.services.server_share import (
 from eiketsu_env.services.leaderboard import (
     LEADERBOARD_PAYLOAD_VERSION,
     LEADERBOARD_ROW_DECK,
+    LEADERBOARD_ROW_DECK_MATCHUP_MATRIX,
     RANK_SCOPE_ALL,
 )
 from eiketsu_env.services.share import ShareConfig, export_contribution
@@ -75,6 +77,14 @@ def _settings(tmp_path: Path) -> Settings:
 class _FakeRequest:
     def __init__(self, cookies: dict[str, str] | None = None) -> None:
         self.cookies = cookies or {}
+
+
+class _FakeBackgroundTasks:
+    def __init__(self) -> None:
+        self.tasks: list[tuple[tuple, dict]] = []
+
+    def add_task(self, *args, **kwargs) -> None:
+        self.tasks.append((args, kwargs))
 
 
 def _write_card_catalog(settings: Settings) -> None:
@@ -544,9 +554,100 @@ def test_refresh_public_leaderboard_snapshots_builds_filter_matrix(tmp_path):
         rows = session.scalars(select(ServerLeaderboardRow)).all()
         assert run.status == "ready"
         assert run.row_count == len(rows)
-        assert {row.row_type for row in rows} >= {"deck", "card", "archetype"}
+        assert {row.row_type for row in rows} >= {"deck", "card", "archetype", LEADERBOARD_ROW_DECK_MATCHUP_MATRIX}
         assert {row.rank_scope for row in rows} >= {"all"}
         assert session.scalars(select(ServerLeaderboardSnapshot)).all() == []
+
+
+def test_public_leaderboard_matchup_matrix_tracks_direction_and_low_samples(tmp_path):
+    settings = _settings(tmp_path / "server")
+    _write_card_catalog(settings)
+    _init_db(settings)
+    set_server_config(settings, "Ver.vps", "2026-05-10", "2026-05-12")
+    for index in range(5):
+        _insert_match(
+            settings,
+            f"matrix-a-b-{index}",
+            ["card-a"],
+            ["card-b"],
+            played_at=f"2026-05-11 10:{index:02d}",
+            result="win",
+        )
+    for index in range(4):
+        _insert_match(
+            settings,
+            f"matrix-c-a-{index}",
+            ["card-c"],
+            ["card-a"],
+            played_at=f"2026-05-11 11:{index:02d}",
+            result="win",
+        )
+
+    refresh_public_leaderboard_materialized(settings)
+    payload = public_leaderboard_matchup_matrix(settings)
+    matrix = payload["matchup_matrix"]
+    columns = [item["deck_fingerprint"] for item in matrix["columns"]]
+
+    assert payload["leaderboard_status"] == "ready"
+    assert matrix["min_sample_count"] == 5
+    assert matrix["limit"] == 20
+    assert matrix["sort_basis"] == "win_rate"
+    assert columns[:3] == ["card-c", "card-a", "card-b"]
+
+    def cell(row_fingerprint: str, column_fingerprint: str) -> dict:
+        column_index = columns.index(column_fingerprint)
+        row = next(item for item in matrix["rows"] if item["deck"]["deck_fingerprint"] == row_fingerprint)
+        return row["cells"][column_index]
+
+    a_into_b = cell("card-a", "card-b")
+    b_into_a = cell("card-b", "card-a")
+    c_into_a = cell("card-c", "card-a")
+
+    assert a_into_b["visible"] is True
+    assert a_into_b["sample_count"] == 5
+    assert a_into_b["win_rate"] == pytest.approx(1.0)
+    assert a_into_b["tone"] == "advantage"
+    assert b_into_a["visible"] is True
+    assert b_into_a["sample_count"] == 5
+    assert b_into_a["win_rate"] == pytest.approx(0.0)
+    assert b_into_a["tone"] == "disadvantage"
+    assert c_into_a["visible"] is False
+    assert c_into_a["sample_count"] == 4
+
+
+def test_leaderboard_matchup_route_renders_matrix_and_preserves_filters(tmp_path, monkeypatch):
+    settings = _settings(tmp_path / "server")
+    _write_card_catalog(settings)
+    _init_db(settings)
+    set_server_config(settings, "Ver.vps", "2026-05-10", "2026-05-12")
+    for index in range(5):
+        _insert_match(
+            settings,
+            f"matrix-route-{index}",
+            ["card-a"],
+            ["card-b"],
+            played_at=f"2026-05-11 12:{index:02d}",
+            result="win",
+        )
+    refresh_public_leaderboard_materialized(settings)
+
+    monkeypatch.setattr("eiketsu_env.server_app.upgrade_database", lambda _settings: None)
+    app = create_app(settings)
+    route = next(route for route in app.routes if getattr(route, "path", "") == "/leaderboard/matchups")
+    response = route.endpoint(_FakeBackgroundTasks(), rank_scope=RANK_SCOPE_ALL, version="Ver.vps")
+    html = response.body.decode("utf-8")
+
+    assert "公开卡组对局矩阵" in html
+    assert "matchup-matrix-table" in html
+    assert "matchup-matrix-avatar" in html
+    assert "matchup-matrix-mini-strip" in html
+    assert "100.00%" in html
+    assert " · n=5" in html
+    assert 'action="/leaderboard/matchups"' in html
+    assert 'name="rank_scope" value="all"' in html
+    assert '<option value="Ver.vps" selected>Ver.vps</option>' in html
+    assert "eiketsu_contributor_name" not in html
+    assert "eiketsu_user_token" not in html
 
 
 def test_public_leaderboard_page_reads_materialized_rows_with_pagination(tmp_path):

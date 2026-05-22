@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>$page_title</title>
+    <link rel="stylesheet" href="/web/static/leaderboard.css?v=$asset_version">
+  </head>
+  <body>
+    <main class="page">
+      <div class="leaderboard-topbar">
+        <nav class="site-nav"><a href="/leaderboard">返回公开榜</a></nav>
+      </div>
+      <header class="report-header">
+        <div class="title-block">
+          <p>$eyebrow</p>
+          <h1>$title</h1>
+        </div>
+        <dl class="summary">
+          $summary_items
+        </dl>
+        <p class="leaderboard-mobile-summary">$mobile_summary</p>
+      </header>
+      <p class="leaderboard-note">$privacy_note</p>
+      $view_controls
+      $display_notice
+      $matrix
+    </main>
+  </body>
+</html>
