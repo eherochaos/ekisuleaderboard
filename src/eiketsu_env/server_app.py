@@ -23,6 +23,7 @@ from eiketsu_env.services.leaderboard import (
     RANK_SCOPE_ALL,
     contributor_leaderboard,
     personal_leaderboard,
+    public_leaderboard_matchup_matrix,
     public_leaderboard_page,
     refresh_public_leaderboard_snapshots,
 )
@@ -41,6 +42,7 @@ from eiketsu_env.web.leaderboard_view import (
     LEADERBOARD_STATIC_FILES,
     WEB_STATIC_ROOT,
     _leaderboard_display_limit,
+    _leaderboard_matchup_matrix_page,
     _leaderboard_rows_response,
     _leaderboard_visual_page,
 )
@@ -379,6 +381,26 @@ def create_app(settings: Settings | None = None):
         response.delete_cookie("eiketsu_user_token")
         response.delete_cookie("eiketsu_contributor_name")
         return response
+
+    @app.get("/leaderboard/matchups", response_class=HTMLResponse)
+    def leaderboard_matchups(
+        background_tasks: BackgroundTasks,
+        rank_scope: str = RANK_SCOPE_ALL,
+        version: str = "",
+        target_version: str = "",
+    ) -> HTMLResponse:
+        selected_target_version = _target_version_from_query(version, target_version)
+        try:
+            payload = public_leaderboard_matchup_matrix(
+                settings,
+                rank_scope=rank_scope,
+                target_version=selected_target_version,
+            )
+            if payload.get("leaderboard_status") != "ready":
+                background_tasks.add_task(refresh_public_leaderboard_snapshots, settings)
+        except ValueError as exc:
+            return HTMLResponse(_page("公开对局矩阵", f"<p>{html.escape(str(exc))}</p>"))
+        return HTMLResponse(_leaderboard_matchup_matrix_page(payload))
 
     @app.get("/leaderboard", response_class=HTMLResponse)
     def leaderboard(

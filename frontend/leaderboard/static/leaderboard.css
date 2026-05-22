@@ -1129,6 +1129,173 @@ figcaption {
   border: 1px solid #d7dee8;
   color: #667386;
 }
+.matchup-matrix-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.matchup-matrix-meta {
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 8px 14px;
+}
+.matchup-matrix-scroll {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  max-height: 72vh;
+  overflow: auto;
+  background: #ffffff;
+}
+.matchup-matrix-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1180px;
+  table-layout: fixed;
+  width: max-content;
+}
+.matchup-matrix-table th,
+.matchup-matrix-table td {
+  border-bottom: 1px solid #e1e7ef;
+  border-right: 1px solid #e1e7ef;
+  min-width: 92px;
+}
+.matchup-matrix-corner,
+.matchup-matrix-column,
+.matchup-matrix-row-head {
+  background: #f8fafc;
+  color: #1f2937;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+  z-index: 2;
+}
+.matchup-matrix-corner,
+.matchup-matrix-column {
+  position: sticky;
+  top: 0;
+}
+.matchup-matrix-corner,
+.matchup-matrix-row-head {
+  left: 0;
+  min-width: 180px;
+  position: sticky;
+  width: 180px;
+}
+.matchup-matrix-corner {
+  z-index: 4;
+}
+.matchup-matrix-row-head {
+  z-index: 3;
+}
+.matchup-matrix-deck {
+  align-items: center;
+  display: grid;
+  gap: 7px;
+  grid-template-columns: 34px minmax(0, 1fr);
+}
+.matchup-matrix-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.matchup-matrix-avatar {
+  align-items: center;
+  background: #eef2f7;
+  border: 1px solid #cfd8e5;
+  border-radius: 999px;
+  display: flex;
+  height: 34px;
+  justify-content: center;
+  overflow: hidden;
+  width: 34px;
+}
+.matchup-matrix-avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+.matchup-matrix-avatar.is-placeholder {
+  color: #526071;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1.05;
+  padding: 3px;
+  text-align: center;
+}
+.matchup-matrix-rank {
+  color: var(--accent);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+}
+.matchup-matrix-name {
+  color: #17202a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+}
+.matchup-matrix-mini-strip {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+}
+.matchup-matrix-mini-card {
+  background: #eef2f7;
+  border: 1px solid #d7e0eb;
+  border-radius: 3px;
+  display: block;
+  height: 20px;
+  overflow: hidden;
+  width: 14px;
+}
+.matchup-matrix-mini-card img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+.matchup-matrix-mini-card.is-placeholder {
+  color: transparent;
+}
+.matchup-matrix-cell {
+  background: #f8fafc;
+  color: #334155;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  height: 48px;
+  line-height: 1.15;
+  padding: 8px;
+  text-align: center;
+  vertical-align: middle;
+}
+.matchup-matrix-cell small {
+  color: inherit;
+  font-size: 10px;
+  font-weight: 900;
+}
+.matchup-matrix-cell.is-advantage {
+  background: #e8f6ed;
+  color: #176b38;
+}
+.matchup-matrix-cell.is-even {
+  background: #fff8e6;
+  color: #7a5915;
+}
+.matchup-matrix-cell.is-disadvantage {
+  background: #fff0ef;
+  color: #b42318;
+}
+.matchup-matrix-cell.is-empty {
+  background: #f3f6fa;
+  color: transparent;
+}
 @media (max-width: 1040px) {
   .feature-grid {
     grid-template-columns: 1fr;
